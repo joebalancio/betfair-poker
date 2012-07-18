@@ -23,7 +23,7 @@ public class Deck {
      * @param random
      *            the random generator used for shuffling the deck
      */
-    Deck(final List<Card> cards, final Random random) {
+    public Deck(final List<Card> cards, final Random random) {
         this.cards = new ArrayList<Card>(cards);
         this.random = random;
     }

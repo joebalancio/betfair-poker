@@ -18,5 +18,6 @@
   </scm>
   <modules>
     <module>deck</module>
+    <module>table</module>
   </modules>
 </project>
