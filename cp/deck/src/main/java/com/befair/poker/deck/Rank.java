@@ -1,6 +1,6 @@
 package com.betfair.poker.deck;
 
-public enum RankEnum {
+public enum Rank {
     TWO("2"), 
     THREE("3"),
     FOUR("4"),
@@ -17,7 +17,7 @@ public enum RankEnum {
     
     private final String value;
 
-    RankEnum(String v) {
+    Rank(String v) {
         value = v;
     }
 
@@ -25,8 +25,8 @@ public enum RankEnum {
         return value;
     }
 
-    public static RankEnum fromValue(String v) {
-        for (RankEnum c: RankEnum.values()) {
+    public static Rank fromValue(String v) {
+        for (Rank c: Rank.values()) {
             if (c.value.equals(v)) {
                 return c;
             }

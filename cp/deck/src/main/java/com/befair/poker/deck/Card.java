@@ -4,22 +4,37 @@ package com.betfair.poker.deck;
  * A single card in a deck of cards.
  */
 public class Card {
-    private SuitEnum suit;
-    private RankEnum value;
+    private final Suit suit;
+    private final Rank rank;
 
     /**
      * Create new Card instance.
      * 
+     * @param rank
+     *            the rank of this card.
+     * 
      * @param suit
      *            the suit of this card.
-     * @param value
-     *            the value of this card.
      */
-    public Card(String suit, String value) {
-        this.suit = SuitEnum.fromValue(suit);
-        this.value = RankEnum.fromValue(value);
+    public Card(final String rank, final String suit) {
+        this.rank = Rank.fromValue(rank);
+        this.suit = Suit.fromValue(suit);
     }
 
+    /**
+     * Create new Card instance.
+     * 
+     * @param rank
+     *            the rank of this card.
+     * 
+     * @param suit
+     *            the suit of this card.
+     */
+    public Card(final Rank rank, final Suit suit) {
+        this.rank = rank;
+        this.suit = suit;
+    }
+    
     /**
      * Return the suit of this card.
      * 
@@ -30,32 +45,12 @@ public class Card {
     }
 
     /**
-     * Set the suit of this card.
+     * Return the rank of this card.
      * 
-     * @param suit
-     *            the suit to set.
+     * @return the rank of this card.
      */
-    public void setSuit(String suit) {
-        this.suit = SuitEnum.fromValue(suit);
-    }
-
-    /**
-     * Return the value of this card.
-     * 
-     * @return the value of this card.
-     */
-    public String getValue() {
-        return this.value.value();
-    }
-
-    /**
-     * Set the value of this card.
-     * 
-     * @param value
-     *            the value to set.
-     */
-    public void setValue(String value) {
-        this.value = RankEnum.fromValue(value);
+    public String getRank() {
+        return this.rank.value();
     }
 
     /**
@@ -66,7 +61,7 @@ public class Card {
         buffer.append("Card[");
         buffer.append("suit:").append(getSuit());
         buffer.append(", ");
-        buffer.append("value:").append(getValue());
+        buffer.append("rank:").append(getRank());
         buffer.append("]");
 
         return buffer.toString();

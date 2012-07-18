@@ -1,6 +1,6 @@
 package com.betfair.poker.deck;
 
-public enum SuitEnum {
+public enum Suit {
     CLUB("Club"), 
     DIAMOND("Diamond"), 
     HEART("Heart"), 
@@ -8,7 +8,7 @@ public enum SuitEnum {
 
     private final String value;
 
-    SuitEnum(String v) {
+    Suit(String v) {
         value = v;
     }
 
@@ -16,8 +16,8 @@ public enum SuitEnum {
         return value;
     }
 
-    public static SuitEnum fromValue(String v) {
-        for (SuitEnum c: SuitEnum.values()) {
+    public static Suit fromValue(String v) {
+        for (Suit c: Suit.values()) {
             if (c.value.equals(v)) {
                 return c;
             }

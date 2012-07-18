@@ -11,9 +11,9 @@ import java.util.Random;
  * safety will be managed by clients of this class.
  */
 public class Deck {
-    private ArrayList<Card> cards = new ArrayList<Card>();
+    private final ArrayList<Card> cards;
     private int position = 0;
-    private Random random;
+    private final Random random;
 
     /**
      * Create a new Deck instance.
@@ -23,7 +23,7 @@ public class Deck {
      * @param random
      *            the random generator used for shuffling the deck
      */
-    Deck(final List<Card> cards, Random random) {
+    Deck(final List<Card> cards, final Random random) {
         this.cards = new ArrayList<Card>(cards);
         this.random = random;
     }

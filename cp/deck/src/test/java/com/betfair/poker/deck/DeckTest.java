@@ -1,44 +1,50 @@
 package com.betfair.poker.deck;
 
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
-
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
+import java.util.Random;
+import java.util.ArrayList;
 
 public class DeckTest {
-    private BeanFactory factory;
+    private ArrayList<Card> cards;
 
-    @BeforeMethod
-    public void init() {
-        Resource res = new ClassPathResource("beans.xml");
-        this.factory = new XmlBeanFactory(res);
+    @BeforeClass
+    private void init() {
+       this.cards = new ArrayList<Card>();
+        
+        for (Suit suit : Suit.values()) {
+            for (Rank rank : Rank.values()) {
+                cards.add(new Card(rank, suit));
+            }
+        }
+    }
+
+    private Deck newDeck() {
+        return new Deck(new ArrayList<Card>(cards), new Random());
     }
 
     @Test
     public void dealCardTest() throws Exception {
-        Deck deck = (Deck) factory.getBean("deck");
+        Deck deck = newDeck();
         Assert.assertNotNull(deck);
         Card card = deck.dealCard();
         Assert.assertNotNull(card);
-        Assert.assertEquals("Card[suit:Club, value:2]", card.toString());
+        Assert.assertEquals("Card[suit:Club, rank:2]", card.toString());
 
         card = deck.dealCard();
         Assert.assertNotNull(card);
-        Assert.assertEquals("Card[suit:Club, value:3]", card.toString());
+        Assert.assertEquals("Card[suit:Club, rank:3]", card.toString());
 
         card = deck.dealCard();
         Assert.assertNotNull(card);
-        Assert.assertEquals("Card[suit:Club, value:4]", card.toString());
+        Assert.assertEquals("Card[suit:Club, rank:4]", card.toString());
     }
 
     @Test
     public void cardsDealtTest() throws Exception {
-        Deck deck = (Deck) factory.getBean("deck");
+        Deck deck = newDeck();
         Assert.assertNotNull(deck);
         Card card = deck.dealCard();
         card = deck.dealCard();
@@ -51,7 +57,7 @@ public class DeckTest {
 
     @Test
     public void cardsRemainingTest() throws Exception {
-        Deck deck = (Deck) factory.getBean("deck");
+        Deck deck = newDeck();
         Assert.assertNotNull(deck);
         Card card = deck.dealCard();
         card = deck.dealCard();
@@ -67,29 +73,29 @@ public class DeckTest {
     // test.
     @Test
     public void shuffleTest() throws Exception {
-        Deck deck = (Deck) factory.getBean("deck");
+        Deck deck = newDeck();
         Assert.assertNotNull(deck);
         deck.shuffle();
 
         Card card = deck.dealCard();
         Assert.assertNotNull(card);
-        Assert.assertFalse("Card[suit:Club, value:2]".equals(card.toString()));
+        Assert.assertFalse("Card[suit:Club, rank:2]".equals(card.toString()));
 
         card = deck.dealCard();
         Assert.assertNotNull(card);
-        Assert.assertFalse("Card[suit:Club, value:3]".equals(card.toString()));
+        Assert.assertFalse("Card[suit:Club, rank:3]".equals(card.toString()));
 
         card = deck.dealCard();
         Assert.assertNotNull(card);
-        Assert.assertFalse("Card[suit:Club, value:4]".equals(card.toString()));
+        Assert.assertFalse("Card[suit:Club, rank:4]".equals(card.toString()));
     }
 
     @Test
     public void toStringTest() throws Exception {
-        Deck deck = (Deck) factory.getBean("deck");
+        Deck deck = newDeck();
         Assert.assertNotNull(deck);
         Assert.assertEquals(
-                "Deck[Card[suit:Club, value:2], Card[suit:Club, value:3], Card[suit:Club, value:4], Card[suit:Club, value:5], Card[suit:Club, value:6], Card[suit:Club, value:7], Card[suit:Club, value:8], Card[suit:Club, value:9], Card[suit:Club, value:10], Card[suit:Club, value:Jack], Card[suit:Club, value:Queen], Card[suit:Club, value:King], Card[suit:Club, value:Ace], Card[suit:Diamond, value:2], Card[suit:Diamond, value:3], Card[suit:Diamond, value:4], Card[suit:Diamond, value:5], Card[suit:Diamond, value:6], Card[suit:Diamond, value:7], Card[suit:Diamond, value:8], Card[suit:Diamond, value:9], Card[suit:Diamond, value:10], Card[suit:Diamond, value:Jack], Card[suit:Diamond, value:Queen], Card[suit:Diamond, value:King], Card[suit:Diamond, value:Ace], Card[suit:Heart, value:2], Card[suit:Heart, value:3], Card[suit:Heart, value:4], Card[suit:Heart, value:5], Card[suit:Heart, value:6], Card[suit:Heart, value:7], Card[suit:Heart, value:8], Card[suit:Heart, value:9], Card[suit:Heart, value:10], Card[suit:Heart, value:Jack], Card[suit:Heart, value:Queen], Card[suit:Heart, value:King], Card[suit:Heart, value:Ace], Card[suit:Spade, value:2], Card[suit:Spade, value:3], Card[suit:Spade, value:4], Card[suit:Spade, value:5], Card[suit:Spade, value:6], Card[suit:Spade, value:7], Card[suit:Spade, value:8], Card[suit:Spade, value:9], Card[suit:Spade, value:10], Card[suit:Spade, value:Jack], Card[suit:Spade, value:Queen], Card[suit:Spade, value:King], Card[suit:Spade, value:Ace]]",
+                "Deck[Card[suit:Club, rank:2], Card[suit:Club, rank:3], Card[suit:Club, rank:4], Card[suit:Club, rank:5], Card[suit:Club, rank:6], Card[suit:Club, rank:7], Card[suit:Club, rank:8], Card[suit:Club, rank:9], Card[suit:Club, rank:10], Card[suit:Club, rank:Jack], Card[suit:Club, rank:Queen], Card[suit:Club, rank:King], Card[suit:Club, rank:Ace], Card[suit:Diamond, rank:2], Card[suit:Diamond, rank:3], Card[suit:Diamond, rank:4], Card[suit:Diamond, rank:5], Card[suit:Diamond, rank:6], Card[suit:Diamond, rank:7], Card[suit:Diamond, rank:8], Card[suit:Diamond, rank:9], Card[suit:Diamond, rank:10], Card[suit:Diamond, rank:Jack], Card[suit:Diamond, rank:Queen], Card[suit:Diamond, rank:King], Card[suit:Diamond, rank:Ace], Card[suit:Heart, rank:2], Card[suit:Heart, rank:3], Card[suit:Heart, rank:4], Card[suit:Heart, rank:5], Card[suit:Heart, rank:6], Card[suit:Heart, rank:7], Card[suit:Heart, rank:8], Card[suit:Heart, rank:9], Card[suit:Heart, rank:10], Card[suit:Heart, rank:Jack], Card[suit:Heart, rank:Queen], Card[suit:Heart, rank:King], Card[suit:Heart, rank:Ace], Card[suit:Spade, rank:2], Card[suit:Spade, rank:3], Card[suit:Spade, rank:4], Card[suit:Spade, rank:5], Card[suit:Spade, rank:6], Card[suit:Spade, rank:7], Card[suit:Spade, rank:8], Card[suit:Spade, rank:9], Card[suit:Spade, rank:10], Card[suit:Spade, rank:Jack], Card[suit:Spade, rank:Queen], Card[suit:Spade, rank:King], Card[suit:Spade, rank:Ace]]",
                 deck.toString());
     }
 }
