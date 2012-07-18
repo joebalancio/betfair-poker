@@ -17,6 +17,6 @@
     <url>ssh://git@git.sfo.us.betfair/api/poker</url>
   </scm>
   <modules>
-    <module>model</module>
+    <module>deck</module>
   </modules>
 </project>

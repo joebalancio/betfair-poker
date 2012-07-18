@@ -1,0 +1,326 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+  <bean name="deck" class="com.betfair.poker.deck.Deck">
+    <constructor-arg>
+      <list>
+        <ref bean="twoClub"/>
+        <ref bean="threeClub"/>
+        <ref bean="fourClub"/>
+        <ref bean="fiveClub"/>
+        <ref bean="sixClub"/>
+        <ref bean="sevenClub"/>
+        <ref bean="eightClub"/>
+        <ref bean="nineClub"/>
+        <ref bean="tenClub"/>
+        <ref bean="jackClub"/>
+        <ref bean="queenClub"/>
+        <ref bean="kingClub"/>
+        <ref bean="aceClub"/>
+        <ref bean="twoDiamond"/>
+        <ref bean="threeDiamond"/>
+        <ref bean="fourDiamond"/>
+        <ref bean="fiveDiamond"/>
+        <ref bean="sixDiamond"/>
+        <ref bean="sevenDiamond"/>
+        <ref bean="eightDiamond"/>
+        <ref bean="nineDiamond"/>
+        <ref bean="tenDiamond"/>
+        <ref bean="jackDiamond"/>
+        <ref bean="queenDiamond"/>
+        <ref bean="kingDiamond"/>
+        <ref bean="aceDiamond"/>
+        <ref bean="twoHeart"/>
+        <ref bean="threeHeart"/>
+        <ref bean="fourHeart"/>
+        <ref bean="fiveHeart"/>
+        <ref bean="sixHeart"/>
+        <ref bean="sevenHeart"/>
+        <ref bean="eightHeart"/>
+        <ref bean="nineHeart"/>
+        <ref bean="tenHeart"/>
+        <ref bean="jackHeart"/>
+        <ref bean="queenHeart"/>
+        <ref bean="kingHeart"/>
+        <ref bean="aceHeart"/>
+        <ref bean="twoSpade"/>
+        <ref bean="threeSpade"/>
+        <ref bean="fourSpade"/>
+        <ref bean="fiveSpade"/>
+        <ref bean="sixSpade"/>
+        <ref bean="sevenSpade"/>
+        <ref bean="eightSpade"/>
+        <ref bean="nineSpade"/>
+        <ref bean="tenSpade"/>
+        <ref bean="jackSpade"/>
+        <ref bean="queenSpade"/>
+        <ref bean="kingSpade"/>
+        <ref bean="aceSpade"/>
+      </list>
+    </constructor-arg>
+    <constructor-arg>
+      <bean class="java.util.Random"/>
+    </constructor-arg>
+  </bean>
+
+  <bean name="twoClub" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Club"/>
+    <constructor-arg type="java.lang.String" value="2"/>
+  </bean>
+  
+  <bean name="threeClub" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Club"/>
+    <constructor-arg type="java.lang.String" value="3"/>
+  </bean>
+  
+  <bean name="fourClub" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Club"/>
+    <constructor-arg type="java.lang.String" value="4"/>
+  </bean>
+  
+  <bean name="fiveClub" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Club"/>
+    <constructor-arg type="java.lang.String" value="5"/>
+  </bean>
+  
+  <bean name="sixClub" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Club"/>
+    <constructor-arg type="java.lang.String" value="6"/>
+  </bean>
+  
+  <bean name="sevenClub" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Club"/>
+    <constructor-arg type="java.lang.String" value="7"/>
+  </bean>
+  
+  <bean name="eightClub" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Club"/>
+    <constructor-arg type="java.lang.String" value="8"/>
+  </bean>
+  
+  <bean name="nineClub" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Club"/>
+    <constructor-arg type="java.lang.String" value="9"/>
+  </bean>
+  
+  <bean name="tenClub" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Club"/>
+    <constructor-arg type="java.lang.String" value="10"/>
+  </bean>
+  
+  <bean name="jackClub" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Club"/>
+    <constructor-arg type="java.lang.String" value="Jack"/>
+  </bean>
+  
+  <bean name="queenClub" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Club"/>
+    <constructor-arg type="java.lang.String" value="Queen"/>
+  </bean>
+  
+  <bean name="kingClub" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Club"/>
+    <constructor-arg type="java.lang.String" value="King"/>
+  </bean>
+  
+  <bean name="aceClub" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Club"/>
+    <constructor-arg type="java.lang.String" value="Ace"/>
+  </bean>
+
+  <bean name="twoDiamond" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Diamond"/>
+    <constructor-arg type="java.lang.String" value="2"/>
+  </bean>
+  
+  <bean name="threeDiamond" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Diamond"/>
+    <constructor-arg type="java.lang.String" value="3"/>
+  </bean>
+  
+  <bean name="fourDiamond" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Diamond"/>
+    <constructor-arg type="java.lang.String" value="4"/>
+  </bean>
+  
+  <bean name="fiveDiamond" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Diamond"/>
+    <constructor-arg type="java.lang.String" value="5"/>
+  </bean>
+  
+  <bean name="sixDiamond" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Diamond"/>
+    <constructor-arg type="java.lang.String" value="6"/>
+  </bean>
+  
+  <bean name="sevenDiamond" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Diamond"/>
+    <constructor-arg type="java.lang.String" value="7"/>
+  </bean>
+  
+  <bean name="eightDiamond" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Diamond"/>
+    <constructor-arg type="java.lang.String" value="8"/>
+  </bean>
+  
+  <bean name="nineDiamond" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Diamond"/>
+    <constructor-arg type="java.lang.String" value="9"/>
+  </bean>
+  
+  <bean name="tenDiamond" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Diamond"/>
+    <constructor-arg type="java.lang.String" value="10"/>
+  </bean>
+  
+  <bean name="jackDiamond" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Diamond"/>
+    <constructor-arg type="java.lang.String" value="Jack"/>
+  </bean>
+  
+  <bean name="queenDiamond" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Diamond"/>
+    <constructor-arg type="java.lang.String" value="Queen"/>
+  </bean>
+  
+  <bean name="kingDiamond" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Diamond"/>
+    <constructor-arg type="java.lang.String" value="King"/>
+  </bean>
+  
+  <bean name="aceDiamond" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Diamond"/>
+    <constructor-arg type="java.lang.String" value="Ace"/>
+  </bean>
+
+  <bean name="twoHeart" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Heart"/>
+    <constructor-arg type="java.lang.String" value="2"/>
+  </bean>
+  
+  <bean name="threeHeart" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Heart"/>
+    <constructor-arg type="java.lang.String" value="3"/>
+  </bean>
+  
+  <bean name="fourHeart" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Heart"/>
+    <constructor-arg type="java.lang.String" value="4"/>
+  </bean>
+  
+  <bean name="fiveHeart" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Heart"/>
+    <constructor-arg type="java.lang.String" value="5"/>
+  </bean>
+  
+  <bean name="sixHeart" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Heart"/>
+    <constructor-arg type="java.lang.String" value="6"/>
+  </bean>
+  
+  <bean name="sevenHeart" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Heart"/>
+    <constructor-arg type="java.lang.String" value="7"/>
+  </bean>
+  
+  <bean name="eightHeart" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Heart"/>
+    <constructor-arg type="java.lang.String" value="8"/>
+  </bean>
+  
+  <bean name="nineHeart" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Heart"/>
+    <constructor-arg type="java.lang.String" value="9"/>
+  </bean>
+  
+  <bean name="tenHeart" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Heart"/>
+    <constructor-arg type="java.lang.String" value="10"/>
+  </bean>
+  
+  <bean name="jackHeart" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Heart"/>
+    <constructor-arg type="java.lang.String" value="Jack"/>
+  </bean>
+  
+  <bean name="queenHeart" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Heart"/>
+    <constructor-arg type="java.lang.String" value="Queen"/>
+  </bean>
+  
+  <bean name="kingHeart" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Heart"/>
+    <constructor-arg type="java.lang.String" value="King"/>
+  </bean>
+  
+  <bean name="aceHeart" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Heart"/>
+    <constructor-arg type="java.lang.String" value="Ace"/>
+  </bean>
+
+  <bean name="twoSpade" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Spade"/>
+    <constructor-arg type="java.lang.String" value="2"/>
+  </bean>
+  
+  <bean name="threeSpade" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Spade"/>
+    <constructor-arg type="java.lang.String" value="3"/>
+  </bean>
+  
+  <bean name="fourSpade" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Spade"/>
+    <constructor-arg type="java.lang.String" value="4"/>
+  </bean>
+  
+  <bean name="fiveSpade" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Spade"/>
+    <constructor-arg type="java.lang.String" value="5"/>
+  </bean>
+  
+  <bean name="sixSpade" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Spade"/>
+    <constructor-arg type="java.lang.String" value="6"/>
+  </bean>
+  
+  <bean name="sevenSpade" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Spade"/>
+    <constructor-arg type="java.lang.String" value="7"/>
+  </bean>
+  
+  <bean name="eightSpade" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Spade"/>
+    <constructor-arg type="java.lang.String" value="8"/>
+  </bean>
+  
+  <bean name="nineSpade" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Spade"/>
+    <constructor-arg type="java.lang.String" value="9"/>
+  </bean>
+  
+  <bean name="tenSpade" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Spade"/>
+    <constructor-arg type="java.lang.String" value="10"/>
+  </bean>
+  
+  <bean name="jackSpade" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Spade"/>
+    <constructor-arg type="java.lang.String" value="Jack"/>
+  </bean>
+  
+  <bean name="queenSpade" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Spade"/>
+    <constructor-arg type="java.lang.String" value="Queen"/>
+  </bean>
+  
+  <bean name="kingSpade" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Spade"/>
+    <constructor-arg type="java.lang.String" value="King"/>
+  </bean>
+  
+  <bean name="aceSpade" class="com.betfair.poker.deck.Card" scope="singleton">
+    <constructor-arg type="java.lang.String" value="Spade"/>
+    <constructor-arg type="java.lang.String" value="Ace"/>
+  </bean>
+</beans>
