@@ -18,6 +18,8 @@
   </scm>
   <modules>
     <module>deck</module>
+    <module>hand</module>
     <module>table</module>
+    <module>player</module>
   </modules>
 </project>

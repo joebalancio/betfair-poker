@@ -17,15 +17,15 @@ public enum Rank {
     
     private final String value;
 
-    Rank(String v) {
-        value = v;
+    Rank(final String v) {
+        this.value = v;
     }
 
-    public String value() {
+    public String getValue() {
         return value;
     }
 
-    public static Rank fromValue(String v) {
+    public static Rank fromValue(final String v) {
         for (Rank c: Rank.values()) {
             if (c.value.equals(v)) {
                 return c;

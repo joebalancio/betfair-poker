@@ -40,8 +40,8 @@ public class Card {
      * 
      * @return the suit of this card.
      */
-    public String getSuit() {
-        return this.suit.value();
+    public Suit getSuit() {
+        return this.suit;
     }
 
     /**
@@ -49,8 +49,8 @@ public class Card {
      * 
      * @return the rank of this card.
      */
-    public String getRank() {
-        return this.rank.value();
+    public Rank getRank() {
+        return this.rank;
     }
 
     /**
@@ -59,9 +59,9 @@ public class Card {
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         buffer.append("Card[");
-        buffer.append("suit:").append(getSuit());
+        buffer.append("suit:").append(getSuit().getValue());
         buffer.append(", ");
-        buffer.append("rank:").append(getRank());
+        buffer.append("rank:").append(getRank().getValue());
         buffer.append("]");
 
         return buffer.toString();

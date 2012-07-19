@@ -9,14 +9,14 @@ public class CardTest {
     public void getSuitTest() throws Exception {
         Card card = new Card("King", "Heart");
         Assert.assertNotNull(card);
-        Assert.assertEquals("Heart", card.getSuit());
+        Assert.assertEquals("Heart", card.getSuit().getValue());
     }
 
     @Test
     public void getRankTest() throws Exception {
         Card card = new Card("King", "Heart");
         Assert.assertNotNull(card);
-        Assert.assertEquals("King", card.getRank());
+        Assert.assertEquals("King", card.getRank().getValue());
     }
 
     @Test
