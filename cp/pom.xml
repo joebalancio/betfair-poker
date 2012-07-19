@@ -19,7 +19,8 @@
   <modules>
     <module>deck</module>
     <module>hand</module>
-    <module>table</module>
     <module>player</module>
+    <module>pot</module>
+    <module>table</module>
   </modules>
 </project>
