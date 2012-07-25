@@ -2,6 +2,14 @@ doctype 5
 html
   head
     title= title
-    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='/css/bootstrap.css')
+    link(rel='stylesheet', href='/css/responsive.css')
+    link(rel='stylesheet', href='/css/style.css')
+    script(data-main='js/main', src='/js/libs/require/require.js')
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
   body
+    div.navbar.navbar-fixed-top
+      div.navbar-inner
+        div.container
+          a.brand HTML5 Poker App
     block content
