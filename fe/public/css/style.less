@@ -1,15 +1,29 @@
+@import "bootstrap.less";
+@import "responsive.less";
+
 body {
   padding-top: 60px;
 }
 canvas {
   width: 100%;
-  background: red;
+  background: url(/img/tabletop.jpg) center center;
+  .border-radius(6px);
 }
 
 div#chatbox {
   .timestamp {
     display: inline-block;
     width: 30px;
-
+  }
+  .scrollable {
+    .well;
+    .well-small;
+    height: 180px;
+    overflow-y: scroll;
+    background-color: @white;
+  }
+  form {
+    margin-bottom: 0px;
   }
 }
+
