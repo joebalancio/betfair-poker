@@ -1,9 +1,17 @@
 package com.betfair.poker.deck;
 
+
+
 /**
  * A single card in a deck of cards.
  */
-public class Card {
+public class Card implements Comparable<Card>{
+	
+	public static final int NO_OF_RANKS = 13;
+	    
+	/** The number of suits in a deck. */
+	public static final int NO_OF_SUITS = 4;
+	
     private final Suit suit;
     private final Rank rank;
 
@@ -65,5 +73,34 @@ public class Card {
         buffer.append("]");
 
         return buffer.toString();
+    }
+   
+    @Override
+    public int hashCode() {
+        return (rank.getRank() * NO_OF_SUITS + suit.getSuit());
+    }
+
+   
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Card) {
+            return ((Card) obj).hashCode() == hashCode();
+        } else {
+            return false;
+        }
+    }
+
+   
+    @Override
+    public int compareTo(Card card) {
+        int thisValue = hashCode();
+        int otherValue = card.hashCode();
+        if (thisValue < otherValue) {
+            return 1;
+        } else if (thisValue > otherValue) {
+            return -1;
+        } else {
+            return 0;
+        }
     }
 }

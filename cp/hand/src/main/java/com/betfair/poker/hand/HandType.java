@@ -8,7 +8,7 @@ public enum HandType {
     FLUSH("Flush", 5),
     STRAIGHT("Straight", 4),
     THREE_OF_A_KIND("Three of a Kind", 3),
-    TWO_PAIR("Two Pair", 2),
+    TWO_PAIRS("Two Pair", 2),
     ONE_PAIR("One Pair", 1),
     HIGH_CARD("High Card", 0);
     
