@@ -28,7 +28,7 @@ public class HandEvaluator {
     private int value = 0;
     
     /** The cards. */
-    private final Card[] cards;
+    private Card[] cards;
     
     /** The rank distribution (number of cards for each rank). */
     private int[] rankDist = new int[Card.NO_OF_RANKS];
@@ -62,6 +62,10 @@ public class HandEvaluator {
     
     /** The weighed components of the hand value (highest first). */
     private int[] rankings = new int[NO_OF_RANKINGS];
+    
+    public HandEvaluator(){
+    	
+    }
 
     /**
      * Constructor.
@@ -97,6 +101,52 @@ public class HandEvaluator {
         }
     }
     
+    public void evaluate(Hand hand)
+    {
+    	reset();
+        this.cards = hand.getCards();
+        
+        // Find patterns.
+        calculateDistributions();
+        findStraight();
+        findFlush();
+        findDuplicates();
+        
+        // Find special values.
+        boolean isSpecialValue =
+                (isStraightFlush() ||
+                 isFourOfAKind()   ||
+                 isFullHouse()     ||
+                 isFlush()         ||
+                 isStraight()      ||
+                 isThreeOfAKind()  ||
+                 isTwoPairs()      ||
+                 isOnePair());
+        if (!isSpecialValue) {
+            calculateHighCard();
+        }
+        
+        // Calculate value.
+        for (int i = 0; i < NO_OF_RANKINGS; i++) {
+            value += rankings[i] * RANKING_FACTORS[i];
+        }
+    }
+    
+    private void reset()
+    {
+    	this.value = 0;
+        this.rankDist = new int[Card.NO_OF_RANKS];
+        this.suitDist = new int[Card.NO_OF_SUITS];
+        this.noOfPairs = 0;
+        this.pairs = new int[MAX_NO_OF_PAIRS];
+        this.flushSuit = -1;
+        this.flushRank = -1;
+        this.straightRank = -1;
+        this.wheelingAce = false;
+        this.tripleRank = -1;
+        this.quadRank = -1;
+        this.rankings = new int[NO_OF_RANKINGS];    	
+    }
     /**
      * Returns the hand value type.
      *

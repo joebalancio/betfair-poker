@@ -13,9 +13,10 @@ import com.betfair.poker.deck.Card;
 public class Hand {
     private CommunityCards communityCards;
     private HoleCards holeCards;
+    private HandEvaluator evaluator;
     
     public Hand() {
-
+    	evaluator = new HandEvaluator();
     }
 	
     public CommunityCards getCommunityCards() {
@@ -34,6 +35,14 @@ public class Hand {
 		this.holeCards = holeCards;
 	}
     
+	public HandEvaluator getEvaluator() {
+		return evaluator;
+	}
+
+	public void setEvaluator(HandEvaluator evaluator) {
+		this.evaluator = evaluator;
+	}
+
 	public Card[] getCards()
 	{
 		List<Card> cards = new ArrayList<Card>();
@@ -52,5 +61,20 @@ public class Hand {
 			this.holeCards = new HoleCards();
 		}
 		this.holeCards.add(card);
+	}
+	/**
+	 * HandEvaluator is not thread safe but since each player should has his own hand so it's safe to call evaluate here.
+	 * @return
+	 */
+	public HandType getHandType()
+	{
+		this.evaluator.evaluate(this);
+		return evaluator.getType();
+	}
+	
+	public Integer getHandValue()
+	{
+		this.evaluator.evaluate(this);
+		return evaluator.getValue();
 	}
 }
