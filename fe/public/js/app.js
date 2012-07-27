@@ -2,13 +2,11 @@ define([
   'jquery',
   'backbone',
   'underscore',
-  'create',
-], function($, Backbone, Underscore, createjs) {
-  console.log(createjs);
-
+  'kinetic'
+], function($, Backbone, Underscore, Kinetic) {
   return {
     initialize: function() {
-      console.log('test');
+      console.log(Kinetic);
     }
   };
 });
