@@ -1,6 +1,3 @@
-
-
-
 package com.betfair.poker.hand;
 
 import com.betfair.poker.deck.Card;

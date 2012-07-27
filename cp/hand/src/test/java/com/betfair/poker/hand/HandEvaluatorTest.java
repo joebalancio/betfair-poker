@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.betfair.poker.deck.Card;
@@ -13,7 +12,6 @@ import com.betfair.poker.deck.Card;
 /**
  * Test suite for the HandEvaluator class.
  * 
- * @author Oscar Stigter
  */
 public class HandEvaluatorTest {
     

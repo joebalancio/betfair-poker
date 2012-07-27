@@ -1,8 +1,8 @@
 package com.betfair.poker.deck;
 
 public enum Suit { 
-	DIAMOND("Diamond", 0),
-    CLUB("Club", 1), 
+	CLUB("Club", 0),
+	DIAMOND("Diamond", 1), 
     HEART("Heart", 2), 
     SPADE("Spade", 3);
 
