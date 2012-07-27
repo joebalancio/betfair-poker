@@ -2,11 +2,19 @@ define([
   'jquery',
   'backbone',
   'underscore',
-  'kinetic'
-], function($, Backbone, Underscore, Kinetic) {
+  'kinetic',
+  'views/table'
+], function($, Backbone, Underscore, Kinetic, TableView) {
   return {
     initialize: function() {
-      console.log(Kinetic);
-    }
+      var myStage = new Kinetic.Stage ({
+        container: "pokerTable",
+        height: 600,
+        width: 1000
+      });
+
+     var table = new TableView({stage: myStage});
+     table.render(); 
+     }
   };
 });
