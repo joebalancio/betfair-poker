@@ -17,6 +17,11 @@
     <url>ssh://git@git.sfo.us.betfair/api/poker/pot</url>
   </scm>
   <dependencies>
+      <dependency>
+      <groupId>com.betfair.poker</groupId>
+      <artifactId>player</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
