@@ -4,7 +4,7 @@ define(function(require,exports,modules) {
 
 	var TableView = Backbone.View.extend({
 		initialize: function() {
-		
+
 		},
 		//Returns an Easel Shape / Display Object
 		render: function() {
@@ -19,13 +19,16 @@ define(function(require,exports,modules) {
 			var self = this;
 
 			tabletopImage.onload = function() {
+        var ratio = tabletopImage.height / tabletopImage.width;
+
+        tabletopImage.width = self.options.stage.attrs.width;
+        tabletopImage.height = self.options.stage.attrs.height = self.options.stage.attrs.width * ratio;
+
 				//tabletop becomes a Kinetic Image Object
 				var tabletop = new Kinetic.Image({
 					x: 0,
 					y: 0,
-					image: tabletopImage,
-					width: self.options.stage.attrs.width - 50,
-					height: self.options.stage.attrs.height
+					image: tabletopImage
 				});
 
 				//draw it!

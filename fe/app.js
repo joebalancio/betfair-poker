@@ -1,19 +1,23 @@
-
 /**
  * Module dependencies.
  */
 
-var express = require('express')
-  , routes = require('./routes')
-  , http = require('http')
-  , path = require('path')
+var express = require('express'),
+  app = express(),
+  routes = require('./routes'),
+  http = require('http'),
+  path = require('path'),
   fs = require('fs'),
   jade = require('jade'),
   url = require('url');
-  mkdirp = require('mkdirp');
+  mkdirp = require('mkdirp'),
+  server = http.createServer(app),
+  io = require('socket.io').listen(server, {debug: true});
 
-var app = express();
 
+/*
+ * Middleware
+ */
 app.configure(function() {
   app.set('port', process.env.PORT || 3000);
   app.set('views', __dirname + '/views');
@@ -41,6 +45,7 @@ app.configure(function() {
         if (!err) return next();
         mkdirp(path.dirname(dest), 0777, function(err){
           if (err) return next(err);
+          str = 'define(function() {\n' + str + '\nreturn jade;\n});';
           fs.writeFile(dest, str, 'utf8', next);
         });
       });
@@ -49,12 +54,36 @@ app.configure(function() {
   app.use(express.static(path.join(__dirname, 'public')));
 });
 
+/*
+ * Development-specific middleware
+ */
 app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
+/*
+ * Routes
+ */
 app.get('/', routes.index);
 
-http.createServer(app).listen(app.get('port'), function(){
+/*
+ * Listen
+ */
+server.listen(app.get('port'), function() {
   console.log("Express server listening on port " + app.get('port'));
+});
+
+/*
+ * Socket.IO
+ */
+io.sockets.on('connection', function(socket) {
+  socket.on('message:create', function(data, callback) {
+    var now = new Date();
+    data.timestamp = now.getHours() + ':' + now.getMinutes();
+    data.player.name = 'joebalancio';
+    console.log(data);
+    socket.emit('messages:create', data);
+    socket.broadcast.emit('messages:create', data);
+    callback(null, data);
+  });
 });

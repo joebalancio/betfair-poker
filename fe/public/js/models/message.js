@@ -1,13 +1,15 @@
-define(function(require,exports,modules){
-	var Backbone = require('backbone').Backbone;
+define(function(require, exports, modules) {
+	var Backbone = require('backbone');
 	var Message = Backbone.Model.extend({
+    url: 'message',
 		defaults: {
-			id: null,
 			timestamp: null,
 			message: null,
-			player_id: null
+			player: null
 		},
-		initialize: function() {}
+		initialize: function() {
+
+    }
 	});
 	return Message;
 });

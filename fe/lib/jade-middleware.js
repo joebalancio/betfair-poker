@@ -110,12 +110,12 @@ module.exports = jade.middleware = function(options){
     var js = jade.compile(str, {
       client: true
     });
+    js = 'define(["jade"], function() {\n' + js + '\nreturn anonymous;\n});';
     var err = null; // FIX ME
 
     fs.stat(jsPath, function(err, stats) {
-      console.log(arguments);
       if (err) return callback(null, js);
-      callback('blah', null);
+      callback(err, js);
     });
   };
 
