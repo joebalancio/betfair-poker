@@ -1,5 +1,6 @@
 package com.betfair.poker.table;
 
+import java.util.List;
 import java.util.Random;
 import java.util.ArrayList;
 
@@ -13,6 +14,7 @@ import com.betfair.poker.deck.Rank;
  */
 public class Table {
     private final Deck deck;
+    private List<Seat> seats;
 
     public Table() {
         ArrayList<Card> cards = new ArrayList<Card>();
@@ -24,9 +26,13 @@ public class Table {
         }
 
         this.deck = new Deck(cards, new Random());
+        this.seats = new ArrayList<Seat>();
+        
     }
 
-    public Table(final Deck deck) {
+    public Table(final Deck deck, final  List<Seat> seats) {
         this.deck = deck;
+        this.seats = seats;
     }
-}
+    
+   }
