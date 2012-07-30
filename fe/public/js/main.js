@@ -14,10 +14,9 @@ require.config({
 require([
   'app'
 ], function(App) {
-  App.initialize();
+  var app = new App();
 });
 
 define('io', function(require, exports, module) {
-  console.log(io);
   module.exports = io;
 });

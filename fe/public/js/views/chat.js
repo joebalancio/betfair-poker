@@ -11,11 +11,7 @@ define(function(require, exports, module) {
       'click form button': 'send'
     },
     initialize: function() {
-      this.on('message:read', function(model) {
-        //var view = new MessageView({model: new Message(
-      });
       this.collection.on('add', this.add, this);
-
       console.log('initialize');
     },
     render: function() {
