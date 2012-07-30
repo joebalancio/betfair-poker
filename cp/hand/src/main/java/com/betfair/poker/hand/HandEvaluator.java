@@ -5,136 +5,125 @@ import com.betfair.poker.deck.Rank;
 
 /**
  * Evaluator for calculating the value of a poker hand.
- *
- * NOTE: This class is implemented with the focus on performance (instead of clean design).
+ * 
+ * NOTE: This class is implemented with the focus on performance (instead of
+ * clean design).
  * 
  * @author Oscar Stigter
  */
 public class HandEvaluator {
-    
+
     /** The number of hand rankings. */
-    private static final int NO_OF_RANKINGS  = 6;
-    
+    private static final int NO_OF_RANKINGS = 6;
+
     /** The maximum number of counting pairs. */
     private static final int MAX_NO_OF_PAIRS = 2;
-    
+
     /** The ranking factors (powers of 13, the number of ranks). */
-    private static final int[] RANKING_FACTORS = {371293, 28561, 2197, 169, 13, 1};
-    
+    private static final int[] RANKING_FACTORS = { 371293, 28561, 2197, 169,
+            13, 1 };
+
     /** The hand value type. */
     private HandType type;
-    
+
     /** The hand value as integer number. */
     private int value = 0;
-    
+
     /** The cards. */
     private Card[] cards;
-    
+
     /** The rank distribution (number of cards for each rank). */
     private int[] rankDist = new int[Card.NO_OF_RANKS];
-    
+
     /** The suit distribution (number of cards for each suit). */
     private int[] suitDist = new int[Card.NO_OF_SUITS];
-    
+
     /** The number of pairs. */
     private int noOfPairs = 0;
-    
+
     /** The ranks of the pairs. */
     private int[] pairs = new int[MAX_NO_OF_PAIRS];
-    
+
     /** The suit of the Flush. */
     private int flushSuit = -1;
-    
+
     /** The rank of the Flush. */
     private int flushRank = -1;
-    
+
     /** The rank of the Straight. */
     private int straightRank = -1;
-    
+
     /** Whether we have a Straight with a wheeling Ace. */
     private boolean wheelingAce = false;
-    
+
     /** The rank of the Three-of-a-Kind. */
     private int tripleRank = -1;
-    
+
     /** The rank of the Four-of-a-Kind. */
     private int quadRank = -1;
-    
+
     /** The weighed components of the hand value (highest first). */
     private int[] rankings = new int[NO_OF_RANKINGS];
-    
-    public HandEvaluator(){
-    	
+
+    public HandEvaluator() {
+
     }
 
     /**
      * Constructor.
-     *
-     * @param  hand  The hand to evaulate.
+     * 
+     * @param hand
+     *            The hand to evaulate.
      */
     public HandEvaluator(Hand hand) {
         cards = hand.getCards();
-        
+
         // Find patterns.
         calculateDistributions();
         findStraight();
         findFlush();
         findDuplicates();
-        
+
         // Find special values.
-        boolean isSpecialValue =
-                (isStraightFlush() ||
-                 isFourOfAKind()   ||
-                 isFullHouse()     ||
-                 isFlush()         ||
-                 isStraight()      ||
-                 isThreeOfAKind()  ||
-                 isTwoPairs()      ||
-                 isOnePair());
+        boolean isSpecialValue = (isStraightFlush() || isFourOfAKind()
+                || isFullHouse() || isFlush() || isStraight()
+                || isThreeOfAKind() || isTwoPairs() || isOnePair());
         if (!isSpecialValue) {
             calculateHighCard();
         }
-        
+
         // Calculate value.
         for (int i = 0; i < NO_OF_RANKINGS; i++) {
             value += rankings[i] * RANKING_FACTORS[i];
         }
     }
-    
-    public void evaluate(Hand hand)
-    {
-    	reset();
+
+    public void evaluate(Hand hand) {
+        reset();
         this.cards = hand.getCards();
-        
+
         // Find patterns.
         calculateDistributions();
         findStraight();
         findFlush();
         findDuplicates();
-        
+
         // Find special values.
-        boolean isSpecialValue =
-                (isStraightFlush() ||
-                 isFourOfAKind()   ||
-                 isFullHouse()     ||
-                 isFlush()         ||
-                 isStraight()      ||
-                 isThreeOfAKind()  ||
-                 isTwoPairs()      ||
-                 isOnePair());
+        boolean isSpecialValue = (isStraightFlush() || isFourOfAKind()
+                || isFullHouse() || isFlush() || isStraight()
+                || isThreeOfAKind() || isTwoPairs() || isOnePair());
         if (!isSpecialValue) {
             calculateHighCard();
         }
-        
+
         // Calculate value.
         for (int i = 0; i < NO_OF_RANKINGS; i++) {
             value += rankings[i] * RANKING_FACTORS[i];
         }
     }
-    
-    private void reset()
-    {
-    	this.value = 0;
+
+    private void reset() {
+        this.value = 0;
         this.rankDist = new int[Card.NO_OF_RANKS];
         this.suitDist = new int[Card.NO_OF_SUITS];
         this.noOfPairs = 0;
@@ -145,28 +134,29 @@ public class HandEvaluator {
         this.wheelingAce = false;
         this.tripleRank = -1;
         this.quadRank = -1;
-        this.rankings = new int[NO_OF_RANKINGS];    	
+        this.rankings = new int[NO_OF_RANKINGS];
     }
+
     /**
      * Returns the hand value type.
-     *
-     * @return  the hand value type
+     * 
+     * @return the hand value type
      */
     public HandType getType() {
         return type;
     }
-    
+
     /**
      * Returns the hand value as an integer.
      * 
      * This method should be used to compare hands.
-     *
-     * @return  the hand value
+     * 
+     * @return the hand value
      */
     public int getValue() {
         return value;
     }
-    
+
     /**
      * Calculates the rank and suit distributions.
      */
@@ -176,7 +166,7 @@ public class HandEvaluator {
             suitDist[card.getSuit().getSuit()]++;
         }
     }
-    
+
     /**
      * Looks for a flush, i.e. five cards with the same suit.
      */
@@ -206,7 +196,7 @@ public class HandEvaluator {
         boolean inStraight = false;
         int rank = -1;
         int count = 0;
-        for (int i = Card.NO_OF_RANKS - 1; i >= 0 ; i--) {
+        for (int i = Card.NO_OF_RANKS - 1; i >= 0; i--) {
             if (rankDist[i] == 0) {
                 inStraight = false;
                 count = 0;
@@ -224,8 +214,10 @@ public class HandEvaluator {
                 }
             }
         }
-        // Special case for the 'Steel Wheel' (Five-high Straight with a 'wheeling Ace') .
-        if ((count == 4) && (rank == Rank.FIVE.getRank()) && (rankDist[Rank.ACE.getRank()] > 0)) {
+        // Special case for the 'Steel Wheel' (Five-high Straight with a
+        // 'wheeling Ace') .
+        if ((count == 4) && (rank == Rank.FIVE.getRank())
+                && (rankDist[Rank.ACE.getRank()] > 0)) {
             wheelingAce = true;
             straightRank = rank;
         }
@@ -237,7 +229,7 @@ public class HandEvaluator {
      */
     private void findDuplicates() {
         // Find quads, triples and pairs.
-        for (int i = Card.NO_OF_RANKS - 1; i >= 0 ; i--) {
+        for (int i = Card.NO_OF_RANKS - 1; i >= 0; i--) {
             if (rankDist[i] == 4) {
                 quadRank = i;
             } else if (rankDist[i] == 3) {
@@ -269,9 +261,9 @@ public class HandEvaluator {
     /**
      * Returns true if this hand contains One Pair.
      * 
-     * The value of a One Pair is based on the rank of the pair.
-     * The ranks of the remaining three cards are used as kickers.
-     *
+     * The value of a One Pair is based on the rank of the pair. The ranks of
+     * the remaining three cards are used as kickers.
+     * 
      * @return True if this hand contains One Pair.
      */
     private boolean isOnePair() {
@@ -305,7 +297,7 @@ public class HandEvaluator {
      * The value of a Two Pairs is primarily based on the rank of the highest
      * pair, secondarily on the rank of the lowest pair and tertiarily on the
      * ranks of the remaining one kicker.
-     *
+     * 
      * @return True if this hand contains Two Pairs.
      */
     private boolean isTwoPairs() {
@@ -314,7 +306,7 @@ public class HandEvaluator {
             rankings[0] = type.getIntegerValue();
             // Get the value of the high and low pairs.
             int highRank = pairs[0];
-            int lowRank  = pairs[1];
+            int lowRank = pairs[1];
             rankings[1] = highRank;
             rankings[2] = lowRank;
             // Get the kicker card.
@@ -334,9 +326,9 @@ public class HandEvaluator {
     /**
      * Returns true if this hand contains a Three of a Kind.
      * 
-     * The value of a Three of a Kind is based on the rank of the triple.
-     * The remaining two cards are used as kickers.
-     *
+     * The value of a Three of a Kind is based on the rank of the triple. The
+     * remaining two cards are used as kickers.
+     * 
      * @return True if this hand contains a Three of a Kind.
      */
     private boolean isThreeOfAKind() {
@@ -367,7 +359,7 @@ public class HandEvaluator {
      * 
      * The value of a Straight is based on the rank of the highest card in the
      * straight.
-     *
+     * 
      * @return True if this hand contains a Straight.
      */
     private boolean isStraight() {
@@ -418,7 +410,7 @@ public class HandEvaluator {
      * 
      * The value of a Full House is primarily based on the rank of the triple
      * and secondarily on the rank of the pair. There are no kickers.
-     *
+     * 
      * @return True if this hand contains a Full House.
      */
     private boolean isFullHouse() {
@@ -432,13 +424,13 @@ public class HandEvaluator {
             return false;
         }
     }
-    
+
     /**
      * Returns true if this hand contains a Four of a Kind.
      * 
-     * The value of a Four of a Kind is primarily based on the rank of the
-     * quad. There remaining card is used as kicker.
-     *
+     * The value of a Four of a Kind is primarily based on the rank of the quad.
+     * There remaining card is used as kicker.
+     * 
      * @return True if this hand contains a Four of a Kind.
      */
     private boolean isFourOfAKind() {
@@ -512,7 +504,7 @@ public class HandEvaluator {
                 lastRank = rank;
                 lastSuit = suit;
             }
-            
+
             if (inStraight >= 5 && inFlush >= 5) {
                 if (straightRank == Rank.ACE.getRank()) {
                     // Royal Flush.
@@ -539,5 +531,5 @@ public class HandEvaluator {
             return false;
         }
     }
-    
+
 }
