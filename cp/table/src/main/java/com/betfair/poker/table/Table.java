@@ -44,19 +44,20 @@ public class Table {
             }
             
             if (!game.isPlaying()) {
-                int noOfActivePlayers = 0;
+                List<Seat> activeSeats = new ArrayList<Seat>();
                 
                 for (Seat seat : getSeats()) {
                     if (!seat.isEmpty()) {
                         final Player player = seat.getPlayer();
 
                         if (player.getCash() >= bigBlind) {
-                            noOfActivePlayers++;
+                            activeSeats.add(seat);
                         }
                     }
                 }
 
-                if (noOfActivePlayers > 1) {
+                if (activeSeats.size() > 1) {
+                    game.setActiveSeats(seats);
                     game.playHand();
                 }
             }

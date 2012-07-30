@@ -1,12 +1,14 @@
 package com.betfair.poker.game;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import com.betfair.poker.deck.Card;
 import com.betfair.poker.deck.Deck;
 import com.betfair.poker.deck.Rank;
 import com.betfair.poker.deck.Suit;
+import com.betfair.poker.table.Seat;
 
 /**
  * A single poker game.
@@ -15,6 +17,7 @@ public class Game {
     private final Deck deck;
     private boolean isPlaying;
     private boolean isHandCompleted;
+    private List<Seat> seats;
 
     public Game() {
         ArrayList<Card> cards = new ArrayList<Card>();
@@ -42,6 +45,10 @@ public class Game {
     
     public void reset() {
         // reset fields to start a new game
+        this.isPlaying = false;
+        this.isHandCompleted = false;
+        this.seats = new ArrayList<Seat>();
+        this.deck.shuffle();
     }
     
     public void payPots() {
@@ -55,5 +62,9 @@ public class Game {
      */
     public boolean isHandCompleted() {
         return this.isHandCompleted;
+    }
+    
+    public void setActiveSeats(List<Seat> seats) {
+        this.seats = new ArrayList<Seat>(seats);
     }
 }
