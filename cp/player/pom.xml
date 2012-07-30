@@ -24,11 +24,6 @@
     </dependency>
     <dependency>
       <groupId>com.betfair.poker</groupId>
-      <artifactId>deck</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.betfair.poker</groupId>
       <artifactId>hand</artifactId>
       <version>${project.version}</version>
     </dependency>

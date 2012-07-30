@@ -21,11 +21,6 @@
       <groupId>com.betfair.poker</groupId>
       <artifactId>deck</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.betfair.poker</groupId>
-      <artifactId>table</artifactId>
-      <version>${project.version}</version>
     </dependency>    
     <dependency>
       <groupId>org.testng</groupId>

@@ -1,28 +1,56 @@
 package com.betfair.poker.table;
 
-import java.util.Random;
-import java.util.ArrayList;
+import com.betfair.poker.player.Player;
 
-import com.betfair.poker.deck.Card;
-import com.betfair.poker.deck.Deck;
-import com.betfair.poker.deck.Suit;
-import com.betfair.poker.deck.Rank;
 
 /**
- * A single poker table.
+ * A single poker seat.
  */
 public class Seat {
+    private final int position;
+    private Player player;
+    private boolean isDealer;
     
-	private final int position;
-	
-    public int getPosition() {
-		return position;
-	}
     
-	public Seat(int position) {
-    	this.position = position;
-       
+    public Seat(final int position) {
+        this.position = position;
     }
     
+    public int getPosition() {
+        return position;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
     
+    public void addPlayer(final Player player) {
+        if (getPlayer() == null) {
+            this.player = player;
+        }
+    }
+    
+    public void removePlayer() {
+        this.player = null;
+    }
+    
+    public boolean isEmpty() {
+        if (getPlayer() == null) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public boolean isDealer() {
+        if ((getPlayer() != null) && (isDealer)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public void setDealer(final boolean isDealer) {
+        this.isDealer = isDealer;
+    }
 }
