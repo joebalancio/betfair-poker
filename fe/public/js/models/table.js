@@ -1,6 +1,7 @@
 define(function(require,exports,modules) {
-	var Backbone = require('backbone').Backbone;
+	var Backbone = require('backbone');
 	var Table = Backbone.Model.extend({
+    urlRoot: 'table',
 		defaults: {
 			id: null,
 			seats: {},
@@ -8,7 +9,13 @@ define(function(require,exports,modules) {
 			desired_seat: null,
 			action: null
 		},
-		initialize: function() {}
+		initialize: function() {
+      this.ioBind('read', this.read, this);
+    },
+    read: function(model) {
+      this.set(model);
+    }
+
 	});
 	return Table;
 })
