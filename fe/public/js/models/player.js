@@ -201,8 +201,8 @@ define(function(require,exports,modules) {
       this.shapes.chips.setText('chips: ' + chips);
     },
     updateActive: function(model, active) {
-      //if (active) this.shapes.name.setAttrs(this.activeShapeProps);
-      //else this.shapes.name.setAttrs(this.inactiveShapeProps);
+      if (active) this.shapes.name.setAttrs(this.activeShapeProps);
+      else this.shapes.name.setAttrs(this.inactiveShapeProps);
     },
     updateAction: function(model, action) {
       this.shapes.action.setText(action);
