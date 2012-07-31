@@ -8,7 +8,7 @@ define(function(require,exports,modules) {
      */
     layer: null,
     pot: null,
-    el: 'div#pokerTable',
+    el: 'div#table',
     images: null,
     stage: null,
     shapes: {
@@ -21,23 +21,42 @@ define(function(require,exports,modules) {
       card1: new Kinetic.Image({
         width: 92,
         height: 128,
-        draggable: true
+        offset: {
+          x: 92/2,
+          y: 128/2
+        }
       }),
       card2: new Kinetic.Image({
         width: 92,
         height: 128,
+        offset: {
+          x: 92/2,
+          y: 128/2
+        }
       }),
       card3: new Kinetic.Image({
         width: 92,
         height: 128,
+        offset: {
+          x: 92/2,
+          y: 128/2
+        }
       }),
       card4: new Kinetic.Image({
         width: 92,
         height: 128,
+        offset: {
+          x: 92/2,
+          y: 128/2
+        }
       }),
       card5: new Kinetic.Image({
         width: 92,
-        height: 128
+        height: 128,
+        offset: {
+          x: 92/2,
+          y: 128/2
+        }
       })
 
     },
@@ -48,6 +67,7 @@ define(function(require,exports,modules) {
 		initialize: function() {
       this.model.on('change', this.updateTable, this);
       this.model.on('change:cards', this.updateCards, this);
+      this.model.on('change:pot', this.updatePot, this);
       this.model.on('change', this.updateStage, this);
 
       this.images = this.options.images;
@@ -87,8 +107,8 @@ define(function(require,exports,modules) {
       _.each(this.shapes, function(shape, name) {
         if (name.indexOf('card') === 0) {
           shape.setImage(this.images['card_back']);
-          shape.setX(halfStageWidth - shape.getWidth() / 2 + (shape.getWidth() * 1.1) * cardNum);
-          shape.setY(halfStageHeight  - shape.getHeight() / 2);
+          shape.setX(halfStageWidth + (shape.getWidth() * 1.1) * cardNum);
+          shape.setY(halfStageHeight);
           cardNum++;
         }
       }, this);
@@ -101,16 +121,46 @@ define(function(require,exports,modules) {
 
 		},
     updateTable: function(model) {
+      //this.shapes.pot.setText('Pot: $' + model.get('pot'));
+    },
+    updatePot: function(model, pot) {
       this.shapes.pot.setText('Pot: $' + model.get('pot'));
     },
     updateStage: function() {
       this.layer.getStage().draw();
     },
     updateCards: function(model, cards) {
+      var self = this, range;
       console.log('update cards', cards);
-      _.each(cards, function(card, index) {
-        var cardShape = this.shapes['card' + (index + 1)];
-        cardShape.setImage(this.images[card]);
+      switch (cards.length) {
+        case 3:
+          range = [0, 3];
+          offset = 1;
+          break;
+        case 4:
+          range = [3, 4];
+          offset = 4
+          break;
+        case 5:
+          range = [4, 5];
+          offset = 5
+          break;
+      }
+      _.each(cards.slice.apply(cards, range), function(card, index) {
+        var cardShape = this.shapes['card' + (index + offset)];
+        cardShape.transitionTo({
+          scale: { x: 0, y: 1 },
+          duration: 0.5,
+          easing: 'strong-ease-in',
+          callback: function() {
+            cardShape.setImage(self.images[card]);
+            cardShape.transitionTo({
+              scale: { x: 1, y: 1 },
+              duration: 0.5,
+              easing: 'strong-ease-out'
+            });
+          }
+        });
       }, this);
 
     }

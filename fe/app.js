@@ -77,31 +77,126 @@ server.listen(app.get('port'), function() {
  * Socket.IO
  */
 io.sockets.on('connection', function(socket) {
+  socket.on('start', testJoinGame(socket));
+
+  socket.on('message:create', function(data, callback) {
+    var now = new Date();
+    data.timestamp = now.getHours() + ':' + now.getMinutes();
+    data.player.name = 'joebalancio';
+    socket.emit('messages:create', data);
+    socket.broadcast.emit('messages:create', data);
+    callback(null, data);
+  });
+
+});
+
+function testJoinGame(socket) {
+  return function(data) {
+    var table = {
+      cards: [],
+      pot: 0,
+      availableSeats: [1]
+    },
+    players = [{
+      name: 'joebalancio',
+      id: 1,
+      seat: 1,
+      position: 'd',
+      chips: 100,
+      avatar: 'J01'
+    }, {
+      name: 'paleailment',
+      id: 2,
+      seat: 2,
+      position: 'sb',
+      chips: 100,
+      avatar: 'A05'
+    }, {
+      name: 'philipkim',
+      id: 3,
+      seat: 4,
+      position: 'bb',
+      chips: 100,
+      avatar: 'D03'
+    }],
+    newPlayer = {
+      name: 'subashini',
+      id: 4,
+      position: null,
+      seat: 3,
+      chips: 100,
+      active: true,
+      cards: ['as', 'as'],
+      avatar: 'FD01'
+    }
+
+    // get the initial state
+    socket.emit('players:read', players);
+    socket.emit('table:read', table);
+
+    socket.on('player:create', function(data, callback) {
+      newPlayer.actions = ['check', 'fold', 'raise', 'call'];
+      players.push(newPlayer);
+      socket.emit('players:read', players);
+
+      //table.gamePlayerId = newPlayer.id;
+      socket.emit('table:read', table);
+    });
+
+    socket.on('player:update', function(data, callback) {
+      console.log(data);
+      switch (data.action) {
+        case 'call':
+          table.pot += parseInt(data.amount, 10);
+          table.cards = ['as','as','as'];
+          for (var i=0; i<players.length; i++) {
+            var player = players[i];
+            console.log(player);
+            if (player.id === data.id) player.chips -= data.amount;
+          }
+          break;
+        case 'fold':
+          break;
+      }
+
+      socket.emit('table:read', table);
+      socket.emit('players:read', players);
+    });
+
+  }
+}
+
+function dummydata1(socket) {
   // emit table
   var table = {
     cards: [],
     pot: 0,
     availableSeat: [1]
   };
+
   var players = [{
     name: 'joebalancio',
     id: 1,
-    seat: 1
+    seat: 1,
+    position: 'd'
   }, {
     name: 'paleailment',
     id: 2,
-    seat: 2
+    seat: 2,
+    position: 'sb'
   }, {
     name: 'araabmuzik',
     id: 3,
-    seat: 4
+    seat: 4,
+    position: 'bb'
   }];
-  socket.on('start', function(data) {
+
+  return function(data) {
     socket.emit('table:read', table);
     socket.emit('players:read', players);
 
     var delay = 1000;
-    var increment = 2000;
+    var increment = 1000;
 
     // player 1's turn
     setTimeout(function() {
@@ -148,21 +243,11 @@ io.sockets.on('connection', function(socket) {
       players[2].amount = 10;
 
       players[0].active = true;
+      players[0].actions = ['check', 'raise', 'call', 'fold'];
       table.pot += 10
       table.cards = ['as', 'as', 'as'];
       socket.emit('players:read', players);
       socket.emit('table:read', table);
     }, delay);
-
-  });
-
-  socket.on('message:create', function(data, callback) {
-    var now = new Date();
-    data.timestamp = now.getHours() + ':' + now.getMinutes();
-    data.player.name = 'joebalancio';
-    socket.emit('messages:create', data);
-    socket.broadcast.emit('messages:create', data);
-    callback(null, data);
-  });
-
-});
+  };
+}
