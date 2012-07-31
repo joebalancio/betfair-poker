@@ -77,7 +77,7 @@ server.listen(app.get('port'), function() {
  * Socket.IO
  */
 io.sockets.on('connection', function(socket) {
-  socket.on('start', testJoinGame(socket));
+  socket.on('start', startEmptyTable(socket));
 
   socket.on('message:create', function(data, callback) {
     var now = new Date();
@@ -120,7 +120,7 @@ function testJoinGame(socket) {
       avatar: 'D03'
     }],
     newPlayer = {
-      name: 'subashini',
+      name: 'subhashini',
       id: 4,
       position: null,
       seat: 3,
@@ -249,5 +249,77 @@ function dummydata1(socket) {
       socket.emit('players:read', players);
       socket.emit('table:read', table);
     }, delay);
+  };
+}
+
+function startEmptyTable(socket) {
+  // emit table
+  var table = {
+    cards: [],
+    pot: 0,
+    revealingOrder: []
+  };
+
+  var players = [];
+
+  var player1 = {
+    name: 'joe',
+    id: 1,
+    seat: 1,
+    chips: 100,
+    avatar: 'J01'
+  };
+  var player2 = {
+    name: 'justin',
+    id: 2,
+    seat: 2,
+    chips: 100,
+    avatar: 'J02'
+  };
+  var player3 = {
+    name: 'gary',
+    id: 3,
+    seat: 3,
+    chips: 100,
+    avatar: 'J03'
+  };
+  var player4 = {
+    name: 'tony',
+    id: 4,
+    seat: 4,
+    chips: 100,
+    avatar: 'J04'
+  };
+
+  return function() {
+    socket.emit('players:read', players);
+    socket.emit('table:read', table);
+
+    socket.on('player:create', function(data) {
+      players.push(player1);
+      socket.emit('players:read', players);
+      socket.emit('table:read', table);
+
+      var delay = 1000;
+      setTimeout(function() {
+        players.push(player2);
+        socket.emit('players:read', players);
+        socket.emit('table:read', table);
+      }, delay);
+
+      delay+=1000
+      setTimeout(function() {
+        players.push(player3);
+        socket.emit('players:read', players);
+        socket.emit('table:read', table);
+      }, delay);
+
+      delay+=1000
+      setTimeout(function() {
+        players.push(player4);
+        socket.emit('players:read', players);
+        socket.emit('table:read', table);
+      }, delay);
+    });
   };
 }
