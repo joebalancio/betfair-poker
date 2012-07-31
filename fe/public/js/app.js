@@ -34,7 +34,8 @@ define([
      * Functions
      */
     initialize: function() {
-      window.socket = io.connect('http://localhost:3000');
+      var endpoint = window.location.protocol + '//' + window.location.host;
+      window.socket = io.connect(endpoint);
 
       this.stage = new Kinetic.Stage ({
         container: "table",
