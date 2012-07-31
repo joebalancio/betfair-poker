@@ -3,6 +3,7 @@ html
   head
     title HTML5 Poker App
     link(rel='stylesheet', href='/css/style.css')
+    script(data-main='js/main', src='/socket.io/socket.io.js')
     script(data-main='js/main', src='/js/libs/require/require.js')
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
   body
@@ -11,3 +12,8 @@ html
         div.container
           a.brand HTML5 Poker App
     block content
+    div#overlay
+      div.table(style='display:table; width:100%; height:100%')
+        div.cell(style='display:table-cell; vertical-align:middle')
+          div.progress.progress-striped.active
+            div.bar

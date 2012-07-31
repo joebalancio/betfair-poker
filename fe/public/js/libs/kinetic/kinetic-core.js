@@ -3,7 +3,7 @@
  * http://www.kineticjs.com/
  * Copyright 2012, Eric Rowell
  * Licensed under the MIT or GPL Version 2 licenses.
- * Date: Jul 26 2012
+ * Date: Jul 28 2012
  *
  * Copyright (C) 2011 - 2012 by Eric Rowell
  *
@@ -35,6 +35,7 @@
  */
 var Kinetic = {};
 Kinetic.Filters = {};
+Kinetic.Plugins = {};
 Kinetic.Global = {
     BUBBLE_WHITELIST: ['mousedown', 'mousemove', 'mouseup', 'mouseover', 'mouseout', 'click', 'dblclick', 'touchstart', 'touchmove', 'touchend', 'tap', 'dbltap', 'dragstart', 'dragmove', 'dragend'],
     stages: [],
@@ -3124,7 +3125,7 @@ Kinetic.Stage = Kinetic.Container.extend({
          * it exists
          */
         try {
-            this.content.removeChild(layer.canvas);
+            this.content.removeChild(layer.canvas.element);
         }
         catch(e) {
         }
@@ -3455,9 +3456,9 @@ Kinetic.Stage = Kinetic.Container.extend({
     },
     _touchmove: function(evt) {
         evt.preventDefault();
-        that.touchEnd = false;
-        that.touchMove = true;
-        that._handleStageEvent(evt);
+        this.touchEnd = false;
+        this.touchMove = true;
+        this._handleStageEvent(evt);
 
         // start drag and drop
         this._startDrag(evt);
@@ -4064,21 +4065,25 @@ Kinetic.Shape = Kinetic.Node.extend({
      * @methodOf Kinetic.Shape.prototype
      */
     stroke: function(context) {
-        var go = Kinetic.Global;
-        var appliedShadow = false;
+        var strokeWidth = this.getStrokeWidth();
+        var stroke = this.getStroke();
+        if(stroke || strokeWidth) {
+            var go = Kinetic.Global;
+            var appliedShadow = false;
 
-        context.save();
-        if(this.attrs.shadow && !this.appliedShadow) {
-            appliedShadow = this._applyShadow(context);
-        }
+            context.save();
+            if(this.attrs.shadow && !this.appliedShadow) {
+                appliedShadow = this._applyShadow(context);
+            }
 
-        context.lineWidth = this.attrs.strokeWidth;
-        context.strokeStyle = this.attrs.stroke;
-        context.stroke(context);
-        context.restore();
+            context.lineWidth = strokeWidth || 2;
+            context.strokeStyle = stroke || 'black';
+            context.stroke(context);
+            context.restore();
 
-        if(appliedShadow) {
-            this.stroke(context);
+            if(appliedShadow) {
+                this.stroke(context);
+            }
         }
     },
     /**
@@ -4550,29 +4555,28 @@ Kinetic.Ellipse = Kinetic.Shape.extend({
         });
 
         this.shapeType = "Ellipse";
+        config.drawFunc = this.drawFunc;
 
-        config.drawFunc = function(context) {
-            var r = this.getRadius();
-            context.beginPath();
-            context.save();
-            if(r.x !== r.y) {
-                context.scale(1, r.y / r.x);
-            }
-            context.arc(0, 0, r.x, 0, Math.PI * 2, true);
-            context.restore();
-            context.closePath();
-            this.fill(context);
-            this.stroke(context);
-        };
         // call super constructor
         this._super(config);
-
         this._convertRadius();
-
         var that = this;
         this.on('radiusChange.kinetic', function() {
             that._convertRadius();
         });
+    },
+    drawFunc: function(context) {
+        var r = this.getRadius();
+        context.beginPath();
+        context.save();
+        if(r.x !== r.y) {
+            context.scale(1, r.y / r.x);
+        }
+        context.arc(0, 0, r.x, 0, Math.PI * 2, true);
+        context.restore();
+        context.closePath();
+        this.fill(context);
+        this.stroke(context);
     },
     /**
      * converts numeric radius into an object
@@ -4633,33 +4637,34 @@ Kinetic.Node.addGettersSetters(Kinetic.Ellipse, ['radius']);
 Kinetic.Image = Kinetic.Shape.extend({
     init: function(config) {
         this.shapeType = "Image";
-        config.drawFunc = function(context) {
-            if(!!this.attrs.image) {
-                var width = this.getWidth();
-                var height = this.getHeight();
-
-                context.beginPath();
-                context.rect(0, 0, width, height);
-                context.closePath();
-                this.fill(context);
-                this.stroke(context);
-
-                // if cropping
-                if(this.attrs.crop && this.attrs.crop.width && this.attrs.crop.height) {
-                    var cropX = this.attrs.crop.x ? this.attrs.crop.x : 0;
-                    var cropY = this.attrs.crop.y ? this.attrs.crop.y : 0;
-                    var cropWidth = this.attrs.crop.width;
-                    var cropHeight = this.attrs.crop.height;
-                    this.drawImage(context, this.attrs.image, cropX, cropY, cropWidth, cropHeight, 0, 0, width, height);
-                }
-                // no cropping
-                else {
-                    this.drawImage(context, this.attrs.image, 0, 0, width, height);
-                }
-            }
-        };
+        config.drawFunc = this.drawFunc;
         // call super constructor
         this._super(config);
+    },
+    drawFunc: function(context) {
+        if(this.attrs.image) {
+            var width = this.getWidth();
+            var height = this.getHeight();
+
+            context.beginPath();
+            context.rect(0, 0, width, height);
+            context.closePath();
+            this.fill(context);
+            this.stroke(context);
+
+            // if cropping
+            if(this.attrs.crop && this.attrs.crop.width && this.attrs.crop.height) {
+                var cropX = this.attrs.crop.x ? this.attrs.crop.x : 0;
+                var cropY = this.attrs.crop.y ? this.attrs.crop.y : 0;
+                var cropWidth = this.attrs.crop.width;
+                var cropHeight = this.attrs.crop.height;
+                this.drawImage(context, this.attrs.image, cropX, cropY, cropWidth, cropHeight, 0, 0, width, height);
+            }
+            // no cropping
+            else {
+                this.drawImage(context, this.attrs.image, 0, 0, width, height);
+            }
+        }
     },
     /**
      * set width and height
@@ -4812,18 +4817,19 @@ Kinetic.Polygon = Kinetic.Shape.extend({
         });
 
         this.shapeType = "Polygon";
-        config.drawFunc = function(context) {
-            context.beginPath();
-            context.moveTo(this.attrs.points[0].x, this.attrs.points[0].y);
-            for(var n = 1; n < this.attrs.points.length; n++) {
-                context.lineTo(this.attrs.points[n].x, this.attrs.points[n].y);
-            }
-            context.closePath();
-            this.fill(context);
-            this.stroke(context);
-        };
+        config.drawFunc = this.drawFunc;
         // call super constructor
         this._super(config);
+    },
+    drawFunc: function(context) {
+        context.beginPath();
+        context.moveTo(this.attrs.points[0].x, this.attrs.points[0].y);
+        for(var n = 1; n < this.attrs.points.length; n++) {
+            context.lineTo(this.attrs.points[n].x, this.attrs.points[n].y);
+        }
+        context.closePath();
+        this.fill(context);
+        this.stroke(context);
     }
 });
 
@@ -4872,69 +4878,7 @@ Kinetic.Text = Kinetic.Shape.extend({
         this.dummyCanvas = document.createElement('canvas');
         this.shapeType = "Text";
 
-        config.drawFunc = function(context) {
-            /*
-             * draw rect
-             */
-            context.beginPath();
-            var boxWidth = this.getBoxWidth();
-            var boxHeight = this.getBoxHeight();
-
-            if(this.attrs.cornerRadius === 0) {
-                // simple rect - don't bother doing all that complicated maths stuff.
-                context.rect(0, 0, boxWidth, boxHeight);
-            }
-            else {
-                // arcTo would be nicer, but browser support is patchy (Opera)
-                context.moveTo(this.attrs.cornerRadius, 0);
-                context.lineTo(boxWidth - this.attrs.cornerRadius, 0);
-                context.arc(boxWidth - this.attrs.cornerRadius, this.attrs.cornerRadius, this.attrs.cornerRadius, Math.PI * 3 / 2, 0, false);
-                context.lineTo(boxWidth, boxHeight - this.attrs.cornerRadius);
-                context.arc(boxWidth - this.attrs.cornerRadius, boxHeight - this.attrs.cornerRadius, this.attrs.cornerRadius, 0, Math.PI / 2, false);
-                context.lineTo(this.attrs.cornerRadius, boxHeight);
-                context.arc(this.attrs.cornerRadius, boxHeight - this.attrs.cornerRadius, this.attrs.cornerRadius, Math.PI / 2, Math.PI, false);
-                context.lineTo(0, this.attrs.cornerRadius);
-                context.arc(this.attrs.cornerRadius, this.attrs.cornerRadius, this.attrs.cornerRadius, Math.PI, Math.PI * 3 / 2, false);
-            }
-            context.closePath();
-
-            this.fill(context);
-            this.stroke(context);
-            /*
-             * draw text
-             */
-            var p = this.attrs.padding;
-            var lineHeightPx = this.attrs.lineHeight * this.getTextHeight();
-            var textArr = this.textArr;
-
-            context.font = this.attrs.fontStyle + ' ' + this.attrs.fontSize + 'pt ' + this.attrs.fontFamily;
-            context.textBaseline = 'middle';
-            context.textAlign = 'left';
-            context.save();
-            context.translate(p, 0);
-            context.translate(0, p + this.getTextHeight() / 2);
-
-            // draw text lines
-            for(var n = 0; n < textArr.length; n++) {
-                var text = textArr[n];
-
-                // horizontal alignment
-                context.save();
-                if(this.attrs.align === 'right') {
-                    context.translate(this.getBoxWidth() - this._getTextSize(text).width - p * 2, 0);
-                }
-                else if(this.attrs.align === 'center') {
-                    context.translate((this.getBoxWidth() - this._getTextSize(text).width - p * 2) / 2, 0);
-                }
-
-                this.fillText(context, text);
-                this.strokeText(context, text);
-                context.restore();
-
-                context.translate(0, lineHeightPx);
-            }
-            context.restore();
-        };
+        config.drawFunc = this.drawFunc;
         // call super constructor
         this._super(config);
 
@@ -4945,8 +4889,68 @@ Kinetic.Text = Kinetic.Shape.extend({
             var attr = attrs[n];
             this.on(attr + 'Change.kinetic', that._setTextData);
         }
-
         that._setTextData();
+    },
+    drawFunc: function(context) {
+        // draw rect
+        context.beginPath();
+        var boxWidth = this.getBoxWidth();
+        var boxHeight = this.getBoxHeight();
+
+        if(this.attrs.cornerRadius === 0) {
+            // simple rect - don't bother doing all that complicated maths stuff.
+            context.rect(0, 0, boxWidth, boxHeight);
+        }
+        else {
+            // arcTo would be nicer, but browser support is patchy (Opera)
+            context.moveTo(this.attrs.cornerRadius, 0);
+            context.lineTo(boxWidth - this.attrs.cornerRadius, 0);
+            context.arc(boxWidth - this.attrs.cornerRadius, this.attrs.cornerRadius, this.attrs.cornerRadius, Math.PI * 3 / 2, 0, false);
+            context.lineTo(boxWidth, boxHeight - this.attrs.cornerRadius);
+            context.arc(boxWidth - this.attrs.cornerRadius, boxHeight - this.attrs.cornerRadius, this.attrs.cornerRadius, 0, Math.PI / 2, false);
+            context.lineTo(this.attrs.cornerRadius, boxHeight);
+            context.arc(this.attrs.cornerRadius, boxHeight - this.attrs.cornerRadius, this.attrs.cornerRadius, Math.PI / 2, Math.PI, false);
+            context.lineTo(0, this.attrs.cornerRadius);
+            context.arc(this.attrs.cornerRadius, this.attrs.cornerRadius, this.attrs.cornerRadius, Math.PI, Math.PI * 3 / 2, false);
+        }
+        context.closePath();
+
+        this.fill(context);
+        this.stroke(context);
+        /*
+         * draw text
+         */
+        var p = this.attrs.padding;
+        var lineHeightPx = this.attrs.lineHeight * this.getTextHeight();
+        var textArr = this.textArr;
+
+        context.font = this.attrs.fontStyle + ' ' + this.attrs.fontSize + 'pt ' + this.attrs.fontFamily;
+        context.textBaseline = 'middle';
+        context.textAlign = 'left';
+        context.save();
+        context.translate(p, 0);
+        context.translate(0, p + this.getTextHeight() / 2);
+
+        // draw text lines
+        for(var n = 0; n < textArr.length; n++) {
+            var text = textArr[n];
+
+            // horizontal alignment
+            context.save();
+            if(this.attrs.align === 'right') {
+                context.translate(this.getBoxWidth() - this._getTextSize(text).width - p * 2, 0);
+            }
+            else if(this.attrs.align === 'center') {
+                context.translate((this.getBoxWidth() - this._getTextSize(text).width - p * 2) / 2, 0);
+            }
+
+            this.fillText(context, text);
+            this.strokeText(context, text);
+            context.restore();
+
+            context.translate(0, lineHeightPx);
+        }
+        context.restore();
     },
     /**
      * get box width
@@ -5250,35 +5254,36 @@ Kinetic.Line = Kinetic.Shape.extend({
         });
 
         this.shapeType = "Line";
-        config.drawFunc = function(context) {
-            var lastPos = {};
-            context.beginPath();
-
-            context.moveTo(this.attrs.points[0].x, this.attrs.points[0].y);
-
-            for(var n = 1; n < this.attrs.points.length; n++) {
-                var x = this.attrs.points[n].x;
-                var y = this.attrs.points[n].y;
-                if(this.attrs.dashArray.length > 0) {
-                    // draw dashed line
-                    var lastX = this.attrs.points[n - 1].x;
-                    var lastY = this.attrs.points[n - 1].y;
-                    this._dashedLine(context, lastX, lastY, x, y, this.attrs.dashArray);
-                }
-                else {
-                    // draw normal line
-                    context.lineTo(x, y);
-                }
-            }
-
-            if(!!this.attrs.lineCap) {
-                context.lineCap = this.attrs.lineCap;
-            }
-
-            this.stroke(context);
-        };
+        config.drawFunc = this.drawFunc;
         // call super constructor
         this._super(config);
+    },
+    drawFunc: function(context) {
+        var lastPos = {};
+        context.beginPath();
+
+        context.moveTo(this.attrs.points[0].x, this.attrs.points[0].y);
+
+        for(var n = 1; n < this.attrs.points.length; n++) {
+            var x = this.attrs.points[n].x;
+            var y = this.attrs.points[n].y;
+            if(this.attrs.dashArray.length > 0) {
+                // draw dashed line
+                var lastX = this.attrs.points[n - 1].x;
+                var lastY = this.attrs.points[n - 1].y;
+                this._dashedLine(context, lastX, lastY, x, y, this.attrs.dashArray);
+            }
+            else {
+                // draw normal line
+                context.lineTo(x, y);
+            }
+        }
+
+        if(!!this.attrs.lineCap) {
+            context.lineCap = this.attrs.lineCap;
+        }
+
+        this.stroke(context);
     },
     /**
      * draw dashed line.  Written by Phrogz
@@ -5392,27 +5397,27 @@ Kinetic.Sprite = Kinetic.Shape.extend({
             frameRate: 17
         });
 
-        config.drawFunc = function(context) {
-            if(!!this.attrs.image) {
-                var anim = this.attrs.animation;
-                var index = this.attrs.index;
-                var f = this.attrs.animations[anim][index];
-
-                context.beginPath();
-                context.rect(0, 0, f.width, f.height);
-                context.closePath();
-
-                this.drawImage(context, this.attrs.image, f.x, f.y, f.width, f.height, 0, 0, f.width, f.height);
-            }
-        };
+        config.drawFunc = this.drawFunc;
         // call super constructor
         this._super(config);
-
         var that = this;
         this.on('animationChange.kinetic', function() {
             // reset index when animation changes
             that.setIndex(0);
         });
+    },
+    drawFunc: function(context) {
+        if(this.attrs.image) {
+            var anim = this.attrs.animation;
+            var index = this.attrs.index;
+            var f = this.attrs.animations[anim][index];
+
+            context.beginPath();
+            context.rect(0, 0, f.width, f.height);
+            context.closePath();
+
+            this.drawImage(context, this.attrs.image, f.x, f.y, f.width, f.height, 0, 0, f.width, f.height);
+        }
     },
     /**
      * start sprite animation

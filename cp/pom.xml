@@ -16,7 +16,11 @@
     <developerConnection>scm:git:ssh://git@git.sfo.us.betfair/api/poker</developerConnection>
     <url>ssh://git@git.sfo.us.betfair/api/poker</url>
   </scm>
+  <properties>
+    <camel.version>2.10.0</camel.version>
+  </properties>
   <modules>
+    <module>chat</module>
     <module>deck</module>
     <module>hand</module>
     <module>player</module>

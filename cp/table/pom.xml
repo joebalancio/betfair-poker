@@ -17,9 +17,10 @@
     <url>ssh://git@git.sfo.us.betfair/api/poker/table</url>
   </scm>
   <dependencies>
+   
     <dependency>
       <groupId>com.betfair.poker</groupId>
-      <artifactId>deck</artifactId>
+      <artifactId>player</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

@@ -1,17 +1,15 @@
 package com.betfair.poker.deck;
 
-
-
 /**
  * A single card in a deck of cards.
  */
-public class Card implements Comparable<Card>{
-	
-	public static final int NO_OF_RANKS = 13;
-	    
-	/** The number of suits in a deck. */
-	public static final int NO_OF_SUITS = 4;
-	
+public class Card implements Comparable<Card> {
+
+    public static final int NO_OF_RANKS = 13;
+
+    /** The number of suits in a deck. */
+    public static final int NO_OF_SUITS = 4;
+
     private final Suit suit;
     private final Rank rank;
 
@@ -42,7 +40,7 @@ public class Card implements Comparable<Card>{
         this.rank = rank;
         this.suit = suit;
     }
-    
+
     /**
      * Return the suit of this card.
      * 
@@ -74,13 +72,12 @@ public class Card implements Comparable<Card>{
 
         return buffer.toString();
     }
-   
+
     @Override
     public int hashCode() {
         return (rank.getRank() * NO_OF_SUITS + suit.getSuit());
     }
 
-   
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Card) {
@@ -90,7 +87,6 @@ public class Card implements Comparable<Card>{
         }
     }
 
-   
     @Override
     public int compareTo(Card card) {
         int thisValue = hashCode();

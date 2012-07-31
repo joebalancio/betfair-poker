@@ -22,5 +22,10 @@
       <artifactId>testng</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.betfair.poker</groupId>
+      <artifactId>hand</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 </project>
