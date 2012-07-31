@@ -77,7 +77,7 @@ server.listen(app.get('port'), function() {
  * Socket.IO
  */
 io.sockets.on('connection', function(socket) {
-  socket.on('start', startEmptyTable(socket));
+  socket.on('start', testJoinGame(socket));
 
   socket.on('message:create', function(data, callback) {
     var now = new Date();
@@ -321,5 +321,77 @@ function startEmptyTable(socket) {
         socket.emit('table:read', table);
       }, delay);
     });
+  };
+}
+
+// Mock transition between rounds
+function transitionRound(socket, round) {
+  // emit table
+  var table = {
+    cards: [],
+    pot: 100,
+    revealingOrder: []
+  };
+
+  var players = [{
+    name: 'joe',
+    id: 1,
+    seat: 1,
+    chips: 100,
+    avatar: 'J01'
+  }, {
+    name: 'justin',
+    id: 2,
+    seat: 2,
+    chips: 100,
+    avatar: 'J02'
+  }, {
+    name: 'gary',
+    id: 3,
+    seat: 3,
+    chips: 100,
+    avatar: 'J03'
+  }, {
+    name: 'tony',
+    id: 4,
+    seat: 4,
+    chips: 100,
+    avatar: 'J04'
+  }];
+
+  switch(round) {
+    case 'preflop':
+      preCards = [];
+      postCards = ['as','as','as'];
+      break;
+    case 'flop':
+      preCards = ['as','as','as'];
+      postCards = ['as','as','as','as'];
+      break;
+    case 'turn':
+      preCards = ['as','as','as','as'];
+      postCards = ['as','as','as','as','as'];
+      table.cards = ['as','as','as','as'];
+      break;
+    case 'river':
+      preCards = ['as','as','as','as','as'];
+      postCards = ['as','as','as','as','as'];
+      break;
+  }
+
+  return function() {
+    var delay = 1000;
+    setTimeout(function() {
+      table.cards = preCards;
+      socket.emit('table:read', table);
+      socket.emit('players:read', players);
+    }, delay);
+
+    delay += 1000;
+    setTimeout(function() {
+      table.cards = postCards;
+      socket.emit('table:read', table);
+      socket.emit('players:read', players);
+    }, delay);
   };
 }

@@ -34,8 +34,6 @@ define([
      * Functions
      */
     initialize: function() {
-      var endpoint = window.location.protocol + '//' + window.location.host;
-      window.socket = io.connect(endpoint);
 
       this.stage = new Kinetic.Stage ({
         container: "table",
@@ -70,18 +68,14 @@ define([
         var chatView = new ChatView({collection: new Messages});
         chatView.render();
 
-        //$('#overlay').hide();
-
         // draw the stage
         this.stage.draw();
 
         // signal websockets that the app is ready
-        setTimeout(function() {
-          window.socket.emit('start');
+        window.socket.emit('start');
 
-          // hide the overlay
-          $('#overlay').fadeOut();
-        }, 500);
+        // hide the overlay
+        $('#overlay').delay(500).fadeOut();
       });
     },
 
