@@ -16,15 +16,26 @@
     <developerConnection>scm:git:ssh://git@git.sfo.us.betfair/api/poker/chat</developerConnection>
     <url>ssh://git@git.sfo.us.betfair/api/poker/chat</url>
   </scm>
+  <properties>
+    <camel.version>2.x-fuse-SNAPSHOT</camel.version>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-core</artifactId>
+      <version>${camel.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-xstream</artifactId>
+      <version>${camel.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-websocket</artifactId>
+      <version>${camel.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

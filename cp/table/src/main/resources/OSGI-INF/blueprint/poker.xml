@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+  xmlns:camel="http://camel.apache.org/schema/blueprint"
+  xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+            http://camel.apache.org/schema/blueprint http://camel.apache.org/schema/blueprint/camel-blueprint.xsd">
+
+  <cm:property-placeholder persistent-id="com.betfair.poker" update-strategy="reload">
+    <cm:default-properties>
+      <cm:property name="com.betfair.poker.chat.fromEndpoint" value="tcp://localhost:61616" />
+      <cm:property name="com.betfair.poker.chat.toEndpoint" value="tcp://localhost:61616" />
+    </cm:default-properties>
+  </cm:property-placeholder>
+
+  <bean id="pokerTable" class="com.betfair.poker.table.Table">
+
+  </bean>
+
+  <bean id="pokerRouteBuilder" class="com.betfair.poker.table.PokerRouteBuilder">
+    <property name="table" ref="pokerTable" />
+    <property name="fromEndpoint" value="${com.betfair.poker.chat.fromEndpoint}" />
+    <property name="toEndpoint" value="${com.betfair.poker.chat.toEndpoint}" />
+  </bean>
+
+  <camel:camelContext id="pokerContext">
+    <camel:routeBuilder ref="pokerRouteBuilder" />
+  </camel:camelContext>
+
+</blueprint>

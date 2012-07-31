@@ -16,12 +16,32 @@
     <developerConnection>scm:git:ssh://git@git.sfo.us.betfair/api/poker/table</developerConnection>
     <url>ssh://git@git.sfo.us.betfair/api/poker/table</url>
   </scm>
+  <properties>
+    <camel.version>2.x-fuse-SNAPSHOT</camel.version>
+  </properties>
   <dependencies>
-   
     <dependency>
       <groupId>com.betfair.poker</groupId>
       <artifactId>player</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-core</artifactId>
+      <version>${camel.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-xstream</artifactId>
+      <version>${camel.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-websocket</artifactId>
+      <version>${camel.version}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.testng</groupId>
