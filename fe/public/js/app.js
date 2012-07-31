@@ -69,7 +69,7 @@ define([
         chatView.render();
 
         // draw the stage
-        this.stage.draw();
+        //this.stage.draw();
 
         // signal websockets that the app is ready
         window.socket.emit('start');
@@ -206,8 +206,14 @@ define([
 
       };
       var completed = 0;
-      var len = _.size(images);
+      var len = 0;
       var self = this;
+
+      // calculate size of images array so we know when all images have been preloaded
+      _.each(images, function(value, key) {
+        if (_.isString(value)) len++;
+        else len += _.size(value);
+      });
 
       function preload(name, src, callback, subkey) {
         var i = new Image();

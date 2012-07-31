@@ -395,3 +395,47 @@ function transitionRound(socket, round) {
     }, delay);
   };
 }
+
+// End of hand
+function endOfHand(socket) {
+  var table = {
+    cards: ['as','as','as','as','as'],
+    pot: 100
+  };
+
+  var players = [{
+      name: 'joebalancio',
+      id: 1,
+      seat: 1,
+      position: 'd',
+      chips: 100,
+      avatar: 'J01'
+    }, {
+      name: 'paleailment',
+      id: 2,
+      seat: 2,
+      position: 'sb',
+      chips: 100,
+      avatar: 'A05'
+    }, {
+      name: 'philipkim',
+      id: 3,
+      seat: 4,
+      position: 'bb',
+      chips: 100,
+      avatar: 'D03'
+    }, {
+      name: 'subhashini',
+      id: 4,
+      position: null,
+      seat: 3,
+      chips: 100,
+      active: true,
+      cards: ['as', 'as'],
+      avatar: 'FD01'
+    }];
+  return function(data) {
+    socket.emit('table:read', table);
+    socket.emit('players:read', players);
+  };
+}
