@@ -77,7 +77,7 @@ server.listen(app.get('port'), function() {
  * Socket.IO
  */
 io.sockets.on('connection', function(socket) {
-  socket.on('start', testJoinGame(socket));
+  socket.on('start', startEmptyTable(socket));
 
   socket.on('message:create', function(data, callback) {
     var now = new Date();
