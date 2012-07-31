@@ -34,7 +34,6 @@ define([
      * Functions
      */
     initialize: function() {
-      window.socket = io.connect('http://localhost:3000');
 
       this.stage = new Kinetic.Stage ({
         container: "table",
@@ -69,18 +68,14 @@ define([
         var chatView = new ChatView({collection: new Messages});
         chatView.render();
 
-        //$('#overlay').hide();
-
         // draw the stage
         this.stage.draw();
 
         // signal websockets that the app is ready
-        setTimeout(function() {
-          window.socket.emit('start');
+        window.socket.emit('start');
 
-          // hide the overlay
-          $('#overlay').fadeOut();
-        }, 500);
+        // hide the overlay
+        $('#overlay').delay(500).fadeOut();
       });
     },
 
@@ -211,8 +206,14 @@ define([
 
       };
       var completed = 0;
-      var len = _.size(images);
+      var len = 0;
       var self = this;
+
+      // calculate size of images array so we know when all images have been preloaded
+      _.each(images, function(value, key) {
+        if (_.isString(value)) len++;
+        else len += _.size(value);
+      });
 
       function preload(name, src, callback, subkey) {
         var i = new Image();

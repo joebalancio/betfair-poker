@@ -6,10 +6,10 @@ define(function(require, exports, modules) {
     url: 'messages',
     socket: window.socket,
     initialize: function() {
-      this.ioBind('create', this.create, this);
+      this.ioBind('read', this.read, this);
     },
-    create: function(data) {
-      console.log('creating data');
+    read: function(data) {
+      console.log('reading new messages');
       this.add(data);
     }
 	});
