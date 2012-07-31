@@ -12,7 +12,8 @@ var express = require('express'),
   url = require('url');
   mkdirp = require('mkdirp'),
   server = http.createServer(app),
-  io = require('socket.io').listen(server, {debug: true});
+  io = require('socket.io').listen(server, {debug: true}),
+  _ = require('underscore');
 
 
 /*
@@ -77,14 +78,15 @@ server.listen(app.get('port'), function() {
  * Socket.IO
  */
 io.sockets.on('connection', function(socket) {
+  //socket.on('start', demoActions(socket));
   socket.on('start', startEmptyTable(socket));
 
   socket.on('message:create', function(data, callback) {
     var now = new Date();
     data.timestamp = now.getHours() + ':' + now.getMinutes();
     data.player.name = 'joebalancio';
-    socket.emit('messages:create', data);
-    socket.broadcast.emit('messages:create', data);
+    socket.emit('messages:read', data);
+    socket.broadcast.emit('messages:read', data);
     callback(null, data);
   });
 
@@ -437,5 +439,117 @@ function endOfHand(socket) {
   return function(data) {
     socket.emit('table:read', table);
     socket.emit('players:read', players);
+
+    setTimeout(function() {
+      table.winner = 1;
+      socket.emit('table:read', table);
+      socket.emit('players:read', players);
+    }, 1000);
+  };
+}
+
+// demo actions
+function demoActions(socket) {
+  var table = {
+    cards: ['as','as','as'],
+    pot: 100
+  };
+
+  var players = [{
+      name: 'joebalancio',
+      id: 1,
+      seat: 1,
+      position: 'd',
+      chips: 100,
+      cards: ['as','as'],
+      active: true,
+      actions: ['check','fold','raise','call'],
+      avatar: 'J01'
+    }, {
+      name: 'paleailment',
+      id: 2,
+      seat: 2,
+      position: 'sb',
+      chips: 100,
+      avatar: 'A05'
+    }, {
+      name: 'philipkim',
+      id: 3,
+      seat: 4,
+      position: 'bb',
+      chips: 100,
+      avatar: 'D03'
+    }, {
+      name: 'subhashini',
+      id: 4,
+      position: null,
+      seat: 3,
+      chips: 100,
+      avatar: 'FD01'
+    }];
+  return function(data) {
+    socket.emit('table:read', table);
+    socket.emit('players:read', players);
+
+    socket.on('player:update', function(data) {
+      _.each(players, function(player) {
+        if (player.id === data.id) {
+          delete player.actions;
+          if (data.amount) {
+            player.amount -= data.amount;
+            table.pot += parseInt(data.amount, 10);
+          }
+          player.active = false;
+          players[1].active=true;
+          socket.emit('table:read', table);
+          socket.emit('players:read', players);
+        }
+      });
+    });
+  };
+}
+
+function endOfHandToStartOfHand(socket) {
+  var table = {
+    cards: ['as','as','as'],
+    pot: 100,
+    winner: 1
+  };
+
+  var players = [{
+      name: 'joebalancio',
+      id: 1,
+      seat: 1,
+      position: 'd',
+      chips: 100,
+      cards: ['as','as'],
+      active: true,
+      actions: ['check','fold','raise','call'],
+      avatar: 'J01'
+    }, {
+      name: 'paleailment',
+      id: 2,
+      seat: 2,
+      position: 'sb',
+      chips: 100,
+      avatar: 'A05'
+    }, {
+      name: 'philipkim',
+      id: 3,
+      seat: 4,
+      position: 'bb',
+      chips: 100,
+      avatar: 'D03'
+    }, {
+      name: 'subhashini',
+      id: 4,
+      position: null,
+      seat: 3,
+      chips: 100,
+      avatar: 'FD01'
+    }];
+  return function() {
+    socket.emit('players:read', players);
+    socket.emit('table:read', table);
   };
 }

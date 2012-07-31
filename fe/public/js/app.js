@@ -69,7 +69,7 @@ define([
         chatView.render();
 
         // draw the stage
-        //this.stage.draw();
+        this.stage.draw();
 
         // signal websockets that the app is ready
         window.socket.emit('start');

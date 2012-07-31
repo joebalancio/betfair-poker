@@ -15,6 +15,7 @@
     "stitch": "*",
 
     "mkdirp": "*",
-    "socket.io": "*"
+    "socket.io": "*",
+    "underscore": "*"
   }
 }
