@@ -22,12 +22,18 @@ block content
           form
             textarea
             button.btn(type='submit') Submit
-      div.span9
-        div#pokerTable
-        button.btn#deal1 Deal Player 1
-        button.btn#deal2 Deal Player 2
-        button.btn#deal3 Deal Player 3
-        button.btn#deal4 Deal Player 4
+      div#poker.span9
+        div#table
+        button.btn#join Join
+        div#actions.well.hide
+          button.btn#call Call
+          button.btn#raise Raise
+          button.btn#check Check
+          button.btn#fold Fold
+          &nbsp;
+          span.input-prepend
+            span.add-on $
+            input.input-mini(type='text')
         hr
         div.row
           div.span12

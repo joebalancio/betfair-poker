@@ -125,7 +125,7 @@ public class Game {
                 throw new IllegalStateException("Invalid action: " + action);
        	}
     	if (currentPlayer.getPlayer().isAllIn()) {
-    		currentPlayer.getPlayer().setInAllPot(pot);
+    		//currentPlayer.getPlayer().setInAllPot(pot);
         }
     }
     

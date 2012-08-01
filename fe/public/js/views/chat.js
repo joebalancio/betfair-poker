@@ -10,6 +10,8 @@ define(function(require, exports, module) {
     events: {
       'click form button': 'send'
     },
+    sessionPlayer: null,
+
     initialize: function() {
       this.collection.on('add', this.add, this);
       console.log('initialize');
@@ -19,13 +21,8 @@ define(function(require, exports, module) {
     },
     send: function() {
       var text = this.$el.find('form textarea').val();
-      var message = new Message({
-        message: text,
-        player: {
-          id: 1
-        }
-      });
-      message.save();
+      var name = this.player ? this.player.get('name') : 'guest';
+      this.sendMessage(name, text);
       console.log('send');
       return false;
     },
@@ -37,6 +34,11 @@ define(function(require, exports, module) {
       scroll
         .append(messageView.el)
         .animate({scrollTop: (scroll.prop('scrollHeight') - scroll.innerHeight())}, 'fast');
+    },
+    sendMessage: function(name, text) {
+      var data = { message: text };
+      if (name) data.name = name;
+      new Message(data).save();
     }
   });
 

@@ -31,19 +31,21 @@ public class Table {
             Seat seat = new Seat(i);
             seats.add(seat);
         }
-        
+
         this.game = new Game();
     }
 
     public void start() {
-        while (true) {
+        while (true) 
+        {
             if (game.isHandCompleted()) {
                 game.payPots();
                 game.reset();
                 setSeatDealer();
             }
             
-            if (!game.isPlaying()) {
+            if (!game.isPlaying())
+            {
                 List<Seat> activeSeats = new ArrayList<Seat>();
                 
                 for (Seat seat : getSeats()) {
@@ -63,7 +65,15 @@ public class Table {
             }
         }
     }
-
+    
+    public int getBigBlind() {
+        return this.bigBlind;
+    }
+    
+    public Game getGame() {
+        return this.game;
+    }
+    
     public List<Seat> getSeats() {
         return new ArrayList<Seat>(seats);
     }

@@ -17,7 +17,7 @@
     <url>ssh://git@git.sfo.us.betfair/api/poker</url>
   </scm>
   <properties>
-    <camel.version>2.10.0</camel.version>
+    <camel.version>2.x-fuse-SNAPSHOT</camel.version>
   </properties>
   <modules>
     <module>chat</module>

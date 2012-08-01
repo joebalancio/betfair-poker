@@ -1,4 +1,9 @@
 p
   small.timestamp #{timestamp}
-  b #{player.name}:&nbsp;
+  case name
+    when 'sentinel'
+      b.label.label-important #{name}
+    default
+      b #{name}:
+  &nbsp;
   span #{message}
