@@ -29,6 +29,8 @@ define([
       'click button#fold': 'fold',
       'click button#join': 'join'
     },
+    sessionPlayer: null,
+    chatView: null,
 
     /*
      * Functions
@@ -50,7 +52,7 @@ define([
       this.players.on('add', this.addPlayer, this);
       this.players.on('add change', this.updateStage, this);
       this.players.on('add change:actions', this.displayActions, this);
-      this.players.on('add change:actions', this.sessionPlayer, this);
+      this.players.on('add change:actions', this.retrieveSessionPlayer, this);
 
       this.$('button').not('#join').hide();
 
@@ -66,8 +68,8 @@ define([
         });
         table.render();
 
-        var chatView = new ChatView({collection: new Messages});
-        chatView.render();
+        this.chatView = new ChatView({collection: new Messages, player: this.sessionPlayer});
+        this.chatView.render(); // not used atm
 
         // draw the stage
         this.stage.draw();
@@ -286,7 +288,7 @@ define([
       }
     },
 
-    sessionPlayer: function(model) {
+    retrieveSessionPlayer: function(model) {
       var actions = model.get('actions');
       if (_.isArray(actions)) {
         this.sessionPlayer = model;

@@ -86,7 +86,6 @@ io.sockets.on('connection', function(socket) {
   socket.on('message:create', function(data, callback) {
     var now = new Date();
     data.timestamp = now.getHours() + ':' + now.getMinutes();
-    data.player.name = 'joebalancio';
     socket.emit('messages:read', data);
     socket.broadcast.emit('messages:read', data);
     callback(null, data);
@@ -583,6 +582,9 @@ function playerRegistration(socket) {
     socket.on('player:create', function(data) {
       var player = _.extend({}, data);
 
+      var now = new Date();
+      now = now.getHours() + ':' + now.getMinutes();
+
       // assign id
       player.id = 1;
       player.chips = 100;
@@ -590,10 +592,16 @@ function playerRegistration(socket) {
       player.position = 'd';
       player.seat = 1;
       player.actions = [];
+      player.name = 'joe';
 
       players.push(player);
 
       socket.emit('players:read', players);
+      socket.emit('messages:read', {
+        message: player.name + ' joined!',
+        name: 'sentinel',
+        timestamp: now
+      });
     });
 
   };
