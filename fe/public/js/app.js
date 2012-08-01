@@ -61,7 +61,8 @@ define([
         var table = new TableView({
           layer: this.layers.table,
           model: new TableModel,
-          images: images
+          images: images,
+          players: this.players
         });
         table.render();
 
@@ -250,12 +251,12 @@ define([
 
       switch (seat) {
         case 1:
-          model.group.setX(this.stage.attrs.width - model.group.width);
-          model.group.setY(this.stage.attrs.height / 2 - model.group.height / 2);
+          model.group.setX(this.stage.attrs.width - (model.group.width - 20) );
+          model.group.setY(this.stage.attrs.height / 2 - model.group.height / 2.3);
           break;
         case 2:
           model.group.setX(this.stage.attrs.width / 2 - model.group.width / 2);
-          model.group.setY(this.stage.attrs.height - model.group.height);
+          model.group.setY(this.stage.attrs.height - (model.group.height / 1.7) );
           break;
         case 3:
           model.group.setX(this.stage.attrs.width / 2 - model.group.width / 2);
@@ -263,7 +264,7 @@ define([
           break;
         case 4:
           model.group.setX(0);
-          model.group.setY(this.stage.attrs.height / 2 - model.group.height / 2);
+          model.group.setY(this.stage.attrs.height / 2 - model.group.height / 2.3);
           break;
       }
       this.layers.players.add(model.group);

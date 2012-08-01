@@ -79,8 +79,8 @@ server.listen(app.get('port'), function() {
  */
 io.sockets.on('connection', function(socket) {
   //socket.on('start', demoActions(socket));
-  socket.on('start', startEmptyTable(socket));
-  //socket.on('start', endOfHandToStartOfHand(socket));
+  //socket.on('start', startEmptyTable(socket));
+  socket.on('start', endOfHandToStartOfHand(socket));
   //socket.on('start', playerRegistration(socket));
 
   socket.on('message:create', function(data, callback) {
@@ -270,28 +270,31 @@ function startEmptyTable(socket) {
     name: 'joe',
     id: 1,
     seat: 1,
-    chips: 100,
-    avatar: 'J01'
+    chips: 1000,
+    avatar: 'J01',
+    position: 'd'
   };
   var player2 = {
-    name: 'justin',
+    name: 'justinjustinjustinjustin',
     id: 2,
     seat: 2,
-    chips: 100,
-    avatar: 'J02'
+    chips: 1000,
+    avatar: 'J02',
+    position: 'bb'
   };
   var player3 = {
     name: 'gary',
     id: 3,
     seat: 3,
-    chips: 100,
-    avatar: 'J03'
+    chips: 1000,
+    avatar: 'J03',
+    position: 'sb'
   };
   var player4 = {
     name: 'tony',
     id: 4,
     seat: 4,
-    chips: 100,
+    chips: 1000,
     avatar: 'J04'
   };
 
@@ -344,10 +347,10 @@ function transitionRound(socket, round) {
     chips: 100,
     avatar: 'J01'
   }, {
-    name: 'justin',
+    name: 'namelongerthanjustin',
     id: 2,
     seat: 2,
-    chips: 100,
+    chips: 1004,
     avatar: 'J02'
   }, {
     name: 'gary',
@@ -513,7 +516,7 @@ function demoActions(socket) {
 
 function endOfHandToStartOfHand(socket) {
   var table = {
-    cards: ['as','as','as'],
+    cards: ['as','as','as','as','as'],
     pot: 100,
     winner: 1
   };
@@ -551,7 +554,18 @@ function endOfHandToStartOfHand(socket) {
   return function() {
     socket.emit('players:read', players);
     socket.emit('table:read', table);
-
+    
+    setTimeout(function() {
+      players[0].position = '';
+      players[1].position = 'd';
+      players[2].position = 'sb';
+      players[3].position = 'bb';
+      players[table.winner].chips += table.pot;
+      delete table.winner;
+      table.pot = 0;
+      socket.emit('players:read', players);
+      socket.emit('table:read', table);
+    }, 3000);
 
   };
 }

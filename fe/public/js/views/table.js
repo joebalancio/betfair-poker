@@ -23,7 +23,7 @@ define(function(require,exports,modules) {
         height: 128,
         offset: {
           x: 92/2,
-          y: 128/2
+          y: 128/1.2
         }
       }),
       card2: new Kinetic.Image({
@@ -31,7 +31,7 @@ define(function(require,exports,modules) {
         height: 128,
         offset: {
           x: 92/2,
-          y: 128/2
+          y: 128/1.2
         }
       }),
       card3: new Kinetic.Image({
@@ -39,23 +39,25 @@ define(function(require,exports,modules) {
         height: 128,
         offset: {
           x: 92/2,
-          y: 128/2
+          y: 128/1.2
         }
       }),
       card4: new Kinetic.Image({
         width: 92,
         height: 128,
+        visible: 1,
         offset: {
           x: 92/2,
-          y: 128/2
+          y: 128/1.2
         }
       }),
       card5: new Kinetic.Image({
         width: 92,
         height: 128,
+        visible: 1,
         offset: {
           x: 92/2,
-          y: 128/2
+          y: 128/1.2
         }
       })
 
@@ -70,8 +72,12 @@ define(function(require,exports,modules) {
       this.model.on('change:pot', this.updatePot, this);
       this.model.on('change', this.updateStage, this);
 
+      this.model.on('change:winner', this.updateWinner, this);
+      this.model.on('change:status', this.updateStatus, this);
+
       this.images = this.options.images;
       this.layer = this.options.layer;
+      this.players = this.options.players;
 		},
 
     /*
@@ -94,10 +100,10 @@ define(function(require,exports,modules) {
       stage.setHeight(stageHeight);
       halfStageHeight = stageHeight / 2;
       //this.$('.kineticjs-content').height(stage.attrs.height);
-
+      
       // set placement of pot
-      this.shapes.pot.setX(halfStageWidth);
-      this.shapes.pot.setY(halfStageHeight * .5);
+      this.shapes.pot.setX(stageWidth / 2.3);
+      this.shapes.pot.setY((stageHeight / 2) + (128 / 2.25));
 
       // set image
       this.shapes.tabletop.setImage(image);
@@ -128,6 +134,12 @@ define(function(require,exports,modules) {
     },
     updateStage: function() {
       this.layer.getStage().draw();
+    },
+    updateWinner: function(model, winner) {
+    	console.log(winner);
+    	if(winner) {
+    		this.shapes.pot.setText(this.players.get(winner + 1).get('name') + ' won ' + model.get('pot') + ' chips!');
+    	}
     },
     updateCards: function(model, cards) {
       var self = this, range;
