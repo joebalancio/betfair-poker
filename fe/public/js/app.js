@@ -5,13 +5,14 @@ define([
   'kinetic',
   'views/table',
   'views/chat',
+  'views/effects',
   'collections/message',
   'models/table',
   'collections/player',
   'models/player',
   'backbone_lib/backbone.iosync',
   'backbone_lib/backbone.iobind'
-], function($, Backbone, _, Kinetic, TableView, ChatView, Messages, TableModel, PlayerCollection, PlayerModel) {
+], function($, Backbone, _, Kinetic, TableView, ChatView, EffectsView, Messages, TableModel, PlayerCollection, PlayerModel) {
   var AppView = Backbone.View.extend({
     /*
      * Properties
@@ -20,7 +21,8 @@ define([
     stage: null,
     layers: {
       table: new Kinetic.Layer,
-      players: new Kinetic.Layer
+      players: new Kinetic.Layer,
+      effects: new Kinetic.Layer
     },
     events: {
       'click button#call': 'call',
@@ -60,16 +62,27 @@ define([
         this.players.images = images;
         this.images = images;
 
+        // effects view
+        var effects = new EffectsView({
+          layer: this.layers.effects
+        });
+        effects.render();
+
+        // table view
         var table = new TableView({
           layer: this.layers.table,
           model: new TableModel,
           images: images,
-          players: this.players
+          players: this.players,
+          effects: effects
         });
         table.render();
 
+        // chat view
         this.chatView = new ChatView({collection: new Messages, player: this.sessionPlayer});
         this.chatView.render(); // not used atm
+
+
 
         // draw the stage
         this.stage.draw();

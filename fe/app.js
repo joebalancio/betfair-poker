@@ -78,9 +78,11 @@ server.listen(app.get('port'), function() {
  * Socket.IO
  */
 io.sockets.on('connection', function(socket) {
+  socket.on('start', testJoinGame(socket));
+  //socket.on('start', dummydata1(socket));
   //socket.on('start', demoActions(socket));
   //socket.on('start', startEmptyTable(socket));
-  socket.on('start', endOfHandToStartOfHand(socket));
+  //socket.on('start', endOfHandToStartOfHand(socket));
   //socket.on('start', playerRegistration(socket));
 
   socket.on('message:create', function(data, callback) {
@@ -141,9 +143,16 @@ function testJoinGame(socket) {
       newPlayer.actions = ['check', 'fold', 'raise', 'call'];
       players.push(newPlayer);
       socket.emit('players:read', players);
+      var now = new Date();
+      now = now.getHours() + ':' + now.getMinutes();
 
       //table.gamePlayerId = newPlayer.id;
       socket.emit('table:read', table);
+      socket.emit('messages:read', {
+        message: newPlayer.name + ' joined!',
+        name: 'sentinel',
+        timestamp: now
+      });
     });
 
     socket.on('player:update', function(data, callback) {
@@ -551,9 +560,11 @@ function endOfHandToStartOfHand(socket) {
       avatar: 'FD01'
     }];
   return function() {
-    socket.emit('players:read', players);
-    socket.emit('table:read', table);
-    
+    setTimeout(function() {
+      socket.emit('players:read', players);
+      socket.emit('table:read', table);
+    }, 1000);
+
     setTimeout(function() {
       players[0].position = '';
       players[1].position = 'd';
@@ -562,6 +573,7 @@ function endOfHandToStartOfHand(socket) {
       players[table.winner].chips += table.pot;
       delete table.winner;
       table.pot = 0;
+      table.status = 'start';
       socket.emit('players:read', players);
       socket.emit('table:read', table);
     }, 3000);
