@@ -58,7 +58,7 @@ public class Table {
 
                 if (activeSeats.size() > 1) {
                     game.setActiveSeats(seats);
-                    game.playHand();
+                    game.initGame();
                 }
             }
         }

@@ -8,6 +8,7 @@ import com.betfair.poker.hand.Hand;
 public class Player {
     private final String name;
     private Status status;
+    private Action action;
     private Hand hand;
     private int cash;
     private int bet;
@@ -47,7 +48,7 @@ public class Player {
         bet += blind;
     }
 
-    public Status act(Status status, int minBet, int currentBet) {
+    public Action act(Action status, int minBet, int currentBet) {
         switch (status) {
         case CHECK:
             break;
@@ -99,6 +100,14 @@ public class Player {
     public void setStatus(Status status) {
         this.status = status;
     }
+    
+    public Action getAction() {
+        return action;
+    }
+
+    public void setAction(Action action) {
+        this.action = action;
+    }
 
     public Hand getHand() {
         return hand;
@@ -123,6 +132,10 @@ public class Player {
     public int getCash() {
         return cash;
     }
+    
+    public void setCash(int cash) {
+        this.cash = cash;
+    }
 
     public boolean isAllIn() {
         return isAllIn;
@@ -135,6 +148,11 @@ public class Player {
     @Override
     public String toString() {
         return name;
+    }
+    
+    public int getRaises()
+    {
+    	return raises;
     }
 
 }

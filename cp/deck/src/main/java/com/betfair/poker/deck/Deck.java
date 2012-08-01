@@ -67,6 +67,18 @@ public class Deck {
 
         return cards.get(position++);
     }
+    
+    public List<Card> dealCard(int noOfCards) {
+    	List<Card> dealtCards = new ArrayList<Card>();
+        if (position == 51) {
+            return null;
+        }
+        for(int i=0; i< noOfCards; i++)
+        {
+        	dealtCards.add(cards.get(position++));
+        }
+        return dealtCards;
+    }
 
     /**
      * Shuffles the deck of cards.

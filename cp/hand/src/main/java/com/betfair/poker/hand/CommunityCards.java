@@ -1,6 +1,7 @@
 package com.betfair.poker.hand;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.betfair.poker.deck.Card;
 
@@ -20,5 +21,15 @@ public class CommunityCards extends AbstractCardsList<Card> {
             throw new IllegalArgumentException("Too many cards");
         }
         this.add(card);
+    }
+    
+    public void addCards(List<Card> cards) {
+        if (cards == null || cards.isEmpty()) {
+            throw new IllegalArgumentException("Null card");
+        }
+        if (size() + cards.size() > MAX_SIZE) {
+            throw new IllegalArgumentException("Too many cards");
+        }
+        this.addCards(cards);
     }
 }
