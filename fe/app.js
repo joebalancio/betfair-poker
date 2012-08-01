@@ -80,6 +80,8 @@ server.listen(app.get('port'), function() {
 io.sockets.on('connection', function(socket) {
   //socket.on('start', demoActions(socket));
   socket.on('start', startEmptyTable(socket));
+  //socket.on('start', endOfHandToStartOfHand(socket));
+  //socket.on('start', playerRegistration(socket));
 
   socket.on('message:create', function(data, callback) {
     var now = new Date();
@@ -523,8 +525,6 @@ function endOfHandToStartOfHand(socket) {
       position: 'd',
       chips: 100,
       cards: ['as','as'],
-      active: true,
-      actions: ['check','fold','raise','call'],
       avatar: 'J01'
     }, {
       name: 'paleailment',
@@ -551,5 +551,36 @@ function endOfHandToStartOfHand(socket) {
   return function() {
     socket.emit('players:read', players);
     socket.emit('table:read', table);
+
+
+  };
+}
+
+// player registration and avatar selection
+function playerRegistration(socket) {
+  var table = {
+    cards: [],
+    pot: 0
+  },
+  players = [];
+
+  return function() {
+    socket.emit('table:read', table);
+    socket.on('player:create', function(data) {
+      var player = _.extend({}, data);
+
+      // assign id
+      player.id = 1;
+      player.chips = 100;
+      player.active = true;
+      player.position = 'd';
+      player.seat = 1;
+      player.actions = [];
+
+      players.push(player);
+
+      socket.emit('players:read', players);
+    });
+
   };
 }

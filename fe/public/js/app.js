@@ -325,7 +325,10 @@ define([
     },
 
     join: function() {
-      console.log('join');
+      var attrs = {
+        avatar: 'F01',
+        name: 'joe'
+      };
       this.sessionPlayer = new PlayerModel();
       this.sessionPlayer.save();
     }

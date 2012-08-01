@@ -15,9 +15,13 @@ define(function(require, exports, modules) {
 
       _.each(models, function(value) {
         var model = this.get(value.id);
-        value.images = this.images;
+        var player;
         if (model) model.set(value);
-        else newModels.push(value);
+        else {
+          var player = new PlayerModel(value);
+          player.images = this.images;
+          newModels.push(player);
+        }
       }, this);
 
       if (newModels.length > 0) this.add(newModels);
