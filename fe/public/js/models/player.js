@@ -85,6 +85,8 @@ define(function(require,exports,modules) {
         name: new Kinetic.Text({
           text: '',
           textFill: 'white',
+          align: 'center',
+          height: 50,
           shadow: {
             color: 'black',
             blur: 2,
@@ -122,8 +124,8 @@ define(function(require,exports,modules) {
         }),
         positionCircle: new Kinetic.Ellipse({
           radius: 10,
-          x: 120,
-          y: 95,
+          y: 37,
+          x: 30,
           visible: false,
           shadow: {
             color: 'black',
@@ -139,20 +141,15 @@ define(function(require,exports,modules) {
           align: 'center',
           width: 20,
           height: 20,
-          y: 90,
-          x: 110
-        }),
-        outline: new Kinetic.Rect({
-          stroke: 'gray',
-          width: this.group.width,
-          height: this.group.height,
-          y: 0,
-          visible: false
+          y: 32,
+          x: 20
         }),
         chips: new Kinetic.Text({
-          textFill: 'white',
-          text: 'chips:',
-          y: 90
+          textFill: 'black',
+          text: '$',
+          align: 'center',
+          x: 63,
+          y: 32
         }),
         card1: new Kinetic.Image({
           width: 50,
@@ -174,7 +171,7 @@ define(function(require,exports,modules) {
           name: 'card'
         }),
         avatar: new Kinetic.Image({
-          name: 'avatar'
+          name: 'avatar',
         })
       };
       _.each(this.shapes, function(shape) {
@@ -198,7 +195,7 @@ define(function(require,exports,modules) {
       this.updateAvatar(model, model.get('avatar'));
     },
     updateChips: function(model, chips) {
-      this.shapes.chips.setText('chips: ' + chips);
+      this.shapes.chips.setText('$' + chips);
     },
     updateActive: function(model, active) {
       if (active) this.shapes.name.setAttrs(this.activeShapeProps);
@@ -251,7 +248,7 @@ define(function(require,exports,modules) {
           y: 0.25
         },
         x: this.group.width / 2,
-        y: 5
+        y: 25
       });
     },
 

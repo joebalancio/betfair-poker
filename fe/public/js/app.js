@@ -5,13 +5,14 @@ define([
   'kinetic',
   'views/table',
   'views/chat',
+  'views/effects',
   'collections/message',
   'models/table',
   'collections/player',
   'models/player',
   'backbone_lib/backbone.iosync',
   'backbone_lib/backbone.iobind'
-], function($, Backbone, _, Kinetic, TableView, ChatView, Messages, TableModel, PlayerCollection, PlayerModel) {
+], function($, Backbone, _, Kinetic, TableView, ChatView, EffectsView, Messages, TableModel, PlayerCollection, PlayerModel) {
   var AppView = Backbone.View.extend({
     /*
      * Properties
@@ -20,7 +21,8 @@ define([
     stage: null,
     layers: {
       table: new Kinetic.Layer,
-      players: new Kinetic.Layer
+      players: new Kinetic.Layer,
+      effects: new Kinetic.Layer
     },
     events: {
       'click button#call': 'call',
@@ -29,6 +31,8 @@ define([
       'click button#fold': 'fold',
       'click button#join': 'join'
     },
+    sessionPlayer: null,
+    chatView: null,
 
     /*
      * Functions
@@ -50,7 +54,7 @@ define([
       this.players.on('add', this.addPlayer, this);
       this.players.on('add change', this.updateStage, this);
       this.players.on('add change:actions', this.displayActions, this);
-      this.players.on('add change:actions', this.sessionPlayer, this);
+      this.players.on('add change:actions', this.retrieveSessionPlayer, this);
 
       this.$('button').not('#join').hide();
 
@@ -58,15 +62,27 @@ define([
         this.players.images = images;
         this.images = images;
 
+        // effects view
+        var effects = new EffectsView({
+          layer: this.layers.effects
+        });
+        effects.render();
+
+        // table view
         var table = new TableView({
           layer: this.layers.table,
           model: new TableModel,
-          images: images
+          images: images,
+          players: this.players,
+          effects: effects
         });
         table.render();
 
-        var chatView = new ChatView({collection: new Messages});
-        chatView.render();
+        // chat view
+        this.chatView = new ChatView({collection: new Messages, player: this.sessionPlayer});
+        this.chatView.render(); // not used atm
+
+
 
         // draw the stage
         this.stage.draw();
@@ -250,12 +266,12 @@ define([
 
       switch (seat) {
         case 1:
-          model.group.setX(this.stage.attrs.width - model.group.width);
-          model.group.setY(this.stage.attrs.height / 2 - model.group.height / 2);
+          model.group.setX(this.stage.attrs.width - (model.group.width - 20) );
+          model.group.setY(this.stage.attrs.height / 2 - model.group.height / 2.3);
           break;
         case 2:
           model.group.setX(this.stage.attrs.width / 2 - model.group.width / 2);
-          model.group.setY(this.stage.attrs.height - model.group.height);
+          model.group.setY(this.stage.attrs.height - (model.group.height / 1.7) );
           break;
         case 3:
           model.group.setX(this.stage.attrs.width / 2 - model.group.width / 2);
@@ -263,7 +279,7 @@ define([
           break;
         case 4:
           model.group.setX(0);
-          model.group.setY(this.stage.attrs.height / 2 - model.group.height / 2);
+          model.group.setY(this.stage.attrs.height / 2 - model.group.height / 2.3);
           break;
       }
       this.layers.players.add(model.group);
@@ -285,7 +301,7 @@ define([
       }
     },
 
-    sessionPlayer: function(model) {
+    retrieveSessionPlayer: function(model) {
       var actions = model.get('actions');
       if (_.isArray(actions)) {
         this.sessionPlayer = model;
@@ -325,7 +341,10 @@ define([
     },
 
     join: function() {
-      console.log('join');
+      var attrs = {
+        avatar: 'F01',
+        name: 'joe'
+      };
       this.sessionPlayer = new PlayerModel();
       this.sessionPlayer.save();
     }

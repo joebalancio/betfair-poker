@@ -78,13 +78,16 @@ server.listen(app.get('port'), function() {
  * Socket.IO
  */
 io.sockets.on('connection', function(socket) {
+  socket.on('start', testJoinGame(socket));
+  //socket.on('start', dummydata1(socket));
   //socket.on('start', demoActions(socket));
-  socket.on('start', startEmptyTable(socket));
+  //socket.on('start', startEmptyTable(socket));
+  //socket.on('start', endOfHandToStartOfHand(socket));
+  //socket.on('start', playerRegistration(socket));
 
   socket.on('message:create', function(data, callback) {
     var now = new Date();
     data.timestamp = now.getHours() + ':' + now.getMinutes();
-    data.player.name = 'joebalancio';
     socket.emit('messages:read', data);
     socket.broadcast.emit('messages:read', data);
     callback(null, data);
@@ -140,9 +143,16 @@ function testJoinGame(socket) {
       newPlayer.actions = ['check', 'fold', 'raise', 'call'];
       players.push(newPlayer);
       socket.emit('players:read', players);
+      var now = new Date();
+      now = now.getHours() + ':' + now.getMinutes();
 
       //table.gamePlayerId = newPlayer.id;
       socket.emit('table:read', table);
+      socket.emit('messages:read', {
+        message: newPlayer.name + ' joined!',
+        name: 'sentinel',
+        timestamp: now
+      });
     });
 
     socket.on('player:update', function(data, callback) {
@@ -268,28 +278,31 @@ function startEmptyTable(socket) {
     name: 'joe',
     id: 1,
     seat: 1,
-    chips: 100,
-    avatar: 'J01'
+    chips: 1000,
+    avatar: 'J01',
+    position: 'd'
   };
   var player2 = {
-    name: 'justin',
+    name: 'justinjustinjustinjustin',
     id: 2,
     seat: 2,
-    chips: 100,
-    avatar: 'J02'
+    chips: 1000,
+    avatar: 'J02',
+    position: 'bb'
   };
   var player3 = {
     name: 'gary',
     id: 3,
     seat: 3,
-    chips: 100,
-    avatar: 'J03'
+    chips: 1000,
+    avatar: 'J03',
+    position: 'sb'
   };
   var player4 = {
     name: 'tony',
     id: 4,
     seat: 4,
-    chips: 100,
+    chips: 1000,
     avatar: 'J04'
   };
 
@@ -342,10 +355,10 @@ function transitionRound(socket, round) {
     chips: 100,
     avatar: 'J01'
   }, {
-    name: 'justin',
+    name: 'namelongerthanjustin',
     id: 2,
     seat: 2,
-    chips: 100,
+    chips: 1004,
     avatar: 'J02'
   }, {
     name: 'gary',
@@ -511,7 +524,7 @@ function demoActions(socket) {
 
 function endOfHandToStartOfHand(socket) {
   var table = {
-    cards: ['as','as','as'],
+    cards: ['as','as','as','as','as'],
     pot: 100,
     winner: 1
   };
@@ -523,8 +536,6 @@ function endOfHandToStartOfHand(socket) {
       position: 'd',
       chips: 100,
       cards: ['as','as'],
-      active: true,
-      actions: ['check','fold','raise','call'],
       avatar: 'J01'
     }, {
       name: 'paleailment',
@@ -549,7 +560,61 @@ function endOfHandToStartOfHand(socket) {
       avatar: 'FD01'
     }];
   return function() {
-    socket.emit('players:read', players);
+    setTimeout(function() {
+      socket.emit('players:read', players);
+      socket.emit('table:read', table);
+    }, 1000);
+
+    setTimeout(function() {
+      players[0].position = '';
+      players[1].position = 'd';
+      players[2].position = 'sb';
+      players[3].position = 'bb';
+      players[table.winner].chips += table.pot;
+      delete table.winner;
+      table.pot = 0;
+      table.status = 'start';
+      socket.emit('players:read', players);
+      socket.emit('table:read', table);
+    }, 3000);
+
+  };
+}
+
+// player registration and avatar selection
+function playerRegistration(socket) {
+  var table = {
+    cards: [],
+    pot: 0
+  },
+  players = [];
+
+  return function() {
     socket.emit('table:read', table);
+    socket.on('player:create', function(data) {
+      var player = _.extend({}, data);
+
+      var now = new Date();
+      now = now.getHours() + ':' + now.getMinutes();
+
+      // assign id
+      player.id = 1;
+      player.chips = 100;
+      player.active = true;
+      player.position = 'd';
+      player.seat = 1;
+      player.actions = [];
+      player.name = 'joe';
+
+      players.push(player);
+
+      socket.emit('players:read', players);
+      socket.emit('messages:read', {
+        message: player.name + ' joined!',
+        name: 'sentinel',
+        timestamp: now
+      });
+    });
+
   };
 }
