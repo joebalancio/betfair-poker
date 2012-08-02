@@ -12,43 +12,59 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
 import com.betfair.poker.game.Game;
+import com.betfair.poker.player.Action;
 import com.betfair.poker.player.Player;
 
 public class PokerRouteBuilder extends RouteBuilder {
-
-    private String fromEndpoint;
-    private String toEndpoint;
     private Table table;
     private final ObjectMapper mapper = new ObjectMapper();
 
     public PokerRouteBuilder() {
-
     }
 
     @Override
     public void configure() throws Exception {
-        // from(fromEndpoint)
-        // .routeId(fromEndpoint)
-        // .marshal().json()
-        // .unmarshal().json()
-        // .to(toEndpoint);
-
-        // expose a chat websocket client, that sends back an echo
-        from("websocket://poker").routeId("pokerWebsocket")
-                .log(">>> Message received from WebSocket Client : ${body}")
-                .transform().simple("${body}${body}")
-                // send back to the client, by sending the message to the same
-                // endpoint
-                // this is needed as by default messages is InOnly
-                // and we will by default send back to the current client using
-                // the provided connection key
+        // expose a chat websocket client
+        from("websocket://poker")
+                .routeId("pokerWebsocket")
+                .log(">>> Message received from WebSocket Client: ${body}")
+                //.transform().simple("${body}${body}")
                 .process(new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
                         String msg = exchange.getIn().getBody().toString();
                         System.out.println(msg);
+                        exchange.getOut().setBody("update websocket");
                     }
-                }).to("websocket://poker");
+                })
+                .to("direct:readTable")
+                .to("direct:readPlayers");
+
+        from("direct:readTable")
+                .routeId("direct:readTable")
+                .process(new Processor() {
+                  @Override
+                  public void process(Exchange exchange) throws Exception {
+                      String msg = exchange.getIn().getBody().toString();
+                      System.out.println(msg);
+                      exchange.getOut().setBody(readTable());
+                  }
+                })
+                .log(">>> Message sending to WebSocket Client: ${body}")
+                .to("websocket://poker?sendToAll=true");
+        
+        from("direct:readPlayers")
+            .routeId("direct:readPlayers")
+            .process(new Processor() {
+                @Override
+                public void process(Exchange exchange) throws Exception {
+                    String msg = exchange.getIn().getBody().toString();
+                    System.out.println(msg);
+                    exchange.getOut().setBody(readPlayers());
+                }
+            })
+            .log(">>> Message sending to WebSocket Client: ${body}")
+            .to("websocket://poker?sendToAll=true");
     }
 
     private void startGame() {
@@ -69,10 +85,9 @@ public class PokerRouteBuilder extends RouteBuilder {
 
             if (activeSeats.size() > 1) {
                 game.setActiveSeats(activeSeats);
-                game.playHand();
+                game.initGame();
             }
         }
-
     }
 
     private void endGame() {
@@ -85,29 +100,140 @@ public class PokerRouteBuilder extends RouteBuilder {
         }
     }
 
-    private String readPlayer() {
-        return null;
+    private String readPlayer(final Map<String, Object> inMap) {
+        final Integer position = (Integer) inMap.get("seat");
+
+        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> innerMap = new HashMap<String, Object>();
+        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+
+        map.put("name", "player:read");
+
+        final Seat seat = table.getSeat(position);
+
+        if (!seat.isEmpty()) {
+            final Player player = seat.getPlayer();
+            final Game game = table.getGame();
+
+            innerMap.put("name", player.getName());
+            innerMap.put("id", player.getId());
+            innerMap.put("chips", player.getCash());
+            innerMap.put("seat", seat.getPosition());
+            innerMap.put("position", seat.getGamePosition());
+            innerMap.put("avatar", player.getAvatar());
+
+            if (seat.isTurn()) {
+                innerMap.put("status", player.getStatus());
+            } else {
+                innerMap.put("status", "turn");
+            }
+
+            innerMap.put("actions", game.getAllowedActions(player));
+            list.add(innerMap);
+
+            map.put("args", list);
+        }
+
+        return mapToJson(map);
     }
 
-    private String createPlayer(final Map<String, Object> map) {
+    private void createPlayer(final Map<String, Object> map) {
+        final Integer id = (Integer) map.get("id");
+        final Integer pos = (Integer) map.get("seat");
+        final String name = (String) map.get("name");
+        final String avatar = (String) map.get("avatar");
+
+        Player player = new Player(name, id);
+        player.setAvatar(avatar);
+        table.addPlayer(player, pos);
+
         startGame();
-        return null;
     }
 
-    private String deletePlayer(final Map<String, Object> map) {
-        return null;
+    private void deletePlayer(final Map<String, Object> map) {
+        final Integer position = (Integer) map.get("seat");
+        final Seat seat = table.getSeat(position);
+
+        if (!seat.isEmpty()) {
+            final Player player = seat.getPlayer();
+            final Game game = table.getGame();
+
+            game.removeSeat(seat.getPosition());
+
+            table.removePlayer(position);
+        }
     }
 
-    private String updatePlayer(final Map<String, Object> map) {
-        return null;
+    private void updatePlayer(final Map<String, Object> map) {
+        final Integer id = (Integer) map.get("id");
+        final Integer pos = (Integer) map.get("seat");
+        final String action = (String) map.get("action");
+        final Integer amount = (Integer) map.get("amount");
+
+        final Game game = table.getGame();
+        final Seat seat = game.getSeat(pos);
+
+        if (!seat.isEmpty()) {
+            final Player player = seat.getPlayer();
+            game.playHand(pos, Action.fromName(action), amount);
+        }
+
+        endGame();
     }
 
-    private String readPlayers() {
-        return null;
+    public String readPlayers() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        List<List<Map<String, Object>>> list2 = new ArrayList<List<Map<String, Object>>>();
+        final Game game = table.getGame();
+
+        map.put("name", "players:read");
+
+        for (Seat seat : table.getSeats()) {
+            if (!seat.isEmpty()) {
+                Player player = seat.getPlayer();
+                Map<String, Object> innerMap = new HashMap<String, Object>();
+
+                innerMap.put("name", player.getName());
+                innerMap.put("id", player.getId());
+                innerMap.put("chips", player.getCash());
+                innerMap.put("seat", seat.getPosition());
+                innerMap.put("position", seat.getGamePosition());
+                innerMap.put("avatar", player.getAvatar());
+
+                if (seat.isTurn()) {
+                    innerMap.put("status", player.getStatus());
+                } else {
+                    innerMap.put("status", "turn");
+                }
+
+                innerMap.put("actions", game.getAllowedActions(player));
+                list.add(innerMap);
+            }
+        }
+
+        list2.add(list);
+
+        map.put("args", list2);
+
+        return mapToJson(map);
     }
 
-    private String readTable() {
-        return null;
+    public String readTable() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> innerMap = new HashMap<String, Object>();
+        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+
+        map.put("name", "table:read");
+
+        innerMap.put("cards", table.getGame().getCommunityCards().getCards());
+        innerMap.put("pot", table.getGame().getPot());
+        innerMap.put("status", table.getGame().getStatus());
+        list.add(innerMap);
+
+        map.put("args", list);
+
+        return mapToJson(map);
     }
 
     private Map<String, Object> jsonToMap(final String json) {
@@ -127,14 +253,6 @@ public class PokerRouteBuilder extends RouteBuilder {
         } catch (final Exception e) {
             return null;
         }
-    }
-
-    public void setFromEndpoint(final String fromEndpoint) {
-        this.fromEndpoint = fromEndpoint;
-    }
-
-    public void setToEndpoint(final String toEndpoint) {
-        this.toEndpoint = toEndpoint;
     }
 
     public void setTable(final Table table) {

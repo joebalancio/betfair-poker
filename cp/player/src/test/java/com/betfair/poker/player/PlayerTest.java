@@ -12,14 +12,14 @@ public class PlayerTest {
 
         player.act(Action.BET, 2, 2);
         Assert.assertEquals(player.getBet(), 2);
-        Assert.assertEquals(player.getCash(), 98);
+        Assert.assertEquals(player.getCash(), 9998);
 
         player.act(Action.RAISE, 2, 2);
         Assert.assertEquals(player.getBet(), 4);
-        Assert.assertEquals(player.getCash(), 96);
+        Assert.assertEquals(player.getCash(), 9996);
 
         player.act(Action.CALL, 2, 4);
         Assert.assertEquals(player.getBet(), 4);
-        Assert.assertEquals(player.getCash(), 96);
+        Assert.assertEquals(player.getCash(), 9996);
     }
 }

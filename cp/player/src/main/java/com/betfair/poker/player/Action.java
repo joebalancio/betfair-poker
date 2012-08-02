@@ -20,9 +20,7 @@ public enum Action {
     FOLD("Fold", "folds"),
 
     /** Continuing the game. */
-    CONTINUE("Continue", "continues"),
-
-    ;
+    CONTINUE("Continue", "continues");
 
     /** The name. */
     private final String name;
@@ -41,6 +39,15 @@ public enum Action {
         this.verb = verb;
     }
 
+    public static Action fromName(final String v) {
+        for (Action c : Action.values()) {
+            if (c.name.equals(v)) {
+                return c;
+            }
+        }
+        throw new IllegalArgumentException(v.toString());
+    }
+    
     /**
      * Returns the name.
      * 
@@ -59,11 +66,6 @@ public enum Action {
         return verb;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Enum#toString()
-     */
     @Override
     public String toString() {
         return name;

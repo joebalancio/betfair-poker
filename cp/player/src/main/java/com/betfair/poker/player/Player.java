@@ -6,19 +6,22 @@ import com.betfair.poker.hand.Hand;
  * A single poker player.
  */
 public class Player {
-    private final String name;
+    private static final int DEFAULT_CASH = 10000;
+    private String name;
     private Status status;
     private Action action;
     private Hand hand;
-    private int cash;
+    private int cash = DEFAULT_CASH;
     private int bet;
     private boolean isAllIn = false;
     private int betIncrement;
     private int raises;
+    private int id;
+    private String avatar;
 
-    public Player(String name, int cash) {
+    public Player(String name, int id) {
         this.name = name;
-        this.cash = cash;
+        this.id = id;
         this.hand = new Hand();
         this.status = Status.CONTINUE;
         resetHand();
@@ -125,10 +128,30 @@ public class Player {
         this.bet = bet;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+    
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+    
     public String getName() {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+    
     public int getCash() {
         return cash;
     }

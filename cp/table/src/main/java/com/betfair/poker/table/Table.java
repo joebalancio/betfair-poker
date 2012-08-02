@@ -65,14 +65,19 @@ public class Table {
         }
     }
 
-    private Seat getSeat(final int position) {
+    public Seat getDealer() {
+        final Seat seat = getSeat(dealer);
+        return seat;
+    }
+    
+    public Seat getSeat(final int position) {
         final Seat seat = getSeats().get(position);
 
         return seat;
     }
 
     public void setSeatDealer() {
-        Seat seat = getSeat(dealer);
+        final Seat seat = getDealer();
 
         if (seat.isEmpty()) {
             changeDealer();
