@@ -13,7 +13,8 @@ var express = require('express'),
   mkdirp = require('mkdirp'),
   server = http.createServer(app),
   io = require('socket.io').listen(server, {debug: true}),
-  _ = require('underscore');
+  _ = require('underscore'),
+  poker = require('./lib/node-poker');
 
 
 /*
@@ -82,7 +83,7 @@ io.sockets.on('connection', function(socket) {
   //socket.on('start', dummydata1(socket));
   //socket.on('start', demoActions(socket));
   //socket.on('start', startEmptyTable(socket));
-  socket.on('start', endOfHandToStartOfHand(socket));
+  //socket.on('start', endOfHandToStartOfHand(socket));
   //socket.on('start', playerRegistration(socket));
 
   socket.on('message:create', function(data, callback) {
@@ -92,6 +93,7 @@ io.sockets.on('connection', function(socket) {
     socket.broadcast.emit('messages:read', data);
     callback(null, data);
   });
+
 
 });
 
@@ -622,3 +624,139 @@ function playerRegistration(socket) {
 
   };
 }
+
+var
+  table = new poker.Table(50, 100, 3, 10, 'table_1', 100, 1000),
+  ids = [],
+  idCounter = 0;
+
+function passthrough(data) {
+  return data;
+}
+
+function tableJson(table, socket, callback) {
+  var t;
+  if (!table.game) return callback({});
+  return callback({
+    status: table.game.roundName,
+    cards: table.game.board,
+    pot: table.game.pot,
+    user: socket.user
+  });
+}
+
+function playersJson(players, socket, callback) {
+  // if table has started, identify the active user
+  // if start then dealer is active
+  return callback(_.map(players, function(player, index) {
+    var position;
+    if (player.table.game) {
+      if (player.table.dealer === index) {
+        position = 'd';
+      } else if (player.table.smallBlindPlayer === index) {
+        position = 'sb';
+      } else if (player.table.bigBlindPlayer === index) {
+        position = 'bb';
+      }
+    }
+
+    return {
+      chips: player.chips,
+      id: player.id,
+      seat: index + 1,
+      name: player.name,
+      avatar: player.avatar,
+      position: position,
+      status: player.status,
+      cards: player.cards
+    };
+  }));
+}
+
+function filterPlayersForBroadcast(players) {
+  return _.map(players, function(player) {
+    return _.pick(player, 'chips', 'id', 'seat', 'name', 'avatar', 'position', 'status', 'cards');
+  });
+}
+
+io.sockets.on('connection', function(socket) {
+  socket.on('load', function() {
+    // get initial state
+    socket.emit('table:read', tableJson(table, socket, passthrough));
+    socket.emit('players:read', playersJson(table.players, socket, passthrough));
+  });
+
+  socket.on('player:create', function(data) {
+    var id = ++idCounter;
+    socket.user = id;
+    ids.push(id);
+    table.AddPlayer(data.name, 500);
+    _.extend(_.last(table.players), data, {
+      id: id
+    });
+
+
+    // check if minimum players
+    if (table.players.length >= table.minPlayers && table.players.length <= table.maxPlayers) {
+      // start game
+      table.StartGame();
+
+      // activate dealer
+      if (table.game && table.game.roundName === 'Deal') {
+        table.players[table.dealer].status = 'turn';
+      }
+      socket.emit('table:read', tableJson(table, socket, passthrough));
+      socket.broadcast.emit('table:read', tableJson(table, socket, passthrough));
+    }
+
+    socket.emit('players:read', playersJson(table.players, socket, passthrough));
+    socket.broadcast.emit('players:read', playersJson(table.players, socket, passthrough));
+  });
+
+  socket.on('player:update', function(data) {
+    var index, player;
+
+    _.each(table.players, function(p, i) {
+      if (p.id === socket.user && p.id === data.id) {
+        player = p;
+        index = i;
+        return;
+      }
+    });
+
+    if (!player) return;
+
+    // deactivate player
+    player.status = '';
+
+    // activate next player
+    if (++index === table.players.length) index = 0;
+    table.players[index].status = 'turn';
+
+    switch (data.action) {
+      case 'bet':
+        player.Bet(data.amount);
+        break;
+      case 'check':
+        player.Check();
+        break;
+      case 'call':
+        player.Bet();
+        break;
+      case 'fold':
+        player.Bet();
+        break;
+    }
+
+    socket.emit('table:read', tableJson(table, socket, passthrough));
+    socket.broadcast.emit('table:read', tableJson(table, socket, passthrough));
+    socket.emit('players:read', playersJson(table.players, socket, passthrough));
+    socket.broadcast.emit('players:read', playersJson(table.players, socket, passthrough));
+
+    if (table.game.roundName === 'Showdown') {
+      delete table.game;
+      table.StartGame();
+    }
+  });
+
+});

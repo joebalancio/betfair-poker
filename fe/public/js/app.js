@@ -6,13 +6,14 @@ define([
   'views/table',
   'views/chat',
   'views/effects',
+  'views/register',
   'collections/message',
   'models/table',
   'collections/player',
   'models/player',
   'backbone_lib/backbone.iosync',
   'backbone_lib/backbone.iobind'
-], function($, Backbone, _, Kinetic, TableView, ChatView, EffectsView, Messages, TableModel, PlayerCollection, PlayerModel) {
+], function($, Backbone, _, Kinetic, TableView, ChatView, EffectsView, RegisterView, Messages, TableModel, PlayerCollection, PlayerModel) {
   var AppView = Backbone.View.extend({
     /*
      * Properties
@@ -24,15 +25,22 @@ define([
       players: new Kinetic.Layer,
       effects: new Kinetic.Layer
     },
+    sprites: {},
     events: {
       'click button#call': 'call',
       'click button#raise': 'raise',
       'click button#check': 'check',
       'click button#fold': 'fold',
-      'click button#join': 'join'
     },
-    sessionPlayer: null,
+    user: null,
     chatView: null,
+    views: {
+      table: null,
+      effects: null,
+      chat: null,
+      register: null,
+      players: null // TODO
+    },
 
     /*
      * Functions
@@ -53,42 +61,55 @@ define([
       this.players = new PlayerCollection;
       this.players.on('add', this.addPlayer, this);
       this.players.on('add change', this.updateStage, this);
-      this.players.on('add change:actions', this.displayActions, this);
-      this.players.on('add change:actions', this.retrieveSessionPlayer, this);
-
-      this.$('button').not('#join').hide();
+      this.players.on('change:status', this.displayActions, this);
+      this.players.sprites = this.sprites;
+      this.players.layer = this.layers.player;
+      this.players.user = this.user;
+      this.table = new TableModel;
+      this.table.on('change:current', this.updateUser, this);
 
       this.preloadImages(function(images) {
         this.players.images = images;
         this.images = images;
+        this.generateCards();
 
         // effects view
-        var effects = new EffectsView({
+        this.views.effects = new EffectsView({
           layer: this.layers.effects
         });
-        effects.render();
+        this.views.effects.render();
 
         // table view
-        var table = new TableView({
+        this.views.table = new TableView({
           layer: this.layers.table,
-          model: new TableModel,
+          model: this.table,
           images: images,
           players: this.players,
-          effects: effects
+          effects: this.views.effects,
+          sprites: this.sprites
         });
-        table.render();
+        this.views.table.render();
 
         // chat view
-        this.chatView = new ChatView({collection: new Messages, player: this.sessionPlayer});
-        this.chatView.render(); // not used atm
+        this.views.chat = new ChatView({collection: new Messages, player: this.user});
+        this.views.chat.render(); // not used atm
 
-
+        // register
+        this.views.register = new RegisterView({
+          model: new PlayerModel({
+            sprites: this.sprites,
+            images: this.images
+          }),
+          images: this.images,
+          sprites: this.sprites,
+        });
+        this.views.register.render();
 
         // draw the stage
         this.stage.draw();
 
         // signal websockets that the app is ready
-        window.socket.emit('start');
+        window.socket.emit('load');
 
         // hide the overlay
         $('#overlay').delay(500).fadeOut();
@@ -102,6 +123,8 @@ define([
         glyphicons_halflings: '/img/glyphicons-halflings.png',
         as: '/img/cards/as.png',
         card_back: '/img/cards/back.png',
+        cardSprites: '/img/cardsprites.png',
+        cardSpritesSmall: '/img/cardsprites_small.png',
         avatars: {
           A01: '/img/avatars/A01.png',
           A02: '/img/avatars/A02.png',
@@ -264,6 +287,15 @@ define([
     addPlayer: function(model) {
       var seat = model.get('seat');
 
+      // get current screen's user
+      if (model.get('name') === this.views.register.model.get('name') &&
+        model.get('avatar') === this.views.register.model.get('avatar')) {
+        console.log('found screen user');
+        this.user = model;
+        model.user = model;
+        model.trigger('change:cards', model, model.get('cards'));
+      }
+
       switch (seat) {
         case 1:
           model.group.setX(this.stage.attrs.width - (model.group.width - 20) );
@@ -291,64 +323,149 @@ define([
     },
 
     displayActions: function(model) {
-      var actions = model.get('actions');
-      if (_.isArray(actions)) {
+      console.log('display actions', model, this.user);
+      var status = model.get('status');
+
+
+      if (model == this.user && status === 'turn') {
         this.$('#actions').show();
-        this.$el.find('button').hide();
-        _.each(actions, function(action) {
-          this.$el.find('button#' + action).show();
-        }, this);
       }
     },
 
-    retrieveSessionPlayer: function(model) {
-      var actions = model.get('actions');
-      if (_.isArray(actions)) {
-        this.sessionPlayer = model;
-      }
+    setUser: function(model) {
+      console.log(model);
+
+      this.players.each(function(player) {
+        console.log(player.id, model, model.id);
+        if (player.id === model.id) {
+          this.user = player;
+        }
+      });
     },
 
     call: function() {
-      var amount = this.$('#actions input').val();
+      console.log('call');
       var data = {
-        id: this.sessionPlayer.id,
-        amount: amount,
+        id: this.user.id,
+        seat: this.user.id,
         action: 'call'
       };
 
-      this.sessionPlayer.save(data, { data: data });
-      console.log('call', amount);
+      this.user.save(data, { data: data });
+      this.$('#actions').hide();
     },
 
     check: function() {
       console.log('check');
+      var data = {
+        id: this.user.id,
+        seat: this.user.id,
+        action: 'check'
+      };
+
+      this.user.save(data, {data: data});
+      this.$('#actions').hide();
     },
 
     raise: function() {
       console.log('raise');
+      var amount = this.$('#actions input').val();
+      var data = {
+        id: this.user.id,
+        seat: this.user.id,
+        amount: amount,
+        action: 'bet'
+      };
+
+      this.user.save(data, { data: data });
+      this.$('#actions').hide();
     },
 
     fold: function() {
       console.log('fold');
 
       var data = {
-        id: this.sessionPlayer.id,
+        id: this.user.id,
+        seat: this.user.id,
         action: 'fold'
       };
 
-      this.sessionPlayer.save(data, { data: data });
-      this.sessionPlayer.fold();
+      this.user.save(data, { data: data });
+      this.user.fold();
+      this.$('#actions').hide();
     },
 
-    join: function() {
-      var attrs = {
-        avatar: 'F01',
-        name: 'joe'
+    generateCards: function() {
+      // construct animations
+      var suites = ['C', 'D', 'H', 'S'];
+      var ranks = [null, 'A', 2, 3, 4, 5, 6, 7, 8, 9, 'T', 'J', 'Q', 'K'];
+      var dim = {
+        width: 92,
+        height: 128
+      },
+      smallDim = {
+        width: 69,
+        height: 96
+      }
+      var animations = {
+        back: [{
+          x: 0,
+          y: 0,
+          width: dim.width,
+          height: dim.height
+        }]
       };
-      this.sessionPlayer = new PlayerModel();
-      this.sessionPlayer.save();
-    }
+      var smallAnimations = {
+        back: [{
+          x: 0,
+          y: 0,
+          width: smallDim.width,
+          height: smallDim.height
+        }]
+      };
 
+      _.each(suites, function(suite, i) {
+        _.each(ranks, function(rank, j) {
+          var props;
+          if (rank) {
+            animations['' + rank + suite] = animations[suite + rank] = [{
+              x: j * dim.width,
+              y: i * dim.height,
+              width: dim.width,
+              height: dim.height
+            }];
+            smallAnimations['' + rank + suite] = smallAnimations[suite + rank] = [{
+              x: j * smallDim.width,
+              y: i * smallDim.height,
+              width: smallDim.width,
+              height: smallDim.height
+            }];
+          }
+        });
+      });
+
+      // create cards sprite
+      this.sprites.cards = {
+        id: 'cards',
+        x: 200,
+        y: 200,
+        image: this.images.cardSprites,
+        animation: 'back',
+        animations: animations,
+        frameRate: 1
+      };
+
+      this.sprites.smallCards = {
+        id: 'smallCards',
+        x: 400,
+        y: 400,
+        image: this.images.cardSpritesSmall,
+        animation: 'back',
+        animations: smallAnimations,
+        frameRate: 1
+      };
+
+    }
 
   });
 
