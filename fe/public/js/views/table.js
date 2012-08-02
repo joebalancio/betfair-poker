@@ -12,57 +12,7 @@ define(function(require,exports,modules) {
     images: null,
     stage: null,
     effects: null,
-    shapes: {
-      tabletop: new Kinetic.Image({}),
-      pot: new Kinetic.Text({
-        fontSize: 20,
-        text: '0',
-        textFill: 'black'
-      }),
-      card1: new Kinetic.Image({
-        width: 92,
-        height: 128,
-        offset: {
-          x: 92/2,
-          y: 128/1.2
-        }
-      }),
-      card2: new Kinetic.Image({
-        width: 92,
-        height: 128,
-        offset: {
-          x: 92/2,
-          y: 128/1.2
-        }
-      }),
-      card3: new Kinetic.Image({
-        width: 92,
-        height: 128,
-        offset: {
-          x: 92/2,
-          y: 128/1.2
-        }
-      }),
-      card4: new Kinetic.Image({
-        width: 92,
-        height: 128,
-        visible: 1,
-        offset: {
-          x: 92/2,
-          y: 128/1.2
-        }
-      }),
-      card5: new Kinetic.Image({
-        width: 92,
-        height: 128,
-        visible: 1,
-        offset: {
-          x: 92/2,
-          y: 128/1.2
-        }
-      })
-
-    },
+    shapes: {},
 
     /*
      * Functions
@@ -80,6 +30,43 @@ define(function(require,exports,modules) {
       this.layer = this.options.layer;
       this.players = this.options.players;
       this.effects = this.options.effects;
+      this.sprites = this.options.sprites;
+      console.log(this.sprites);
+
+      this.shapes = {
+        tabletop: new Kinetic.Image({}),
+        pot: new Kinetic.Text({
+          fontSize: 20,
+          text: '0',
+          textFill: 'black'
+        }),
+        card1: new Kinetic.Sprite(_.extend({
+          width: 92,
+          height: 128,
+          offset: { x: 92/2, y: 128/1.2 },
+        }, this.sprites.cards)),
+        card2: new Kinetic.Sprite(_.extend({
+          width: 92,
+          height: 128,
+          offset: { x: 92/2, y: 128/1.2 },
+        }, this.sprites.cards)),
+        card3: new Kinetic.Sprite(_.extend({
+          width: 92,
+          height: 128,
+          offset: { x: 92/2, y: 128/1.2 },
+        }, this.sprites.cards)),
+        card4: new Kinetic.Sprite(_.extend({
+          width: 92,
+          height: 128,
+          offset: { x: 92/2, y: 128/1.2 },
+        }, this.sprites.cards)),
+        card5: new Kinetic.Sprite(_.extend({
+          width: 92,
+          height: 128,
+          offset: { x: 92/2, y: 128/1.2 },
+        }, this.sprites.cards)),
+
+      };
     },
 
     /*
@@ -114,8 +101,8 @@ define(function(require,exports,modules) {
       var cardNum = -2;
       _.each(this.shapes, function(shape, name) {
         if (name.indexOf('card') === 0) {
-          shape.setImage(this.images['card_back']);
-          shape.setX(halfStageWidth + (shape.getWidth() * 1.1) * cardNum);
+          console.log(shape);
+          shape.setX(halfStageWidth + (shape.attrs.width * 1.1) * cardNum);
           shape.setY(halfStageHeight);
           cardNum++;
         }
@@ -196,45 +183,42 @@ define(function(require,exports,modules) {
       */
     },
     updateCards: function(model, cards) {
-      var self = this, range;
+      var self = this;
       console.log('update cards', cards);
-      switch (cards.length) {
-        case 3:
-          range = [0, 3];
-          offset = 1;
-          break;
-        case 4:
-          range = [3, 4];
-          offset = 4
-          break;
-        case 5:
-          range = [4, 5];
-          offset = 5
-          break;
-      }
-      _.each(cards.slice.apply(cards, range), function(card, index) {
-        var cardShape = this.shapes['card' + (index + offset)];
-        cardShape.transitionTo({
-          scale: { x: 0, y: 1 },
-          duration: 0.5,
-          easing: 'strong-ease-in',
-          callback: function() {
-            cardShape.setImage(self.images[card]);
-            cardShape.transitionTo({
-              scale: { x: 1, y: 1 },
-              duration: 0.5,
-              easing: 'strong-ease-out'
-            });
-          }
-        });
+      _.each(cards, function(card, index) {
+        var cardShape = this.shapes['card' + (index + 1)];
+        if (!cardShape.attrs.flipped) {
+          cardShape.attrs.flipped = true;
+          cardShape.show();
+          cardShape.transitionTo({
+            scale: { x: 0, y: 1 },
+            duration: 0.5,
+            easing: 'strong-ease-in',
+            callback: function() {
+              cardShape.setAnimation(card);
+              cardShape.transitionTo({
+                scale: { x: 1, y: 1 },
+                duration: 0.5,
+                easing: 'strong-ease-out'
+              });
+            }
+          });
+        }
       }, this);
 
     },
 
     updateStatus: function(model, status) {
-      if (status === 'start') {
+      if (status === 'deal') {
+      	_.each(this.shapes, function(card, index) {
+	      		if(index.indexOf('card') === 0) {
+	      		var cardShape = this.shapes[index];
+	      		cardShape.hide();
+      		}
+      	},this);
         //this.effects.resetSpray();
         //this.effects.spray();
+
       }
     }
   });

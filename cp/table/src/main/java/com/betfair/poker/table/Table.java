@@ -34,37 +34,6 @@ public class Table {
 
         this.game = new Game();
     }
-
-    public void start() {
-        while (true) 
-        {
-            if (game.isHandCompleted()) {
-                game.payPots();
-                game.reset();
-                setSeatDealer();
-            }
-            
-            if (!game.isPlaying())
-            {
-                List<Seat> activeSeats = new ArrayList<Seat>();
-                
-                for (Seat seat : getSeats()) {
-                    if (!seat.isEmpty()) {
-                        final Player player = seat.getPlayer();
-
-                        if (player.getCash() >= bigBlind) {
-                            activeSeats.add(seat);
-                        }
-                    }
-                }
-
-                if (activeSeats.size() > 1) {
-                    game.setActiveSeats(seats);
-                    game.initGame();
-                }
-            }
-        }
-    }
     
     public int getBigBlind() {
         return this.bigBlind;
@@ -96,14 +65,19 @@ public class Table {
         }
     }
 
-    private Seat getSeat(final int position) {
+    public Seat getDealer() {
+        final Seat seat = getSeat(dealer);
+        return seat;
+    }
+    
+    public Seat getSeat(final int position) {
         final Seat seat = getSeats().get(position);
 
         return seat;
     }
 
-    private void setSeatDealer() {
-        Seat seat = getSeat(dealer);
+    public void setSeatDealer() {
+        final Seat seat = getDealer();
 
         if (seat.isEmpty()) {
             changeDealer();

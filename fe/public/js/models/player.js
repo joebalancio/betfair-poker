@@ -64,6 +64,7 @@ define(function(require,exports,modules) {
       textFill: 'white',
       visible: true
     },
+    user: null, // screen user
 
     /*
      * Functions
@@ -72,15 +73,21 @@ define(function(require,exports,modules) {
       this.group = new Kinetic.Group;
       this.group.height = 200;
       this.group.width = 200;
+      this.sprites = this.attributes.sprites;
+      delete this.attributes.sprites;
       this.images = this.attributes.images;
+      delete this.attributes.images;
+      this.user = this.attributes.user;
+      delete this.attributes.user;
       this.on('add', this.add, this);
       this.on('change', this.update, this);
       this.on('change:position', this.updatePosition, this);
-      this.on('change:active', this.updateActive, this);
-      this.on('change:action', this.updateAction, this);
+      //this.on('change:active', this.updateActive, this);
+      //this.on('change:action', this.updateAction, this);
       this.on('change:cards', this.updateCards, this);
       this.on('change:chips', this.updateChips, this);
       this.on('change:avatar', this.updateAvatar, this);
+      this.on('change:status', this.updateStatus, this);
       this.shapes = {
         name: new Kinetic.Text({
           text: '',
@@ -151,6 +158,25 @@ define(function(require,exports,modules) {
           x: 63,
           y: 32
         }),
+        card1: new Kinetic.Sprite(_.extend({
+          width: 50,
+          height: 50 * this.cardRatio,
+          offset: {
+            x: 25,
+            y: 50 * this.cardRatio / 2
+          },
+          rotation: Math.PI * 0.05,
+        }, this.sprites.smallCards)),
+        card2: new Kinetic.Sprite(_.extend({
+          width: 50,
+          height: 50 * this.cardRatio,
+          offset: {
+            x: 25,
+            y: 50 * this.cardRatio / 2
+          },
+          rotation: -Math.PI * 0.05,
+        }, this.sprites.smallCards)),
+        /*
         card1: new Kinetic.Image({
           width: 50,
           height: 50 * this.cardRatio,
@@ -170,6 +196,7 @@ define(function(require,exports,modules) {
           rotation: -Math.PI * 0.05,
           name: 'card'
         }),
+        */
         avatar: new Kinetic.Image({
           name: 'avatar',
         })
@@ -186,8 +213,9 @@ define(function(require,exports,modules) {
       this.update(model);
     },
     update: function(model) {
-      this.updateAction(model, model.get('action'));
-      this.updateActive(model, model.get('active'));
+      //this.updateAction(model, model.get('action'));
+      //this.updateActive(model, model.get('active'));
+      this.updateStatus(model, model.get('status'));
       this.updatePosition(model, model.get('position'));
       this.updateCards(model, model.get('cards'));
       this.updateChips(model, model.get('chips'));
@@ -197,10 +225,12 @@ define(function(require,exports,modules) {
     updateChips: function(model, chips) {
       this.shapes.chips.setText('$' + chips);
     },
+    /* @deprecated */
     updateActive: function(model, active) {
       if (active) this.shapes.name.setAttrs(this.activeShapeProps);
       else this.shapes.name.setAttrs(this.inactiveShapeProps);
     },
+    /* @deprecated */
     updateAction: function(model, action) {
       this.shapes.action.setText(action);
     },
@@ -228,13 +258,20 @@ define(function(require,exports,modules) {
       }
     },
     updateCards: function(model, cards) {
-      if (cards) {
-        this.shapes.card1.setImage(this.images[cards[0]]);
-        this.shapes.card2.setImage(this.images[cards[1]]);
+      if (cards && this.user && this.user.id === model.id) {
+        this.shapes.card1.setAnimation(cards[0]);
+        this.shapes.card2.setAnimation(cards[1]);
       } else {
-        this.shapes.card1.setImage(this.images.card_back);
-        this.shapes.card2.setImage(this.images.card_back);
+        this.shapes.card1.setAnimation('back');
+        this.shapes.card2.setAnimation('back');
       }
+
+    /*
+      if(cards && cards[0] === 'over') {
+        this.shapes.card1.hide();
+        this.shapes.card2.hide();
+      }
+      */
     },
     updateName: function(model, name) {
       this.shapes.name.setText(name);
@@ -250,6 +287,22 @@ define(function(require,exports,modules) {
         x: this.group.width / 2,
         y: 25
       });
+    },
+    updateStatus: function(model, status) {
+      switch (status) {
+        case 'turn':
+          this.shapes.name.setAttrs(this.activeShapeProps);
+          break;
+        case 'bet':
+        case 'call':
+        case 'fold':
+        case 'check':
+        default:
+          this.shapes.name.setAttrs(this.inactiveShapeProps);
+          break;
+      }
+
+      console.log('status', status);
     },
 
     fold: function() {

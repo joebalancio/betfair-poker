@@ -19,8 +19,6 @@
 
   <bean id="pokerRouteBuilder" class="com.betfair.poker.table.PokerRouteBuilder">
     <property name="table" ref="pokerTable" />
-    <property name="fromEndpoint" value="${com.betfair.poker.chat.fromEndpoint}" />
-    <property name="toEndpoint" value="${com.betfair.poker.chat.toEndpoint}" />
   </bean>
 
   <camel:camelContext id="pokerContext">

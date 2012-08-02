@@ -8,7 +8,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.betfair.poker</groupId>
-  <artifactId>poker-parent</artifactId>
+  <artifactId>parent</artifactId>
   <name>Betfair::Poker::Parent</name>
   <packaging>pom</packaging>
   <scm>
@@ -17,11 +17,12 @@
     <url>ssh://git@git.sfo.us.betfair/api/poker</url>
   </scm>
   <properties>
-    <camel.version>2.x-fuse-SNAPSHOT</camel.version>
+    <jackson.version>1.9.9</jackson.version>
   </properties>
   <modules>
     <module>chat</module>
     <module>deck</module>
+    <module>features</module>
     <module>hand</module>
     <module>player</module>
     <module>pot</module>

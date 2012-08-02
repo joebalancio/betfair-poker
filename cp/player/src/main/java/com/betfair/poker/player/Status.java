@@ -1,8 +1,9 @@
 package com.betfair.poker.player;
 
-public enum Status {
 
-	 /** Posting the small blind. */
+public enum Status {
+    
+    /** Posting the small blind. */
     SMALL_BLIND("Small Blind", "posts the small blind"),
 
     /** Posting the big blind. */
@@ -27,8 +28,19 @@ public enum Status {
         this.name = name;
         this.verb = verb;
     }
+
+    public static Status fromName(final String v) {
+        for (Status c : Status.values()) {
+            if (c.name.equals(v)) {
+                return c;
+            }
+        }
+        throw new IllegalArgumentException(v.toString());
+    }
     
     /**
+     * 
+     * 
      * Returns the name.
      * 
      * @return The name.
@@ -46,10 +58,6 @@ public enum Status {
         return verb;
     }
     
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Enum#toString()
-     */
     @Override
     public String toString() {
         return name;

@@ -2,7 +2,6 @@ package com.betfair.poker.game;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -16,7 +15,6 @@ import com.betfair.poker.hand.Hand;
 import com.betfair.poker.hand.HoleCards;
 import com.betfair.poker.player.Action;
 import com.betfair.poker.player.Player;
-import com.betfair.poker.player.Status;
 import com.betfair.poker.table.Seat;
 
 /**
@@ -29,10 +27,12 @@ public class Game {
     private List<Seat> seats;
     private int pot;
     private int bet;
-    private int SMALL_BLIND = 2;
-    private int BIG_BLIND = 4;
+    private final int SMALL_BLIND = 2;
+    private final int BIG_BLIND = 4;
     private int minBet;
     private List<Player> activePlayers;
+    private CommunityCards communityCards = new CommunityCards();
+    private final GameStatus status = GameStatus.DEAL;
 
     public Game() {
         ArrayList<Card> cards = new ArrayList<Card>();
@@ -49,75 +49,75 @@ public class Game {
     public Game(final Deck deck) {
         this.deck = deck;
     }
-    
+
     public boolean isPlaying() {
         return this.isPlaying;
-        
     }
-    
-    public void initGame()
-    {
-    	minBet = BIG_BLIND;
-    	bet = minBet;
-    	this.isPlaying = true;
+
+    public void initGame() {
+        minBet = BIG_BLIND;
+        bet = minBet;
+        this.isPlaying = true;
         int dealerIndx = 0;
-        for(int i=0;i<seats.size(); i++)
-        {
-        	if(seats.get(i).isDealer())
-        	{
-        		dealerIndx = i;
-        		
-        	}
+
+        for (int i = 0; i < seats.size(); i++) {
+            if (seats.get(i).isDealer()) {
+                dealerIndx = i;
+
+            }
         }
         int smallBlindIdx = 0;
         int bigBlindIdx = 0;
-        if(dealerIndx == seats.size() - 1)
-        {
-        	smallBlindIdx = 0;
-        	bigBlindIdx = 1;
+
+        if (dealerIndx == seats.size() - 1) {
+            smallBlindIdx = 0;
+            bigBlindIdx = 1;
+        } else {
+            smallBlindIdx = dealerIndx++;
+            bigBlindIdx = smallBlindIdx++;
         }
-        else
-        {
-        	smallBlindIdx = dealerIndx++;
-        	bigBlindIdx = smallBlindIdx++;
-        }
-      //sub small & big blind
-		Seat smallBlind = seats.get(smallBlindIdx);
-		Seat bigBlind = seats.get(bigBlindIdx);
-		smallBlind.getPlayer().setStatus(Status.SMALL_BLIND);
-		bigBlind.getPlayer().postSmallBlind(SMALL_BLIND);
-		bigBlind.getPlayer().setStatus(Status.BIG_BLIND);
-		bigBlind.getPlayer().postBigBlind(BIG_BLIND);
-        //mark next person to bb as isturn =true
-        //deal the cards
+
+        // sub small & big blind
+        Seat smallBlind = seats.get(smallBlindIdx);
+        smallBlind.setSmallBlind(true);
+        smallBlind.getPlayer().postSmallBlind(SMALL_BLIND);
+
+        Seat bigBlind = seats.get(bigBlindIdx);
+        bigBlind.setBigBlind(true);
+        bigBlind.getPlayer().postBigBlind(BIG_BLIND);
+        // mark next person to bb as isturn =true
+        // deal the cards
         dealCards();
     }
-    
-    public void playHand(int seatId, Action action, int currentBet) 
-    {
-    	Seat currentPlayer = seats.get(seatId);
-    	Set<Action> allowedActions = getAllowedActions(currentPlayer.getPlayer());
-    	if (!allowedActions.contains(action)) {
-            String msg = String.format("Illegal action (%s) from player %s!", action, currentPlayer.getPlayer());
-            throw new IllegalStateException(msg);
-        }
-    	switch (action) {
+
+    public void playHand(int seatId, Action action, int currentBet) {
+        Seat currentSeat = getSeat(seatId);
+        if (currentSeat.isTurn()) {
+            Set<Action> allowedActions = getAllowedActions(currentSeat
+                    .getPlayer());
+            if (!allowedActions.contains(action)) {
+                String msg = String.format(
+                        "Illegal action (%s) from player %s!", action,
+                        currentSeat.getPlayer());
+                throw new IllegalStateException(msg);
+            }
+            switch (action) {
             case CHECK:
                 // Do nothing.
                 break;
             case CALL:
                 pot += currentBet;
-                currentPlayer.getPlayer().act(action, bet, currentBet);
+                currentSeat.getPlayer().act(action, bet, currentBet);
                 break;
             case BET:
                 bet = minBet;
                 pot += currentBet;
-                currentPlayer.getPlayer().act(action, bet, currentBet);
+                currentSeat.getPlayer().act(action, bet, currentBet);
                 break;
             case RAISE:
                 bet += minBet;
                 pot += currentBet;
-                currentPlayer.getPlayer().act(action, bet, currentBet);
+                currentSeat.getPlayer().act(action, bet, currentBet);
                 break;
             case FOLD:
                 seats.get(seatId).removePlayer();
@@ -126,12 +126,17 @@ public class Game {
             default:
                 throw new IllegalStateException("Invalid action: " + action);
        	}
-    	if (currentPlayer.getPlayer().isAllIn()) {
-    		currentPlayer.getPlayer().setAllInPot(pot);
+    	if (currentSeat.getPlayer().isAllIn()) {
+    		currentSeat.getPlayer().setAllInPot(pot);
+            }
         }
     }
-    
-    private Set<Action> getAllowedActions(Player player) {
+
+    public int getPot() {
+        return this.pot;
+    }
+
+    public Set<Action> getAllowedActions(Player player) {
         int playerBet = player.getBet();
         Set<Action> actions = new HashSet<Action>();
         if (bet == 0) {
@@ -149,7 +154,7 @@ public class Game {
         actions.add(Action.FOLD);
         return actions;
     }
-    
+
     public void reset() {
         // reset fields to start a new game
         this.isPlaying = false;
@@ -157,11 +162,10 @@ public class Game {
         this.seats = new ArrayList<Seat>();
         this.deck.shuffle();
     }
-    
+
     public void payPots() {
         // pay out pots to winners
         // will need to evaluate hands
-    	
     	List<Seat> winningSeats = getWinners();
     	int tempPot = pot;
     	for(Seat seat: seats)
@@ -228,69 +232,93 @@ public class Game {
     	}
     	return winningSeats;
     }
-    
+
     /**
-     * This will return true when there is only one player left
-     * or all cards have been dealt and all bets placed.  
+     * This will return true when there is only one player left or all cards
+     * have been dealt and all bets placed.
      */
     public boolean isHandCompleted() {
         return this.isHandCompleted;
     }
-    
+
     public void setActiveSeats(List<Seat> seats) {
         this.seats = new ArrayList<Seat>(seats);
     }
-    
-    public void dealCards()
-    {
-    	//Burn the first card
-    	deck.dealCard();
-    	
-    	//Deal 2 cards to each player at the start
-    	Iterator<Seat> iterator = seats.iterator();
-    	while(iterator.hasNext())
-    	{
-    		Seat seat = iterator.next();
-    		Hand hand = new Hand();
-    		HoleCards holeCards = new HoleCards();
-    		holeCards.addCards(deck.dealCard(2));
-    		hand.setHoleCards(holeCards);
-    		seat.getPlayer().setHand(hand);
-    	}
+
+    public List<Seat> getActiveSeats() {
+        return new ArrayList<Seat>(seats);
+    }
+
+    public Seat getSeat(int position) {
+        return seats.get(position);
+    }
+
+    public void dealCards() {
+        // Burn the first card
+        deck.dealCard();
+
+        // Deal 2 cards to each player at the start
+        for (Seat seat : seats) {
+            Hand hand = new Hand();
+            HoleCards holeCards = new HoleCards();
+            holeCards.addCards(deck.dealCards(2));
+            hand.setHoleCards(holeCards);
+            seat.getPlayer().setHand(hand);
+        }
+    }
+
+    public CommunityCards getCommunityCards() {
+        return this.communityCards;
+    }
+
+    public void flop() {
+        // Burn the first card
+        deck.dealCard();
+
+        // Deal 2 cards to each player at the start
+        this.communityCards = new CommunityCards();
+        communityCards.addCards(deck.dealCards(3));
+
+        for (Seat seat : seats) {
+            Hand hand = seat.getPlayer().getHand();
+            if (null == hand)//
+                hand = new Hand();
+            hand.setCommunityCards(communityCards);
+            seat.getPlayer().setHand(hand);
+        }
+    }
+
+    public void turnOrRiver() {
+        // Burn the first card
+        deck.dealCard();
+
+        // Deal 2 cards to each player at the start
+        Card commCard = deck.dealCard();
+        for (Seat seat : seats) {
+            Hand hand = seat.getPlayer().getHand();
+
+            if (null == hand) {
+                hand = new Hand();
+            }
+
+            hand.getCommunityCards().addCard(commCard);
+            seat.getPlayer().setHand(hand);
+        }
+    }
+
+    public GameStatus getStatus() {
+        return this.status;
     }
     
-    public void flop()
-    {
-    	//Burn the first card
-    	deck.dealCard();
-    	
-    	//Deal 2 cards to each player at the start
-    	CommunityCards comCards = new CommunityCards();
-		comCards.addCards(deck.dealCard(3));
-    	for(Seat seat: seats)
-    	{
-    		Hand hand = seat.getPlayer().getHand();
-    		if(null == hand)//
-    			hand = new Hand();
-    		hand.setCommunityCards(comCards);
-    		seat.getPlayer().setHand(hand);
-    	}
-    }
-    
-    public void turnOrRiver()
-    {
-    	//Burn the first card
-    	deck.dealCard();
-    	
-    	//Deal 2 cards to each player at the start
-		Card commCard = deck.dealCard();
-    	for(Seat seat: seats)
-    	{
-    		Hand hand = seat.getPlayer().getHand();
-    		if(null == hand)
-    			hand = new Hand();
-    		hand.getCommunityCards().addCard(commCard);
-    		seat.getPlayer().setHand(hand);
-    	}
+    public void removeSeat(int position) {
+        List<Seat> seats = new ArrayList<Seat>();
+        
+        for (Seat seat : seats) {
+            if (seat.getPosition() != position) {
+                seats.add(seat);
+            }
+        }
+        
+        this.seats = seats;
     }
 }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<features name="poker-${project.version}">
+  <repository>mvn:org.fusesource.esb/fuse-esb/${fabric.version}/xml/features</repository>
+  <repository>mvn:org.apache.karaf.assemblies.features/enterprise/${karaf.version}/xml/features</repository>
+  <repository>mvn:org.apache.karaf.assemblies.features/standard/${karaf.version}/xml/features</repository>
+  <repository>mvn:org.apache.camel.karaf/apache-camel/${camel.version}/xml/features</repository>
+  <repository>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</repository>
+
+  <feature name="poker" version="${project.version}" resolver="(obr)">
+    <bundle>fab:mvn:com.betfair.poker/table/${project.version}</bundle>
+  </feature>
+</features>

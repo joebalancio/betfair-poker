@@ -68,7 +68,7 @@ public class Deck {
         return cards.get(position++);
     }
     
-    public List<Card> dealCard(int noOfCards) {
+    public List<Card> dealCards(int noOfCards) {
     	List<Card> dealtCards = new ArrayList<Card>();
         if (position == 51) {
             return null;
