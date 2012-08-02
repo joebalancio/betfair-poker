@@ -32,6 +32,7 @@ public class Game {
     private int SMALL_BLIND = 2;
     private int BIG_BLIND = 4;
     private int minBet;
+    private List<Player> activePlayers;
 
     public Game() {
         ArrayList<Card> cards = new ArrayList<Card>();
@@ -120,12 +121,13 @@ public class Game {
                 break;
             case FOLD:
                 seats.get(seatId).removePlayer();
+                seats.remove(seatId);
                 break;
             default:
                 throw new IllegalStateException("Invalid action: " + action);
        	}
     	if (currentPlayer.getPlayer().isAllIn()) {
-    		//currentPlayer.getPlayer().setInAllPot(pot);
+    		currentPlayer.getPlayer().setAllInPot(pot);
         }
     }
     
@@ -160,6 +162,54 @@ public class Game {
         // pay out pots to winners
         // will need to evaluate hands
     	
+    	List<Seat> winningSeats = getWinners();
+    	int tempPot = pot;
+    	for(Seat seat: seats)
+    	{
+    		for(Seat winningseat: winningSeats)
+    		{
+    			if(seat.equals(winningseat))
+    			{
+    				// Determine the player's share of the pot.
+    	            int potShare = seat.getPlayer().getAllInPot();
+    	            if (potShare == 0) {
+    	                // Player is not all-in, so he competes for the whole pot.
+    	                potShare = pot / winningSeats.size();
+    	            }
+    	            // Give the player his share of the pot.
+    	            seat.getPlayer().win(potShare);
+    	            tempPot -= potShare;
+    	            // If there is no more pot to divide, we're done.
+    	            if (tempPot == 0) {
+    	                break;
+    	            }
+    			}
+    		}
+    	}
+    }
+    
+    /*private Map<HandValue, List<Player>> getRankedPlayers()
+    {
+    	Map<HandValue, List<Player>> winners = new TreeMap<HandValue, List<Player>>();
+    	for (Seat seat : seats) {
+                // Create a hand with the community cards and the player's hole cards.
+                Hand hand = new Hand();
+                hand.setHoleCards(seat.getPlayer().getHand().getHoleCards());
+                hand.setCommunityCards(seat.getPlayer().getHand().getCommunityCards());
+                // Store the player together with other players with the same hand value.
+                HandValue handValue = new HandValue(hand);
+                List<Player> playerList = winners.get(handValue);
+                if (playerList == null) {
+            	playerList = new LinkedList<Player>();
+                }
+                playerList.add(seat.getPlayer());
+                winners.put(handValue, playerList);
+    	}
+    	return winners;
+    }
+    */
+    private List<Seat> getWinners()
+    {
     	//evaluating hands and determine the winner
     	List<Seat> winningSeats = new ArrayList<Seat>();
     	int handValue = 0;
@@ -176,20 +226,7 @@ public class Game {
     			winningSeats.add(seat);
     		}
     	}
-    	
-    	for(Seat seat: seats)
-    	{
-    		for(Seat winningseat: winningSeats)
-    		{
-    			if(seat.equals(winningseat))
-    			{
-    				int cash = seat.getPlayer().getCash();
-        			//split it among 
-        			cash+= this.pot/winningSeats.size();
-        			seat.getPlayer().setCash(cash);
-    			}
-    		}
-    	}
+    	return winningSeats;
     }
     
     /**

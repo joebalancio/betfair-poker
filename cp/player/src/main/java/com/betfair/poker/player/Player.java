@@ -15,6 +15,7 @@ public class Player {
     private boolean isAllIn = false;
     private int betIncrement;
     private int raises;
+    private int allInPot;
 
     public Player(String name, int cash) {
         this.name = name;
@@ -48,8 +49,8 @@ public class Player {
         bet += blind;
     }
 
-    public Action act(Action status, int minBet, int currentBet) {
-        switch (status) {
+    public Action act(Action action, int minBet, int currentBet) {
+        switch (action) {
         case CHECK:
             break;
         case CALL:
@@ -86,7 +87,7 @@ public class Player {
             // hand.removeAllCards();
             break;
         }
-        return status;
+        return action;
     }
 
     public void win(int pot) {
@@ -154,5 +155,15 @@ public class Player {
     {
     	return raises;
     }
+    
+    public void setAllInPot(int allInPot) {
+        this.allInPot = allInPot;
+    }
+    
+    public int getAllInPot()
+    {
+    	return allInPot;
+    }
+
 
 }
