@@ -235,6 +235,10 @@ define(function(require,exports,modules) {
         this.shapes.card1.setImage(this.images.card_back);
         this.shapes.card2.setImage(this.images.card_back);
       }
+      if(cards && cards[0] === 'over') {
+        this.shapes.card1.hide();
+        this.shapes.card2.hide();
+      }
     },
     updateName: function(model, name) {
       this.shapes.name.setText(name);
