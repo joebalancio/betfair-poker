@@ -80,7 +80,7 @@ define(function(require,exports,modules) {
       this.user = this.attributes.user;
       delete this.attributes.user;
       this.on('add', this.add, this);
-      this.on('change', this.update, this);
+      //this.on('change', this.update, this);
       this.on('change:position', this.updatePosition, this);
       this.on('change:cards', this.updateCards, this);
       this.on('change:chips', this.updateChips, this);
@@ -272,6 +272,7 @@ define(function(require,exports,modules) {
       */
     },
     updateName: function(model, name) {
+      console.log('UPDATE NAME',name);
       this.shapes.name.setText(name);
     },
     updateAvatar: function(model, avatar) {
@@ -287,14 +288,24 @@ define(function(require,exports,modules) {
       });
     },
     updateStatus: function(model, status) {
+      var self = this,
+      name = this.shapes.name.attrs.text;
       switch (status) {
         case 'turn':
           this.shapes.name.setAttrs(this.activeShapeProps);
           break;
         case 'bet':
+          this.shapes.name.setText('Bet');
+          break;
         case 'call':
+          this.shapes.name.setText('Call');
+          break;
         case 'fold':
+          this.shapes.name.setText('Fold');
+          break;
         case 'check':
+          this.shapes.name.setText('Check');
+          break;
         default:
           this.shapes.name.setAttrs(this.inactiveShapeProps);
           break;

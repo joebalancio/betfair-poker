@@ -727,7 +727,6 @@ io.sockets.on('connection', function(socket) {
 
   socket.on('player:update', function(data) {
     var index, player;
-
     _.each(table.players, function(p, i) {
       if (p.id === socket.user && p.id === data.id) {
         player = p;
@@ -759,24 +758,22 @@ io.sockets.on('connection', function(socket) {
         player.Fold();
         break;
     }
-
-    socket.emit('table:read', tableJson(table, socket, passthrough));
-    socket.broadcast.emit('table:read', tableJson(table, socket, passthrough));
     socket.emit('players:read', playersJson(table.players, socket, passthrough));
     socket.broadcast.emit('players:read', playersJson(table.players, socket, passthrough));
-
-    if (table.game.roundName === 'Showdown') {
-      setTimeout(function() {
-        table.NewHand();
-        socket.emit('table:read', tableJson(table, socket, passthrough));
-        socket.broadcast.emit('table:read', tableJson(table, socket, passthrough));
-        socket.emit('players:read', playersJson(table.players, socket, passthrough));
-        socket.broadcast.emit('players:read', playersJson(table.players, socket, passthrough));
-      }, 5000);
-    }
+    socket.emit('table:read', tableJson(table, socket, passthrough));
+    socket.broadcast.emit('table:read', tableJson(table, socket, passthrough));
   });
 
   table.on('change:round', function(roundName) {
+    if (roundName === 'Showdown') {
+      setTimeout(function() {
+        table.NewHand();
+      }, 5000);
+    }
+    socket.emit('players:read', playersJson(table.players, socket, passthrough));
+    socket.broadcast.emit('players:read', playersJson(table.players, socket, passthrough));
+    socket.emit('table:read', tableJson(table, socket, passthrough));
+    socket.broadcast.emit('table:read', tableJson(table, socket, passthrough));
     var now = new Date();
     var message = {
       timestamp:  now.getHours() + ':' + now.getMinutes(),

@@ -203,6 +203,10 @@ define(function(require,exports,modules) {
     },
 
     updateStatus: function(model, status) {
+      _.each(this.players.models, function(player, index) {
+      	console.log(model.get('name'));
+      	player.shapes.name.setText('hi');
+      }, this);
       switch (status) {
         case 'Deal':
           _.each(this.shapes, function(card, index) {
