@@ -33,7 +33,6 @@ public class PokerRouteBuilder extends RouteBuilder {
                     @Override
                     public void process(Exchange exchange) throws Exception {
                         final String msg = exchange.getIn().getBody().toString();
-                        System.out.println(msg);
                         final Map<String, Object> map = jsonToMap(msg);
                         final String name = (String) map.get("name");
                         
@@ -55,15 +54,16 @@ public class PokerRouteBuilder extends RouteBuilder {
                     }
                 })
                 .to("direct:readTable")
-                .to("direct:readPlayers");
+                .to("direct:readPlayers")
+                .delay(100)
+                .to("direct:startGame")
+                .to("direct.endGame");
 
         from("direct:readTable")
                 .routeId("direct:readTable")
                 .process(new Processor() {
                   @Override
                   public void process(Exchange exchange) throws Exception {
-                      String msg = exchange.getIn().getBody().toString();
-                      System.out.println(msg);
                       exchange.getOut().setBody(readTable());
                   }
                 })
@@ -75,16 +75,44 @@ public class PokerRouteBuilder extends RouteBuilder {
             .process(new Processor() {
                 @Override
                 public void process(Exchange exchange) throws Exception {
-                    String msg = exchange.getIn().getBody().toString();
-                    System.out.println(msg);
                     exchange.getOut().setBody(readPlayers());
                 }
             })
             .log(">>> Message sending to WebSocket Client: ${body}")
             .to("websocket://poker?sendToAll=true");
-    }
+        
+        from("direct:startGame")
+            .routeId("direct:startGame")
+            .process(new Processor() {
+                @Override
+                public void process(Exchange exchange) throws Exception {
+                    if (startGame()) {
+                        // add header for when clause
+                    }
+                }
+            })
+            .log(">>> Game Starting")
+            .to("direct:readTable")
+            .to("direct:readPlayers");
+        
+        from("direct:endGame")
+            .routeId("direct:endGame")
+            .process(new Processor() {
+                @Override
+                public void process(Exchange exchange) throws Exception {
+                    if (endGame()) {
+                        // add header for when clause
+                    }
+                }
+            })
+            .log(">>> Game Ended")
+            .to("direct:readTable")
+            .to("direct:readPlayers")
+            .delay(100)
+            .to("direct:startGame");
+        }
 
-    private void startGame() {
+    private boolean startGame() {
         Game game = table.getGame();
 
         if (!game.isPlaying()) {
@@ -103,18 +131,24 @@ public class PokerRouteBuilder extends RouteBuilder {
             if (activeSeats.size() > 1) {
                 game.setActiveSeats(activeSeats);
                 game.initGame();
+                return true;
             }
         }
+        
+        return false;
     }
 
-    private void endGame() {
+    private boolean endGame() {
         Game game = table.getGame();
 
         if (game.isHandCompleted()) {
             game.payPots();
             game.reset();
             table.setSeatDealer();
+            return true;
         }
+        
+        return false;
     }
 
     public String readPlayer(final Map<String, Object> inMap) {
@@ -163,8 +197,6 @@ public class PokerRouteBuilder extends RouteBuilder {
         Player player = new Player(name, id);
         player.setAvatar(avatar);
         table.addPlayer(player, pos);
-
-        startGame();
     }
 
     private void deletePlayer(final Map<String, Object> map) {
@@ -194,8 +226,6 @@ public class PokerRouteBuilder extends RouteBuilder {
             final Player player = seat.getPlayer();
             game.playHand(pos, Action.fromName(action), amount);
         }
-
-        endGame();
     }
 
     public String readPlayers() {
