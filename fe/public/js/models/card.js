@@ -4,7 +4,8 @@ define(function(require,exports,modules) {
 		defaults: {
 			value: null,
 			suit: null,
-			image: null
+			image: null,
+			flipped: 0,
 		},
 		initialize: function() {}
 	});

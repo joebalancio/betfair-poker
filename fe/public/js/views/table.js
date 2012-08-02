@@ -22,6 +22,7 @@ define(function(require,exports,modules) {
       card1: new Kinetic.Image({
         width: 92,
         height: 128,
+        flipped: 0,
         offset: {
           x: 92/2,
           y: 128/1.2
@@ -30,6 +31,7 @@ define(function(require,exports,modules) {
       card2: new Kinetic.Image({
         width: 92,
         height: 128,
+        flipped: 0,
         offset: {
           x: 92/2,
           y: 128/1.2
@@ -38,6 +40,7 @@ define(function(require,exports,modules) {
       card3: new Kinetic.Image({
         width: 92,
         height: 128,
+        flipped: 0,
         offset: {
           x: 92/2,
           y: 128/1.2
@@ -46,7 +49,7 @@ define(function(require,exports,modules) {
       card4: new Kinetic.Image({
         width: 92,
         height: 128,
-        visible: 1,
+        flipped: 0,
         offset: {
           x: 92/2,
           y: 128/1.2
@@ -55,7 +58,7 @@ define(function(require,exports,modules) {
       card5: new Kinetic.Image({
         width: 92,
         height: 128,
-        visible: 1,
+        flipped: 0,
         offset: {
           x: 92/2,
           y: 128/1.2
@@ -196,24 +199,12 @@ define(function(require,exports,modules) {
       */
     },
     updateCards: function(model, cards) {
-      var self = this, range;
+      var self = this;
       console.log('update cards', cards);
-      switch (cards.length) {
-        case 3:
-          range = [0, 3];
-          offset = 1;
-          break;
-        case 4:
-          range = [3, 4];
-          offset = 4
-          break;
-        case 5:
-          range = [4, 5];
-          offset = 5
-          break;
-      }
-      _.each(cards.slice.apply(cards, range), function(card, index) {
-        var cardShape = this.shapes['card' + (index + offset)];
+      _.each(cards, function(card, index) {
+        var cardShape = this.shapes['card' + (index + 1)];
+        cardShape.show();
+        console.log(cardShape);
         cardShape.transitionTo({
           scale: { x: 0, y: 1 },
           duration: 0.5,
@@ -232,9 +223,16 @@ define(function(require,exports,modules) {
     },
 
     updateStatus: function(model, status) {
-      if (status === 'start') {
+      if (status === 'deal') {
+      	_.each(this.shapes, function(card, index) {
+	      		if(index.indexOf('card') === 0) {
+	      		var cardShape = this.shapes[index];
+	      		cardShape.hide();
+      		}
+      	},this);
         //this.effects.resetSpray();
         //this.effects.spray();
+
       }
     }
   });

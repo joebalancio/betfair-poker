@@ -78,11 +78,11 @@ server.listen(app.get('port'), function() {
  * Socket.IO
  */
 io.sockets.on('connection', function(socket) {
-  socket.on('start', testJoinGame(socket));
+  //socket.on('start', testJoinGame(socket));
   //socket.on('start', dummydata1(socket));
   //socket.on('start', demoActions(socket));
   //socket.on('start', startEmptyTable(socket));
-  //socket.on('start', endOfHandToStartOfHand(socket));
+  socket.on('start', endOfHandToStartOfHand(socket));
   //socket.on('start', playerRegistration(socket));
 
   socket.on('message:create', function(data, callback) {
@@ -524,6 +524,7 @@ function demoActions(socket) {
 
 function endOfHandToStartOfHand(socket) {
   var table = {
+    status: 'showdown',
     cards: ['as','as','as','as','as'],
     pot: 100,
     winner: 1
@@ -573,7 +574,10 @@ function endOfHandToStartOfHand(socket) {
       players[table.winner].chips += table.pot;
       delete table.winner;
       table.pot = 0;
-      table.status = 'start';
+      _.each(players, function(player, index) {
+        player.cards = ['over'];
+      },this);
+      table.status = 'deal';
       socket.emit('players:read', players);
       socket.emit('table:read', table);
     }, 3000);
