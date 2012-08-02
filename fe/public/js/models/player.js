@@ -82,8 +82,6 @@ define(function(require,exports,modules) {
       this.on('add', this.add, this);
       this.on('change', this.update, this);
       this.on('change:position', this.updatePosition, this);
-      //this.on('change:active', this.updateActive, this);
-      //this.on('change:action', this.updateAction, this);
       this.on('change:cards', this.updateCards, this);
       this.on('change:chips', this.updateChips, this);
       this.on('change:avatar', this.updateAvatar, this);
