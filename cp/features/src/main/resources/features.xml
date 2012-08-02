@@ -7,6 +7,17 @@
   <repository>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</repository>
 
   <feature name="poker" version="${project.version}" resolver="(obr)">
+     <feature>jackson</feature>
+     <feature>camel-websocket</feature>
     <bundle>fab:mvn:com.betfair.poker/table/${project.version}</bundle>
+  </feature>
+  
+  <feature name="camel-websocket" version="${camel.version}" resolver="(obr)">
+    <bundle>mvn:org.apache.camel/camel-websocket/${camel.version}</bundle>
+  </feature>
+
+  <feature name="jackson" version="${jackson.version}" resolver="(obr)">
+    <bundle>mvn:org.codehaus.jackson/jackson-core-asl/${jackson.version}</bundle>
+    <bundle>mvn:org.codehaus.jackson/jackson-mapper-asl/${jackson.version}</bundle>
   </feature>
 </features>
