@@ -32,8 +32,25 @@ public class PokerRouteBuilder extends RouteBuilder {
                 .process(new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
-                        String msg = exchange.getIn().getBody().toString();
+                        final String msg = exchange.getIn().getBody().toString();
                         System.out.println(msg);
+                        final Map<String, Object> map = jsonToMap(msg);
+                        final String name = (String) map.get("name");
+                        
+                        if ("player:update".equals(name)) {
+                            final List<Map<String, Object>> list = (List<Map<String, Object>>) map.get("args");
+                            final Map<String, Object> data = list.get(0);
+                            updatePlayer(data);
+                        } else if ("player:create".equals(name)) {
+                            final List<Map<String, Object>> list = (List<Map<String, Object>>) map.get("args");
+                            final Map<String, Object> data = list.get(0);
+                            createPlayer(data);
+                        } else if ("player:delete".equals(name)) {
+                            final List<Map<String, Object>> list = (List<Map<String, Object>>) map.get("args");
+                            final Map<String, Object> data = list.get(0);
+                            deletePlayer(data);
+                        }
+                        
                         exchange.getOut().setBody("update websocket");
                     }
                 })
@@ -100,7 +117,7 @@ public class PokerRouteBuilder extends RouteBuilder {
         }
     }
 
-    private String readPlayer(final Map<String, Object> inMap) {
+    public String readPlayer(final Map<String, Object> inMap) {
         final Integer position = (Integer) inMap.get("seat");
 
         Map<String, Object> map = new HashMap<String, Object>();
@@ -236,7 +253,7 @@ public class PokerRouteBuilder extends RouteBuilder {
         return mapToJson(map);
     }
 
-    private Map<String, Object> jsonToMap(final String json) {
+    public Map<String, Object> jsonToMap(final String json) {
         try {
             Map<String, Object> map = mapper.readValue(json,
                     new TypeReference<Map<String, Object>>() {
@@ -247,7 +264,7 @@ public class PokerRouteBuilder extends RouteBuilder {
         }
     }
 
-    private String mapToJson(final Map<String, Object> map) {
+    public String mapToJson(final Map<String, Object> map) {
         try {
             return mapper.writeValueAsString(map);
         } catch (final Exception e) {
