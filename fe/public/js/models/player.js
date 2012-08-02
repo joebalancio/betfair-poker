@@ -272,7 +272,6 @@ define(function(require,exports,modules) {
       */
     },
     updateName: function(model, name) {
-      console.log('UPDATE NAME',name);
       this.shapes.name.setText(name);
     },
     updateAvatar: function(model, avatar) {

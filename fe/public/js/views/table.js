@@ -204,8 +204,7 @@ define(function(require,exports,modules) {
 
     updateStatus: function(model, status) {
       _.each(this.players.models, function(player, index) {
-      	console.log(model.get('name'));
-      	player.shapes.name.setText('hi');
+      	player.shapes.name.setText(player.get('name'));
       }, this);
       switch (status) {
         case 'Deal':
