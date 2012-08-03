@@ -750,7 +750,7 @@ io.sockets.on('connection', function(socket) {
         var message = {
           timestamp:  now.getHours() + ':' + now.getMinutes(),
           message: player.playerName + ' bet ' + data.amount + ' chips.',
-          name: 'Dealer'
+          name: 'dealer'
         };
         table.game.pot += data.amount;
         break;
@@ -760,9 +760,8 @@ io.sockets.on('connection', function(socket) {
         var message = {
           timestamp:  now.getHours() + ':' + now.getMinutes(),
           message: player.playerName + ' checked.',
-          name: 'Dealer'
+          name: 'dealer'
         };
-                console.log(table);
         break;
       case 'call':
         player.Call();
@@ -770,7 +769,7 @@ io.sockets.on('connection', function(socket) {
         var message = {
           timestamp:  now.getHours() + ':' + now.getMinutes(),
           message: player.playerName + ' called.',
-          name: 'Dealer'
+          name: 'dealer'
         };
         table.game.pot += 50;
         break;
@@ -780,7 +779,7 @@ io.sockets.on('connection', function(socket) {
         var message = {
           timestamp:  now.getHours() + ':' + now.getMinutes(),
           message: player.playerName + ' folded.',
-          name: 'Dealer'
+          name: 'dealer'
         };
         break;
     }
