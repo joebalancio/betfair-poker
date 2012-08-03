@@ -278,10 +278,6 @@ define(function(require,exports,modules) {
       if (avatar && this.images.avatars[avatar]) this.shapes.avatar.setImage(this.images.avatars[avatar]);
       else this.shapes.avatar.setImage(this.images.avatars.N03);
       this.shapes.avatar.setAttrs({
-        scale: {
-          x: 0.25,
-          y: 0.25
-        },
         x: this.group.width / 2,
         y: 25
       });
