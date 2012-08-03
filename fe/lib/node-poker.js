@@ -255,7 +255,6 @@ function Progress(table, player){
 			//Move all bets to the pot
 			for(i=0;i<table.game.bets.length;i++){
 				table.game.pot += parseInt(table.game.bets[i]);
-        console.log(table.game.pot);
 			};
 			if(table.game.roundName == "RIVER"){
 				table.game.roundName = "SHOWDOWN";
