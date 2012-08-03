@@ -23,7 +23,6 @@ define(function(require,exports,modules) {
       this.model.on('change:pot', this.updatePot, this);
       this.model.on('change', this.updateStage, this);
 
-      this.model.on('change:winner', this.updateWinner, this);
       this.model.on('change:status', this.updateStatus, this);
 
       this.images = this.options.images;
@@ -153,7 +152,6 @@ define(function(require,exports,modules) {
       console.log('updateTable');
     },
     updatePot: function(model, pot) {
-      console.log(model);
       var
         previousPot = model.previous('pot'),
         showTransition = typeof previousPot !== 'undefined',
@@ -187,7 +185,7 @@ define(function(require,exports,modules) {
         if (pot === 0) {
           this.shapes.chips.transitionTo(fadeOut);
           this.shapes.potBg.transitionTo(fadeOut);
-          this.shapes.pot.transitionTo(fadeOut);
+          this.shapes.pot.setAttrs(fadeOut);
         }
       } else {
         // don't transition
@@ -212,13 +210,6 @@ define(function(require,exports,modules) {
     },
     updateStage: function() {
       this.layer.getStage().draw();
-    },
-    updateWinner: function(model, winner) {
-      if (winner) {
-        this.shapes.pot.setText(this.players.get(winner + 1).get('name') + ' won ' + model.get('pot') + ' chips!');
-      }
-      this.effects.resetSpray();
-      this.effects.spray();
     },
     updateCards: function(model, cards) {
       var self = this,
@@ -260,6 +251,7 @@ define(function(require,exports,modules) {
     },
 
     updateStatus: function(model, status) {
+      var previousStatus = model.previous('status');
       //Set the player's name labels back to their name for the next round
       _.each(this.players.models, function(player, index) {
       	player.shapes.name.setText(player.get('name'));
@@ -286,8 +278,8 @@ define(function(require,exports,modules) {
           },this);
           break;
         case 'SHOWDOWN':
-          this.effects.resetSpray();
-          this.effects.spray();
+          //this.effects.resetSpray();
+          //this.effects.spray();
           break;
       }
     }

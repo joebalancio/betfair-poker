@@ -8,13 +8,19 @@ define(function(require, exports, modules) {
     images: null,
     sprites: null,
     user: null,
+    queue: [],
 
     initialize: function() {
-      this.ioBind('read', this.read, this);
+      this.ioBind('read', this.default, this);
     },
     read: function(models) {
-      console.log('creating data');
-      console.log(this.user);
+      this.queue.push(models);
+    },
+    consume: function() {
+      if (!this.queue.length) return;
+
+      var models = this.queue.shift();
+      console.log(models, this.queue);
       var newModels = [];
 
       _.each(models, function(value) {
@@ -33,7 +39,27 @@ define(function(require, exports, modules) {
       }, this);
 
       if (newModels.length > 0) this.add(newModels);
-    }
+    },
+    default: function(models) {
+      var newModels = [];
+
+      _.each(models, function(value) {
+        var model = this.get(value.id);
+        var player;
+        value.sprites = this.sprites;
+        value.images = this.images;
+        value.layer = this.layer;
+        value.user = this.user;
+        if (model) model.set(value);
+        else {
+          var player = new PlayerModel(value);
+          player.images = this.images;
+          newModels.push(player);
+        }
+      }, this);
+
+      if (newModels.length > 0) this.add(newModels);
+    },
   });
   return Players;
 });

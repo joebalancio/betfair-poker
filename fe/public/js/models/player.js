@@ -7,6 +7,16 @@ define(function(require,exports,modules) {
     url: 'player',
     group: null,
     cardRatio: 1.39,
+    fadeInProps: {
+      alpha: 1,
+      duration: 0.5,
+      easing: 'strong-ease-in'
+    },
+    fadeOutProps: {
+      alpha: 0,
+      duration: 0.5,
+      easing: 'strong-ease-in'
+    },
     activePlayerProps: {
       stroke: 'cyan',
       fill: {
@@ -65,6 +75,7 @@ define(function(require,exports,modules) {
       visible: true
     },
     user: null, // screen user
+    queueChanges: [],
 
     /*
      * Functions
@@ -241,16 +252,15 @@ define(function(require,exports,modules) {
       this.updateAvatar(model, model.get('avatar'));
     },
     updateChips: function(model, chips) {
-      var previousChips = model.previous('chips');
-
-      if (previousChips && chips > previousChips) {
-      } else {
-        this.shapes.chips.setText('$' + chips);
-      }
-
+      this.shapes.chips.setText('$' + chips);
     },
     updatePosition: function(model, position) {
-      if (position) {
+      var previousPosition = model.previous('position');
+      var stage = this.group.getStage();
+
+      if (!stage) {
+        // if there is no stage then just set the properties
+        // this happens on a load
         this.shapes.position.setText(position.toUpperCase());
         switch (position) {
           case 'd':
@@ -265,11 +275,84 @@ define(function(require,exports,modules) {
             this.shapes.position.setAttrs(this.smallBlindTextProps);
             this.shapes.positionCircle.setAttrs(this.smallBlindButtonProps);
             break;
-
+          default:
+            this.shapes.position.setAttrs(this.fadeInProps);
+            this.shapes.positionCircle.setAttrs(this.fadeInProps);
         }
       } else {
-        this.shapes.position.hide();
-        this.shapes.positionCircle.hide();
+        // we have a stage that means we can do fancy stuff
+
+        if (previousPosition != position) {
+          if (position == 'none') {
+            // just fade out if the position if it is empty
+            this.shapes.position.transitionTo(this.fadeOutProps);
+            this.shapes.positionCircle.transitionTo(this.fadeOutProps);
+          } else {
+            // set text and basic props
+            this.shapes.position.setText(position.toUpperCase());
+            switch (position) {
+              case 'd':
+                this.shapes.position.setAttrs(this.dealerTextProps);
+                this.shapes.positionCircle.setAttrs(this.dealerButtonProps);
+                break;
+              case 'bb':
+                this.shapes.position.setAttrs(this.bigBlindTextProps);
+                this.shapes.positionCircle.setAttrs(this.bigBlindButtonProps);
+                break;
+              case 'sb':
+                this.shapes.position.setAttrs(this.smallBlindTextProps);
+                this.shapes.positionCircle.setAttrs(this.smallBlindButtonProps);
+                break;
+              default:
+                this.shapes.position.setAttrs(this.fadeInProps);
+                this.shapes.positionCircle.setAttrs(this.fadeInProps);
+            }
+
+            // transitioning to a value
+            this.shapes.position.setAttrs(this.fadeOutProps);
+            this.shapes.positionCircle.setAttrs(this.fadeOutProps);
+            this.shapes.position.transitionTo(this.fadeInProps);
+            this.shapes.positionCircle.transitionTo(this.fadeInProps);
+          }
+        }
+/*
+        // set text and basic props
+        this.shapes.position.setText(position.toUpperCase());
+        switch (position) {
+          case 'd':
+            this.shapes.position.setAttrs(this.dealerTextProps);
+            this.shapes.positionCircle.setAttrs(this.dealerButtonProps);
+            break;
+          case 'bb':
+            this.shapes.position.setAttrs(this.bigBlindTextProps);
+            this.shapes.positionCircle.setAttrs(this.bigBlindButtonProps);
+            break;
+          case 'sb':
+            this.shapes.position.setAttrs(this.smallBlindTextProps);
+            this.shapes.positionCircle.setAttrs(this.smallBlindButtonProps);
+            break;
+          default:
+            this.shapes.position.setAttrs(this.fadeInProps);
+            this.shapes.positionCircle.setAttrs(this.fadeInProps);
+        }
+
+        // transition only if there is a stage and transitioning from one position to another
+        function done(self) {
+          return function(self) {
+            if (previousPosition != position && stage) {
+              if (position == '') {
+                this.shapes.position.transitionTo(this.fadeOutProps);
+                this.shapes.positionCircle.transitionTo(this.fadeOutProps);
+              } else {
+                this.shapes.position.setAttrs(this.fadeOutProps);
+                this.shapes.positionCircle.setAttrs(this.fadeOutProps);
+                this.shapes.position.transitionTo(this.fadeInProps);
+                this.shapes.positionCircle.transitionTo(this.fadeInProps);
+              }
+            }
+          };
+        }
+          */
       }
     },
     updateCards: function(model, cards) {

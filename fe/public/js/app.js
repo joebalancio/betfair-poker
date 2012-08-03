@@ -31,6 +31,7 @@ define([
       'click button#raise': 'raise',
       'click button#check': 'check',
       'click button#fold': 'fold',
+      'click button#debug': 'debug',
     },
     user: null,
     chatView: null,
@@ -288,6 +289,7 @@ define([
     },
 
     addPlayer: function(model) {
+      console.log('add player');
       var seat = model.get('seat');
 
       // get current screen's user
@@ -486,13 +488,19 @@ define([
         this.views.table.shapes.chips.transitionTo({
           x: position.x,
           y: position.y,
-          duration: 1
+          duration: 1,
+          alpha: 0,
+          easing: 'strong-ease-out'
         });
-
-      } else {
-        this.shapes.chips.setText('$' + chips);
       }
+    },
+
+    debug: function() {
+      this.players.consume();
+      this.views.table.model.consume();
     }
+
+
 
   });
 
