@@ -54,7 +54,7 @@ define(function(require,exports,modules) {
           textFill: 'white',
         }),
         chips: new Kinetic.Image({
-          image: this.images.chips.xlarge,
+          image: this.images.chips.xsmall,
           width: 128,
           height: 77,
           offset: {x: 128/2, y: 77/2},
@@ -65,6 +65,7 @@ define(function(require,exports,modules) {
           width: 92,
           height: 128,
           offset: { x: 92/2, y: 128/1.2 },
+          visible: false,
         }, this.sprites.cards)),
         card2: new Kinetic.Sprite(_.extend({
           width: 92,
@@ -121,37 +122,12 @@ define(function(require,exports,modules) {
       // set image
       this.shapes.tabletop.setImage(image);
 
-      // set chip location
-      //this.shapes.chips.setPosition(halfStageWidth, halfStageHeight);
-
       // pot bg
       this.shapes.potBg.setX(halfStageWidth);
-
-      this.shapes.chips.setDraggable(true);
-      this.shapes.chips.setListening(true);
-      var self = this;
-      var chipImages = ['xsmall','small','medium','large','xlarge'];
-      var i = 0;
-
-      this.shapes.chips.on('click', function() {
-        i++;
-        if (i === chipImages.length) i = 0;
-        self.shapes.chips.setImage(self.images.chips[chipImages[i]]);
-        self.layer.draw();
-      });
-      this.shapes.chips.on('dragend', function() {
-        console.log(self.shapes.chips.getX(), self.shapes.chips.getY());
-      });
-
-      this.shapes.potBg.on('dragend', function() {
-        console.log(self.shapes.potBg.getX(), self.shapes.potBg.getY());
-      });
-
 
       var cardNum = -2;
       _.each(this.shapes, function(shape, name) {
         if (name.indexOf('card') === 0) {
-          console.log(shape);
           shape.setX(halfStageWidth + (shape.attrs.width * 1.1) * cardNum);
           shape.setY(halfStageHeight);
           cardNum++;
@@ -160,7 +136,6 @@ define(function(require,exports,modules) {
 
       //draw it!
       _.each(this.shapes, function(shape, name) {
-        console.log(name);
         this.layer.add(shape);
       }, this);
 
@@ -168,15 +143,33 @@ define(function(require,exports,modules) {
     updateTable: function(model) {
     },
     updatePot: function(model, pot) {
-      var chipCount = model.get('pot');
-      this.shapes.pot.setText('$' + chipCount);
-      if(chipCount > 200 && chipCount < 300) {
+      console.log(model);
+      var previousPot = model.previous('pot');
+      var fadeIn = {
+        alpha: 1,
+        duration: 0.5
+      };
+      var fadeOut = {
+        alpha: 0,
+        duration: 0.5
+      };
+
+      if (previousPot === 0) {
+        this.shapes.chips.transitionTo(fadeIn);
+      }
+
+      if (pot === 0) {
+        this.shapes.chips.transitionTo(fadeOut);
+      }
+
+      this.shapes.pot.setText('$' + pot);
+      if(pot > 200 && pot < 300) {
       	this.shapes.chips.setImage(this.images.chips.small);
-      } else if (chipCount >= 300 && chipCount < 400) {
+      } else if (pot >= 300 && pot < 400) {
       	this.shapes.chips.setImage(this.images.chips.medium);
-      } else if (chipCount >= 400 && chipCount < 500) {
+      } else if (pot >= 400 && pot < 500) {
       	this.shapes.chips.setImage(this.images.chips.large);
-      } else if (chipCount > 500) {
+      } else if (pot > 500) {
       	this.shapes.chips.setImage(this.images.chips.xlarge);
       }
     },
