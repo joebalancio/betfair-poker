@@ -24,12 +24,13 @@ public class HoleCards extends AbstractCardsList<Card> {
     }
     
     public void addCards(List<Card> cards) {
+    	System.out.println(cards.size());
         if (cards == null || cards.isEmpty()) {
             throw new IllegalArgumentException("Null card");
         }
         if (size()  + cards.size() > MAX_SIZE) {
             throw new IllegalArgumentException("Too many cards");
         }
-        this.addCards(cards);
+        this.addAll(cards);
     }
 }

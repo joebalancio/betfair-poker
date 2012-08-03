@@ -10,7 +10,7 @@ import com.betfair.poker.deck.Card;
  * A single poker hand.
  */
 public class Hand {
-    private CommunityCards communityCards;
+    private CommunityCards communityCards = new CommunityCards();
     private HoleCards holeCards;
     private HandEvaluator evaluator;
 
@@ -44,8 +44,10 @@ public class Hand {
 
     public Card[] getCards() {
         List<Card> cards = new ArrayList<Card>();
-        cards.addAll(communityCards.list());
-        cards.addAll(holeCards.list());
+        if(null != communityCards)
+        	cards.addAll(communityCards.list());
+        if(null != holeCards)
+        	cards.addAll(holeCards.list());
         Collections.sort(cards);
         Card[] temp = new Card[cards.size()];
         Card[] result = cards.toArray(temp);

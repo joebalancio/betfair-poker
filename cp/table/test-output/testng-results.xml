@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results skipped="0" failed="0" total="1" passed="1">
+  <reporter-output>
+  </reporter-output>
+  <suite name="Default suite" duration-ms="32" started-at="2012-08-03T05:33:44Z" finished-at="2012-08-03T05:33:44Z">
+    <groups>
+    </groups>
+    <test name="Default test" duration-ms="32" started-at="2012-08-03T05:33:44Z" finished-at="2012-08-03T05:33:44Z">
+      <class name="com.betfair.poker.table.TableTest">
+        <test-method status="PASS" signature="testTheWholeThing()[pri:0, instance:com.betfair.poker.table.TableTest@535b58]" name="testTheWholeThing" duration-ms="23" started-at="2012-08-02T22:33:44Z" finished-at="2012-08-02T22:33:44Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testTheWholeThing -->
+      </class> <!-- com.betfair.poker.table.TableTest -->
+    </test> <!-- Default test -->
+  </suite> <!-- Default suite -->
+</testng-results>

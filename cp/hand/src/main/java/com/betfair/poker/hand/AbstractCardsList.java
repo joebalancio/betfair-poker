@@ -52,5 +52,9 @@ public abstract class AbstractCardsList<T> implements Serializable, Iterable<T> 
     protected void add(T o) {
         m_List.add(o);
     }
+    
+    protected void addAll(List<T> o) {
+        m_List.addAll(o);
+    }
 
 }

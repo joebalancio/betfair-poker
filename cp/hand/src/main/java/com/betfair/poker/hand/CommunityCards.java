@@ -34,6 +34,6 @@ public class CommunityCards extends AbstractCardsList<Card> {
         if (size() + cards.size() > MAX_SIZE) {
             throw new IllegalArgumentException("Too many cards");
         }
-        this.addCards(cards);
+        this.addAll(cards);
     }
 }

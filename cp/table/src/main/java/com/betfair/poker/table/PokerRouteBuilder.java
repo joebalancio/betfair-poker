@@ -110,7 +110,7 @@ public class PokerRouteBuilder extends RouteBuilder {
     private void endGame() {
         Game game = table.getGame();
 
-        if (game.isHandCompleted()) {
+        if (game.isGameCompleted()) {
             game.payPots();
             game.reset();
             table.setSeatDealer();

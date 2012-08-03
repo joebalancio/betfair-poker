@@ -87,7 +87,8 @@ public class Player {
             isAllIn = (cash == 0);
             break;
         case FOLD:
-            // hand.removeAllCards();
+             hand.setHoleCards(null);
+             hand.setCommunityCards(null);
             break;
         }
         return action;
