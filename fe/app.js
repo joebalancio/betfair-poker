@@ -643,7 +643,7 @@ function passthrough(data) {
 
 function tableJson(table, socket, callback) {
   var t;
-  if (!table.game) return callback({});
+  if (!table.game) return callback({status: null, cards: [], pot: 0});
   return callback({
     status: table.game.roundName,
     cards: table.game.board,
