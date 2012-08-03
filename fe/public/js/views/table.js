@@ -42,7 +42,11 @@ define(function(require,exports,modules) {
           draggable: true,
           fill: 'black',
           alpha: 0.5,
-
+          y: 327,
+          offset: {
+            x: 200 / 2,
+            y: 30 / 2,
+          }
         }),
         pot: new Kinetic.Text({
           fontSize: 20,
@@ -120,6 +124,9 @@ define(function(require,exports,modules) {
       // set chip location
       //this.shapes.chips.setPosition(halfStageWidth, halfStageHeight);
 
+      // pot bg
+      this.shapes.potBg.setX(halfStageWidth);
+
       this.shapes.chips.setDraggable(true);
       this.shapes.chips.setListening(true);
       var self = this;
@@ -134,6 +141,10 @@ define(function(require,exports,modules) {
       });
       this.shapes.chips.on('dragend', function() {
         console.log(self.shapes.chips.getX(), self.shapes.chips.getY());
+      });
+
+      this.shapes.potBg.on('dragend', function() {
+        console.log(self.shapes.potBg.getX(), self.shapes.potBg.getY());
       });
 
 
