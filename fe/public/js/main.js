@@ -12,14 +12,9 @@ require.config({
   }
 });
 
-// defining module for sockjs
-define('sock', function(require, exports, module) {
-  module.exports = SockJS;
-});
-
 require([
-  'app', 'sock', 'backbone', 'bf/io'
-], function(App, SockJS, Backbone, bfio) {
+  'app', 'backbone', 'bf/io'
+], function(App, Backbone, bfio) {
   var
     endpoint,
     app,
