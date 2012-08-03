@@ -41,7 +41,7 @@ define(function(require,exports,modules) {
           height: 30,
           draggable: true,
           fill: 'black',
-          alpha: 0.5,
+          alpha: 0,
           y: 327,
           offset: {
             x: 200 / 2,
@@ -52,6 +52,7 @@ define(function(require,exports,modules) {
           fontSize: 20,
           text: '0',
           textFill: 'white',
+          alpha: 0
         }),
         chips: new Kinetic.Image({
           image: this.images.chips.xsmall,
@@ -141,25 +142,43 @@ define(function(require,exports,modules) {
 
     },
     updateTable: function(model) {
+      console.log('updateTable');
     },
     updatePot: function(model, pot) {
       console.log(model);
-      var previousPot = model.previous('pot');
-      var fadeIn = {
-        alpha: 1,
-        duration: 0.5
-      };
-      var fadeOut = {
-        alpha: 0,
-        duration: 0.5
-      };
+      var
+        previousPot = model.previous('pot'),
+        fadeIn = {
+          alpha: 1,
+          duration: 0.5,
+          easing: 'strong-ease-in'
+        },
+        fadeOut = {
+          alpha: 0,
+          duration: 0.5,
+          easing: 'strong-ease-out'
+        },
+        previousPositions;
+
 
       if (previousPot === 0) {
-        this.shapes.chips.transitionTo(fadeIn);
+        previousPositions = {
+          chips: this.shapes.chips.getPosition(),
+          potBg: this.shapes.potBg.getPosition(),
+          pot: this.shapes.pot.getPosition()
+        };
+
+        this.shapes.chips.setAttrs({x: this.layer.getStage().getWidth()});
+        this.shapes.potBg.setAttrs({x: 0});
+        this.shapes.chips.transitionTo(_.extend({}, fadeIn, previousPositions.chips));
+        this.shapes.potBg.transitionTo(_.extend({}, fadeIn, {alpha: 0.5}, previousPositions.potBg));
+        this.shapes.pot.transitionTo(fadeIn);
       }
 
       if (pot === 0) {
         this.shapes.chips.transitionTo(fadeOut);
+        this.shapes.potBg.transitionTo(fadeOut);
+        this.shapes.pot.transitionTo(fadeOut);
       }
 
       this.shapes.pot.setText('$' + pot);
