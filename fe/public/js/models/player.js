@@ -93,6 +93,7 @@ define(function(require,exports,modules) {
         name: new Kinetic.Text({
           text: '',
           textFill: 'white',
+          fontFamily: 'Helvetica',
           align: 'center',
           height: 40,
           shadow: {
@@ -123,11 +124,13 @@ define(function(require,exports,modules) {
         action: new Kinetic.Text({
           textFill: 'blue',
           text: '',
+          fontFamily: 'Helvetica',
           y: 20
         }),
         amount: new Kinetic.Text({
           textFill: 'orange',
           text: '',
+          fontFamily: 'Helvetica',
           y: 40
         }),
         positionCircle: new Kinetic.Ellipse({
@@ -147,6 +150,7 @@ define(function(require,exports,modules) {
           fontSize: 10,
           text: '',
           align: 'center',
+          fontFamily: 'Helvetica',
           width: 20,
           height: 20,
           y: 20,
@@ -156,6 +160,7 @@ define(function(require,exports,modules) {
           textFill: 'black',
           text: '$',
           align: 'center',
+          fontFamily: 'Helvetica',
           width: 150,
           y: 27,
           x: 5,
@@ -228,8 +233,6 @@ define(function(require,exports,modules) {
       this.update(model);
     },
     update: function(model) {
-      //this.updateAction(model, model.get('action'));
-      //this.updateActive(model, model.get('active'));
       this.updateStatus(model, model.get('status'));
       this.updatePosition(model, model.get('position'));
       this.updateCards(model, model.get('cards'));
@@ -238,16 +241,13 @@ define(function(require,exports,modules) {
       this.updateAvatar(model, model.get('avatar'));
     },
     updateChips: function(model, chips) {
-      this.shapes.chips.setText('$' + chips);
-    },
-    /* @deprecated */
-    updateActive: function(model, active) {
-      if (active) this.shapes.name.setAttrs(this.activePlayerProps);
-      else this.shapes.name.setAttrs(this.inactivePlayerProps);
-    },
-    /* @deprecated */
-    updateAction: function(model, action) {
-      this.shapes.action.setText(action);
+      var previousChips = model.previous('chips');
+
+      if (previousChips && chips > previousChips) {
+      } else {
+        this.shapes.chips.setText('$' + chips);
+      }
+
     },
     updatePosition: function(model, position) {
       if (position) {
@@ -300,30 +300,24 @@ define(function(require,exports,modules) {
       });
     },
     updateStatus: function(model, status) {
-      var self = this,
-      name = this.shapes.name.attrs.text;
+      var
+        self = this,
+        name = this.shapes.name.attrs.text,
+        capitalize = status ? status.charAt(0).toUpperCase() + status.substr(1) : '';
+
       switch (status) {
         case 'turn':
           this.shapes.name.setAttrs(this.activePlayerProps);
           break;
         case 'bet':
-          this.shapes.name.setText('Bet');
-          break;
         case 'call':
-          this.shapes.name.setText('Call');
-          break;
         case 'fold':
-          this.shapes.name.setText('Fold');
-          break;
         case 'check':
-          this.shapes.name.setText('Check');
-          break;
+          this.shapes.name.setText(capitalize);
         default:
           this.shapes.name.setAttrs(this.inactivePlayerProps);
           break;
       }
-
-      console.log('status', status);
     },
 
     fold: function() {

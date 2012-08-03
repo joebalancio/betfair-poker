@@ -46,7 +46,6 @@ define([
      * Functions
      */
     initialize: function() {
-
       this.stage = new Kinetic.Stage ({
         container: "table",
         height: 600,
@@ -62,6 +61,7 @@ define([
       this.players.on('add', this.addPlayer, this);
       this.players.on('add change', this.updateStage, this);
       this.players.on('change:status', this.displayActions, this);
+      this.players.on('change:chips', this.moveChips, this);
       this.players.sprites = this.sprites;
       this.players.layer = this.layers.player;
       this.players.user = this.user;
@@ -475,6 +475,23 @@ define([
         frameRate: 1
       };
 
+    },
+
+    moveChips: function(model, chips) {
+      var previousChips = model.previous('chips');
+
+      if (previousChips && chips > previousChips) {
+        var position = model.group.getPosition();
+        console.log(position);
+        this.views.table.shapes.chips.transitionTo({
+          x: position.x,
+          y: position.y,
+          duration: 1
+        });
+
+      } else {
+        this.shapes.chips.setText('$' + chips);
+      }
     }
 
   });

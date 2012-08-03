@@ -14,7 +14,8 @@ var express = require('express'),
   server = http.createServer(app),
   io = require('socket.io').listen(server),
   _ = require('underscore'),
-  poker = require('./lib/node-poker');
+  poker = require('./lib/node-poker'),
+  monomi = require('monomi');
 
 io.configure(function() {
   io.set('log level', 1);
@@ -35,6 +36,7 @@ app.configure(function() {
   app.use(express.logger('dev'));
   app.use(express.bodyParser());
   app.use(express.methodOverride());
+  app.use(monomi.detectBrowserType());
   app.use(app.router);
   app.use(require('less-middleware')({ src: __dirname + '/public' }));
   app.use(require('./lib/jade-middleware')({

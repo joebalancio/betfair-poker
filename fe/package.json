@@ -17,6 +17,6 @@
     "mkdirp": "*",
     "socket.io": "*",
     "underscore": "*",
-    "node-poker": "git://github.com/mjhbell/node-poker.git#master"
+    "monomi": "*"
   }
 }

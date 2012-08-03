@@ -32,7 +32,6 @@ define(function(require,exports,modules) {
       this.effects = this.options.effects;
       this.sprites = this.options.sprites;
 
-
       this.shapes = {
         tabletop: new Kinetic.Image({}),
         potBg: new Kinetic.Rect({
@@ -52,7 +51,8 @@ define(function(require,exports,modules) {
           fontSize: 20,
           text: '0',
           textFill: 'white',
-          alpha: 0
+          alpha: 0,
+          fontFamily: 'Helvetica',
         }),
         chips: new Kinetic.Image({
           image: this.images.chips.xsmall,
@@ -60,7 +60,8 @@ define(function(require,exports,modules) {
           height: 77,
           offset: {x: 128/2, y: 77/2},
           x: 512,
-          y: 319
+          y: 319,
+          alpha: 0,
         }),
         card1: new Kinetic.Sprite(_.extend({
           width: 92,
@@ -116,15 +117,22 @@ define(function(require,exports,modules) {
       stage.setHeight(stageHeight);
       halfStageHeight = stageHeight / 2;
 
+      // 522 x 870
+      var stageDim = this.layer.getStage().getSize();
+      console.log(stageDim);
+
       // set placement of pot
-      this.shapes.pot.setX(stageWidth / 2.3);
-      this.shapes.pot.setY((stageHeight / 2) + (128 / 2.25));
+      //this.shapes.pot.setX(stageWidth / 2.3, (stageHeight / 2) + (128 / 2.25));
+      this.shapes.pot.setPosition(0.43478260869565 * stageWidth, 0.60727969348659 * stageHeight);
 
       // set image
       this.shapes.tabletop.setImage(image);
 
       // pot bg
-      this.shapes.potBg.setX(halfStageWidth);
+      this.shapes.potBg.setPosition(halfStageWidth, 0.6264367816092 * stageHeight);
+
+      // chips
+      this.shapes.chips.setPosition(0.58850574712644 * stageWidth, 0.61111111111111 * stageHeight);
 
       var cardNum = -2;
       _.each(this.shapes, function(shape, name) {
@@ -148,6 +156,7 @@ define(function(require,exports,modules) {
       console.log(model);
       var
         previousPot = model.previous('pot'),
+        showTransition = typeof previousPot !== 'undefined',
         fadeIn = {
           alpha: 1,
           duration: 0.5,
@@ -160,25 +169,34 @@ define(function(require,exports,modules) {
         },
         previousPositions;
 
+      if (showTransition) {
+        if (previousPot === 0) {
+          previousPositions = {
+            chips: this.shapes.chips.getPosition(),
+            potBg: this.shapes.potBg.getPosition(),
+            pot: this.shapes.pot.getPosition()
+          };
 
-      if (previousPot === 0) {
-        previousPositions = {
-          chips: this.shapes.chips.getPosition(),
-          potBg: this.shapes.potBg.getPosition(),
-          pot: this.shapes.pot.getPosition()
-        };
+          this.shapes.chips.setAttrs({x: this.layer.getStage().getWidth()});
+          this.shapes.potBg.setAttrs({x: 0});
+          this.shapes.chips.transitionTo(_.extend({}, fadeIn, previousPositions.chips));
+          this.shapes.potBg.transitionTo(_.extend({}, fadeIn, {alpha: 0.5}, previousPositions.potBg));
+          this.shapes.pot.transitionTo(fadeIn);
+        }
 
-        this.shapes.chips.setAttrs({x: this.layer.getStage().getWidth()});
-        this.shapes.potBg.setAttrs({x: 0});
-        this.shapes.chips.transitionTo(_.extend({}, fadeIn, previousPositions.chips));
-        this.shapes.potBg.transitionTo(_.extend({}, fadeIn, {alpha: 0.5}, previousPositions.potBg));
-        this.shapes.pot.transitionTo(fadeIn);
-      }
-
-      if (pot === 0) {
-        this.shapes.chips.transitionTo(fadeOut);
-        this.shapes.potBg.transitionTo(fadeOut);
-        this.shapes.pot.transitionTo(fadeOut);
+        if (pot === 0) {
+          this.shapes.chips.transitionTo(fadeOut);
+          this.shapes.potBg.transitionTo(fadeOut);
+          this.shapes.pot.transitionTo(fadeOut);
+        }
+      } else {
+        // don't transition
+        if (pot > 0) {
+          // only show pot if positive value
+          this.shapes.chips.setAttrs(_.extend({}, fadeIn));
+          this.shapes.potBg.setAttrs(_.extend({}, fadeIn, {alpha: 0.5}));
+          this.shapes.pot.setAttrs(fadeIn);
+        }
       }
 
       this.shapes.pot.setText('$' + pot);
@@ -203,29 +221,41 @@ define(function(require,exports,modules) {
       this.effects.spray();
     },
     updateCards: function(model, cards) {
-      var self = this;
-      console.log('update cards', cards);
-      _.each(cards, function(card, index) {
-        var cardShape = this.shapes['card' + (index + 1)];
-        if (!cardShape.attrs.flipped) {
-          cardShape.attrs.flipped = true;
+      var self = this,
+      previousCards = model.previous('cards');
+
+      if (previousCards) {
+        _.each(cards, function(card, index) {
+          var cardShape = this.shapes['card' + (index + 1)];
+          if (!cardShape.attrs.flipped) {
+            cardShape.attrs.flipped = true;
+            cardShape.setAnimation('back');
+            cardShape.show();
+            cardShape.transitionTo({
+              scale: { x: 0.1, y: 1 },
+              duration: 0.5,
+              easing: 'strong-ease-in',
+              callback: function() {
+                cardShape.setAnimation(card);
+                cardShape.transitionTo({
+                  scale: { x: 1, y: 1 },
+                  duration: 0.5,
+                  easing: 'strong-ease-out'
+                });
+              }
+            });
+          }
+        }, this);
+      } else {
+        _.each(cards, function(card, index) {
+          var cardShape = this.shapes['card' + (index + 1)];
           cardShape.setAnimation('back');
-          cardShape.show();
-          cardShape.transitionTo({
-            scale: { x: 0.1, y: 1 },
-            duration: 0.5,
-            easing: 'strong-ease-in',
-            callback: function() {
-              cardShape.setAnimation(card);
-              cardShape.transitionTo({
-                scale: { x: 1, y: 1 },
-                duration: 0.5,
-                easing: 'strong-ease-out'
-              });
-            }
+          cardShape.setAttrs({
+            animation: card,
+            visible: true,
           });
-        }
-      }, this);
+        }, this);
+      }
 
     },
 

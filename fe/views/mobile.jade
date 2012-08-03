@@ -1,0 +1,33 @@
+extends layout-mobile
+
+block content
+  div.container-fluid
+    div.span12.hide
+      div.well.form-inline#register
+        input.input-small(type='text', placeholder='username')
+        &nbsp;
+        button.btn#join Join
+    div.span3.hide
+      div#chatbox
+        h1 chat
+        hr
+        div.scrollable
+          p
+            small.timestamp 05:23
+            b joebalancio:&nbsp;
+            span hello
+        hr
+        form
+          textarea
+          button.btn(type='submit') Submit
+    div#poker
+      div#table
+      div#actions.well.hide
+        button.btn#call Call
+        button.btn#raise Raise
+        button.btn#check Check
+        button.btn#fold Fold
+        &nbsp;
+        span.input-prepend
+          span.add-on $
+          input.input-mini(type='text')

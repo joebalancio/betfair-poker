@@ -1,11 +1,21 @@
 @import "bootstrap.less";
 @import "responsive.less";
 
+// variables
+@bodyPadding: 60px;
+@typeOfDisplay: default;
+
+.addBorderRadiusByDisplay () when (@typeOfDisplay = default) {
+  .border-radius(6px);
+}
+.addBorderRadiusByDisplay () when (@typeOfDisplay = mobile) {
+}
+
 body {
-  padding-top: 60px;
+  padding-top: @bodyPadding;
 }
 canvas {
-  .border-radius(6px);
+  .addBorderRadiusByDisplay;
 }
 
 div#chatbox {
@@ -47,4 +57,3 @@ div#overlay {
     }
   }
 }
-
