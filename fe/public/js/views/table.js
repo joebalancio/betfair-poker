@@ -203,6 +203,7 @@ define(function(require,exports,modules) {
     },
 
     updateStatus: function(model, status) {
+      //Set the player's name labels back to their name for the next round
       _.each(this.players.models, function(player, index) {
       	player.shapes.name.setText(player.get('name'));
       }, this);

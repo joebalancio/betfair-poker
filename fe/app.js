@@ -736,7 +736,6 @@ io.sockets.on('connection', function(socket) {
     });
 
     if (!player) return;
-
     // deactivate player
     //player.status = '';
 
@@ -747,17 +746,43 @@ io.sockets.on('connection', function(socket) {
     switch (data.action) {
       case 'bet':
         player.Bet(data.amount);
+        var now = new Date();
+        var message = {
+          timestamp:  now.getHours() + ':' + now.getMinutes(),
+          message: player.playerName + ' bet ' + data.amount + ' chips.',
+          name: 'Dealer'
+        };
         break;
       case 'check':
         player.Check();
+        var now = new Date();
+        var message = {
+          timestamp:  now.getHours() + ':' + now.getMinutes(),
+          message: player.playerName + ' checked.',
+          name: 'Dealer'
+        };
         break;
       case 'call':
         player.Call();
+        var now = new Date();
+        var message = {
+          timestamp:  now.getHours() + ':' + now.getMinutes(),
+          message: player.playerName + ' called.',
+          name: 'Dealer'
+        };
         break;
       case 'fold':
         player.Fold();
+        var now = new Date();
+        var message = {
+          timestamp:  now.getHours() + ':' + now.getMinutes(),
+          message: player.playerName + ' folded.',
+          name: 'Dealer'
+        };
         break;
     }
+    socket.emit('messages:read', message);
+    socket.broadcast.emit('messages:read', message);
     socket.emit('players:read', playersJson(table.players, socket, passthrough));
     socket.broadcast.emit('players:read', playersJson(table.players, socket, passthrough));
     socket.emit('table:read', tableJson(table, socket, passthrough));
