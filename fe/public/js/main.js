@@ -28,18 +28,17 @@ require([
     console.log('disconnected, we should do something here');
   }
 
+  // connect to backend
   if (real) {
-    endpoint = 'ws://poker1.cp.sfo.us.betfair:9292';
-    window.socket = bfio.connect('ws://poker1.cp.sfo.us.betfair:9292/poker');
-    window.socket.on('connect', connect);
-    window.socket.on('disconnect', disconnect);
+    endpoint = 'ws://poker1.cp.sfo.us.betfair:9292/poker';
+    window.socket = bfio.connect(endpoint);
   } else {
     endpoint = window.location.protocol + '//' + window.location.host;
     window.socket = io.connect(endpoint);
-    window.socket.on('connect', connect);
-    window.socket.on('disconnect', disconnect);
   }
 
+  window.socket.on('connect', connect);
+  window.socket.on('disconnect', disconnect);
 
 
 });
