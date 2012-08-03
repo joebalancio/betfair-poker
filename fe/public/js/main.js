@@ -7,28 +7,50 @@ require.config({
     backbone_lib: 'libs/backbone',
     underscore: 'libs/underscore/underscore',
     kinetic: 'libs/kinetic/kinetic',
-    jade: 'libs/jade/runtime'
+    jade: 'libs/jade/runtime',
+    bf: 'libs/betfair'
   }
 });
 
+// defining module for sockjs
+define('sock', function(require, exports, module) {
+  module.exports = SockJS;
+});
+
 require([
-  'app'
-], function(App) {
-  var endpoint = window.location.protocol + '//' + window.location.host;
-  var app;
+  'app', 'sock', 'backbone', 'bf/io'
+], function(App, SockJS, Backbone, bfio) {
+  var
+    endpoint,
+    app,
+    real = false;
 
-  window.socket = io.connect(endpoint);
-
-  window.socket.on('connect', function() {
+  function connect() {
     if (!app) app = new App();
-  });
+  }
 
-  window.socket.on('disconnect', function() {
+  function disconnect() {
     console.log('disconnected, we should do something here');
-  });
+  }
+
+  if (real) {
+    endpoint = 'ws://poker1.cp.sfo.us.betfair:9292';
+    window.socket = bfio.connect('ws://poker1.cp.sfo.us.betfair:9292/poker');
+    window.socket.on('connect', connect);
+    window.socket.on('disconnect', disconnect);
+  } else {
+    endpoint = window.location.protocol + '//' + window.location.host;
+    window.socket = io.connect(endpoint);
+    window.socket.on('connect', connect);
+    window.socket.on('disconnect', disconnect);
+  }
+
+
 
 });
 
+// defining module for socket.io
 define('io', function(require, exports, module) {
   module.exports = io;
 });
+
