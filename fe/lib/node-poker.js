@@ -194,7 +194,7 @@ function Game(smallBlind,bigBlind){
 	this.smallBlind = smallBlind;
 	this.bigBlind = bigBlind;
 	this.pot = 0;
-	this.roundName = "Deal" //Start the first round
+	this.roundName = "DEAL" //Start the first round
 	this.betName = "bet" //bet,raise,re-raise,cap
 	this.bets = new Array();
 	this.deck = new Array();
@@ -257,8 +257,8 @@ function Progress(table, player){
 				table.game.pot += parseInt(table.game.bets[i]);
         console.log(table.game.pot);
 			};
-			if(table.game.roundName == "River"){
-				table.game.roundName = "Showdown";
+			if(table.game.roundName == "RIVER"){
+				table.game.roundName = "SHOWDOWN";
 				table.game.bets.splice(0,table.game.bets.length);
 				//Evaluate each hand
 				for(j=0;j<table.players.length;j++){
@@ -287,20 +287,20 @@ function Progress(table, player){
 					table.players[winners[i]].status = 'win';
 				};
 			};
-			if(table.game.roundName == "Turn"){
-				table.game.roundName = "River";
+			if(table.game.roundName == "TURN"){
+				table.game.roundName = "RIVER";
 				table.game.deck.pop(); //Burn a card
 				table.game.board.push(table.game.deck.pop()) //Turn a card
 				table.game.bets.splice(0,table.game.bets.length);
 			};
-			if(table.game.roundName == "Flop"){
-				table.game.roundName = "Turn";
+			if(table.game.roundName == "FLOP"){
+				table.game.roundName = "TURN";
 				table.game.deck.pop(); //Burn a card
 				table.game.board.push(table.game.deck.pop()) //Turn a card
 				table.game.bets.splice(0,table.game.bets.length);
 			};
-			if(table.game.roundName == "Deal"){
-				table.game.roundName = "Flop";
+			if(table.game.roundName == "DEAL"){
+				table.game.roundName = "FLOP";
 				table.game.deck.pop(); //Burn a card
 				for(i=0;i<3;i++){ //Turn three cards
 					table.game.board.push(table.game.deck.pop());

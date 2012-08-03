@@ -31,41 +31,26 @@ define(function(require,exports,modules) {
       this.players = this.options.players;
       this.effects = this.options.effects;
       this.sprites = this.options.sprites;
-      console.log(this.sprites);
+
 
       this.shapes = {
         tabletop: new Kinetic.Image({}),
+        potBg: new Kinetic.Rect({
+          cornerRadius: 15,
+          width: 200,
+          height: 30,
+          draggable: true,
+          fill: 'black',
+          alpha: 0.5,
+
+        }),
         pot: new Kinetic.Text({
           fontSize: 20,
           text: '0',
-          textFill: 'black',
-          fill: 'white',
-          padding: 5,
-          shadow: {
-            color: 'black',
-            blur: 2,
-            alpha: 0.5,
-            offset: [2, 2]
-          },
-          stroke: 'green',
-          strokeWidth: 1,
-          fill: {
-            start: {
-              x: 0,
-              y: 0
-            },
-            end: {
-              x: 0,
-              y: 50
-            },
-            colorStops: [0, 'lightgreen', 1, 'green']
-          },
-          cornerRadius: 5,
-
-
+          textFill: 'white',
         }),
         chips: new Kinetic.Image({
-          image: this.images.chips.xsmall,
+          image: this.images.chips.xlarge,
           width: 128,
           height: 77,
           offset: {x: 128/2, y: 77/2},
@@ -138,6 +123,15 @@ define(function(require,exports,modules) {
       this.shapes.chips.setDraggable(true);
       this.shapes.chips.setListening(true);
       var self = this;
+      var chipImages = ['xsmall','small','medium','large','xlarge'];
+      var i = 0;
+
+      this.shapes.chips.on('click', function() {
+        i++;
+        if (i === chipImages.length) i = 0;
+        self.shapes.chips.setImage(self.images.chips[chipImages[i]]);
+        self.layer.draw();
+      });
       this.shapes.chips.on('dragend', function() {
         console.log(self.shapes.chips.getX(), self.shapes.chips.getY());
       });
@@ -218,7 +212,7 @@ define(function(require,exports,modules) {
       	player.shapes.name.setText(player.get('name'));
       }, this);
       switch (status) {
-        case 'Deal':
+        case 'DEAL':
           _.each(this.shapes, function(card, index) {
               if(index.indexOf('card') === 0) {
               var cardShape = this.shapes[index];
@@ -227,7 +221,7 @@ define(function(require,exports,modules) {
             }
           },this);
           break;
-        case 'Flop':
+        case 'FLOP':
 
 
           _.each(this.shapes, function(card, index) {
@@ -238,7 +232,7 @@ define(function(require,exports,modules) {
             }
           },this);
           break;
-        case 'Showdown':
+        case 'SHOWDOWN':
           this.effects.resetSpray();
           this.effects.spray();
           break;
