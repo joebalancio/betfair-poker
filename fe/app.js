@@ -752,6 +752,7 @@ io.sockets.on('connection', function(socket) {
           message: player.playerName + ' bet ' + data.amount + ' chips.',
           name: 'Dealer'
         };
+        table.game.pot += data.amount;
         break;
       case 'check':
         player.Check();
@@ -761,6 +762,7 @@ io.sockets.on('connection', function(socket) {
           message: player.playerName + ' checked.',
           name: 'Dealer'
         };
+                console.log(table);
         break;
       case 'call':
         player.Call();
@@ -770,6 +772,7 @@ io.sockets.on('connection', function(socket) {
           message: player.playerName + ' called.',
           name: 'Dealer'
         };
+        table.game.pot += 50;
         break;
       case 'fold':
         player.Fold();

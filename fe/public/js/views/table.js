@@ -163,7 +163,17 @@ define(function(require,exports,modules) {
     updateTable: function(model) {
     },
     updatePot: function(model, pot) {
-      this.shapes.pot.setText('$' + model.get('pot'));
+      var chipCount = model.get('pot');
+      this.shapes.pot.setText('$' + chipCount);
+      if(chipCount > 200 && chipCount < 300) {
+      	this.shapes.chips.setImage(this.images.chips.small);
+      } else if (chipCount >= 300 && chipCount < 400) {
+      	this.shapes.chips.setImage(this.images.chips.medium);
+      } else if (chipCount >= 400 && chipCount < 500) {
+      	this.shapes.chips.setImage(this.images.chips.large);
+      } else if (chipCount > 500) {
+      	this.shapes.chips.setImage(this.images.chips.xlarge);
+      }
     },
     updateStage: function() {
       this.layer.getStage().draw();
