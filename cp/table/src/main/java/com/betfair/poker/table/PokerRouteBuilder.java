@@ -6,8 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
@@ -16,6 +19,11 @@ import com.betfair.poker.player.Action;
 import com.betfair.poker.player.Player;
 
 public class PokerRouteBuilder extends RouteBuilder {
+    private static final String GAME_END = "Game-End";
+    private static final String GAME_START = "Game-Start";
+    
+    public static final Log log = LogFactory.getLog(PokerRouteBuilder.class);
+    
     private Table table;
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -86,33 +94,48 @@ public class PokerRouteBuilder extends RouteBuilder {
             .process(new Processor() {
                 @Override
                 public void process(Exchange exchange) throws Exception {
+                    final Message message = exchange.getIn();
+                    
                     if (startGame()) {
-                        // add header for when clause
+                        message.setHeader(GAME_START, true);
+                    } else {
+                        message.setHeader(GAME_START, false);
                     }
                 }
-            })
-            .log(">>> Game Starting")
-            .to("direct:readTable")
-            .to("direct:readPlayers");
+            })            
+            .choice()
+                .when(header(GAME_START).isEqualTo(true))
+                    .log(">>> Game Starting")
+                    .to("direct:readTable")
+                    .to("direct:readPlayers")
+            .end();
         
         from("direct:endGame")
             .routeId("direct:endGame")
             .process(new Processor() {
                 @Override
                 public void process(Exchange exchange) throws Exception {
+                    final Message message = exchange.getIn();
+                    
                     if (endGame()) {
-                        // add header for when clause
+                        message.setHeader(GAME_END, true);
+                    } else {
+                        message.setHeader(GAME_END, false);
                     }
                 }
-            })
-            .log(">>> Game Ended")
-            .to("direct:readTable")
-            .to("direct:readPlayers")
-            .delay(100)
-            .to("direct:startGame");
+            })                
+            .choice()
+                .when(header(GAME_END).isEqualTo(true))
+                    .log(">>> Game Ended")
+                    .to("direct:readTable")
+                    .to("direct:readPlayers")
+                    .delay(100)
+                    .to("direct:startGame")
+            .end();
+
         }
 
-    private boolean startGame() {
+    public boolean startGame() {
         Game game = table.getGame();
 
         if (!game.isPlaying()) {
@@ -138,7 +161,7 @@ public class PokerRouteBuilder extends RouteBuilder {
         return false;
     }
 
-    private boolean endGame() {
+    public boolean endGame() {
         Game game = table.getGame();
 
         if (game.isGameCompleted()) {
@@ -173,10 +196,10 @@ public class PokerRouteBuilder extends RouteBuilder {
             innerMap.put("position", seat.getGamePosition());
             innerMap.put("avatar", player.getAvatar());
 
-            if (seat.isTurn()) {
+            if (!seat.isTurn()) {
                 innerMap.put("status", player.getStatus());
             } else {
-                innerMap.put("status", "turn");
+                innerMap.put("status", "TURN");
             }
 
             innerMap.put("actions", game.getAllowedActions(player));
@@ -188,7 +211,7 @@ public class PokerRouteBuilder extends RouteBuilder {
         return mapToJson(map);
     }
 
-    private void createPlayer(final Map<String, Object> map) {
+    public void createPlayer(final Map<String, Object> map) {
         final Integer id = (Integer) map.get("id");
         final Integer pos = (Integer) map.get("seat");
         final String name = (String) map.get("name");
@@ -199,21 +222,21 @@ public class PokerRouteBuilder extends RouteBuilder {
         table.addPlayer(player, pos);
     }
 
-    private void deletePlayer(final Map<String, Object> map) {
+    public void deletePlayer(final Map<String, Object> map) {
         final Integer position = (Integer) map.get("seat");
         final Seat seat = table.getSeat(position);
 
         if (!seat.isEmpty()) {
             final Player player = seat.getPlayer();
             final Game game = table.getGame();
-
+            game.playHand(seat.getPosition(), Action.FOLD, 0);
             game.removeSeat(seat.getPosition());
 
             table.removePlayer(position);
         }
     }
 
-    private void updatePlayer(final Map<String, Object> map) {
+    public void updatePlayer(final Map<String, Object> map) {
         final Integer id = (Integer) map.get("id");
         final Integer pos = (Integer) map.get("seat");
         final String action = (String) map.get("action");
@@ -248,10 +271,10 @@ public class PokerRouteBuilder extends RouteBuilder {
                 innerMap.put("position", seat.getGamePosition());
                 innerMap.put("avatar", player.getAvatar());
 
-                if (seat.isTurn()) {
+                if (!seat.isTurn()) {
                     innerMap.put("status", player.getStatus());
                 } else {
-                    innerMap.put("status", "turn");
+                    innerMap.put("status", "TURN");
                 }
 
                 innerMap.put("actions", game.getAllowedActions(player));

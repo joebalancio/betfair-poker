@@ -12,6 +12,62 @@ import com.betfair.poker.player.Player;
 
 public class PokerRouteBuilderTest {
     @Test
+    public void testGamePlay() throws Exception {
+        final PokerRouteBuilder prb = new PokerRouteBuilder();
+        final Table table = new Table(4, 50);
+        prb.setTable(table);
+        
+        final Map<String, Object> map = new HashMap<String, Object>();
+        
+        map.put("id", 1);
+        map.put("seat", 0);
+        map.put("name", "John");
+        map.put("avatar", "1.png");
+        
+        prb.createPlayer(map);
+
+        map.put("id", 2);
+        map.put("seat", 1);
+        map.put("name", "Jack");
+        map.put("avatar", "2.png");
+        
+        prb.createPlayer(map);
+        
+        map.put("id", 3);
+        map.put("seat", 2);
+        map.put("name", "Joe");
+        map.put("avatar", "3.png");
+        
+        prb.createPlayer(map);
+        
+        map.put("id", 4);
+        map.put("seat", 3);
+        map.put("name", "John");
+        map.put("avatar", "4.png");
+        
+        prb.createPlayer(map);
+
+        String json = prb.readTable();
+        Assert.assertNotNull(json);
+        System.out.println("##### table1=\n" + json);
+        
+        json = prb.readPlayers();
+        Assert.assertNotNull(json);
+        System.out.println("##### players1=\n" + json);
+        
+        Assert.assertTrue(prb.startGame());
+        
+        json = prb.readTable();
+        Assert.assertNotNull(json);
+        System.out.println("##### table2=\n" + json);
+        
+        json = prb.readPlayers();
+        Assert.assertNotNull(json);
+        System.out.println("##### players2=\n" + json);
+    }
+    
+    
+    @Test
     public void readTableTest() throws Exception {
         PokerRouteBuilder prb = new PokerRouteBuilder();
         Table table = new Table();

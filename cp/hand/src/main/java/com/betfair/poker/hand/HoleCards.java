@@ -24,7 +24,6 @@ public class HoleCards extends AbstractCardsList<Card> {
     }
     
     public void addCards(List<Card> cards) {
-    	System.out.println(cards.size());
         if (cards == null || cards.isEmpty()) {
             throw new IllegalArgumentException("Null card");
         }
