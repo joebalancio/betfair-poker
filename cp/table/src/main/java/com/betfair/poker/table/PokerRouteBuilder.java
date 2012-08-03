@@ -65,7 +65,7 @@ public class PokerRouteBuilder extends RouteBuilder {
                 .to("direct:readPlayers")
                 .delay(100)
                 .to("direct:startGame")
-                .to("direct.endGame");
+                .to("direct:endGame");
 
         from("direct:readTable")
                 .routeId("direct:readTable")
