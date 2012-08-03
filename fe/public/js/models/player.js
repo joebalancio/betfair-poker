@@ -7,15 +7,15 @@ define(function(require,exports,modules) {
     url: 'player',
     group: null,
     cardRatio: 1.39,
-    activeShapeProps: {
+    activePlayerProps: {
       stroke: 'cyan',
       fill: {
         start: { x: 0, y: 0 },
-        end: { x: 0, y: 50 },
+        end: { x: 0, y: 70 },
         colorStops: [0, 'cyan', 1, 'blue']
       },
     },
-    inactiveShapeProps: {
+    inactivePlayerProps: {
       stroke: 'white',
       textFill: 'dark gray',
       fill: {
@@ -71,8 +71,6 @@ define(function(require,exports,modules) {
      */
 		initialize: function() {
       this.group = new Kinetic.Group;
-      this.group.height = 200;
-      this.group.width = 200;
       this.sprites = this.attributes.sprites;
       delete this.attributes.sprites;
       this.images = this.attributes.images;
@@ -80,20 +78,23 @@ define(function(require,exports,modules) {
       this.user = this.attributes.user;
       delete this.attributes.user;
       this.on('add', this.add, this);
-      this.on('change', this.update, this);
+      //this.on('change', this.update, this);
       this.on('change:position', this.updatePosition, this);
-      //this.on('change:active', this.updateActive, this);
-      //this.on('change:action', this.updateAction, this);
       this.on('change:cards', this.updateCards, this);
       this.on('change:chips', this.updateChips, this);
       this.on('change:avatar', this.updateAvatar, this);
       this.on('change:status', this.updateStatus, this);
       this.shapes = {
+        outline: new Kinetic.Rect({
+          stroke: 'red',
+          width: 180,
+          height: 150
+        }),
         name: new Kinetic.Text({
           text: '',
           textFill: 'white',
           align: 'center',
-          height: 50,
+          height: 40,
           shadow: {
             color: 'black',
             blur: 2,
@@ -114,7 +115,7 @@ define(function(require,exports,modules) {
             },
             colorStops: [0, 'cyan', 1, 'blue']
           },
-          cornerRadius: 5,
+          cornerRadius: 15,
           width: 150,
           x: 5,
           y: 5
@@ -131,8 +132,8 @@ define(function(require,exports,modules) {
         }),
         positionCircle: new Kinetic.Ellipse({
           radius: 10,
-          y: 37,
-          x: 30,
+          y: 25,
+          x: 25,
           visible: false,
           shadow: {
             color: 'black',
@@ -148,15 +149,16 @@ define(function(require,exports,modules) {
           align: 'center',
           width: 20,
           height: 20,
-          y: 32,
-          x: 20
+          y: 20,
+          x: 15
         }),
         chips: new Kinetic.Text({
           textFill: 'black',
           text: '$',
           align: 'center',
-          x: 63,
-          y: 32
+          width: 150,
+          y: 27,
+          x: 5,
         }),
         card1: new Kinetic.Sprite(_.extend({
           width: 50,
@@ -208,6 +210,19 @@ define(function(require,exports,modules) {
       this.shapes.card2.setPosition(50, 70);
       this.shapes.card1.moveToBottom();
       this.shapes.card2.moveToBottom();
+
+      // set offset for group
+      var outlineSize = this.shapes.outline.getSize();
+      this.group.setOffset(outlineSize.width / 2, outlineSize.height / 2);
+      this.group.height = outlineSize.height;
+      this.group.width = outlineSize.width;
+
+      // TEST
+      var self = this;
+      this.group.setDraggable(true);
+      this.group.on('click', function() {
+        console.log(self.group.getX(), self.group.getY());
+      });
 		},
     add: function(model) {
       this.update(model);
@@ -227,8 +242,8 @@ define(function(require,exports,modules) {
     },
     /* @deprecated */
     updateActive: function(model, active) {
-      if (active) this.shapes.name.setAttrs(this.activeShapeProps);
-      else this.shapes.name.setAttrs(this.inactiveShapeProps);
+      if (active) this.shapes.name.setAttrs(this.activePlayerProps);
+      else this.shapes.name.setAttrs(this.inactivePlayerProps);
     },
     /* @deprecated */
     updateAction: function(model, action) {
@@ -280,25 +295,31 @@ define(function(require,exports,modules) {
       if (avatar && this.images.avatars[avatar]) this.shapes.avatar.setImage(this.images.avatars[avatar]);
       else this.shapes.avatar.setImage(this.images.avatars.N03);
       this.shapes.avatar.setAttrs({
-        scale: {
-          x: 0.25,
-          y: 0.25
-        },
         x: this.group.width / 2,
         y: 25
       });
     },
     updateStatus: function(model, status) {
+      var self = this,
+      name = this.shapes.name.attrs.text;
       switch (status) {
         case 'turn':
-          this.shapes.name.setAttrs(this.activeShapeProps);
+          this.shapes.name.setAttrs(this.activePlayerProps);
           break;
         case 'bet':
+          this.shapes.name.setText('Bet');
+          break;
         case 'call':
+          this.shapes.name.setText('Call');
+          break;
         case 'fold':
+          this.shapes.name.setText('Fold');
+          break;
         case 'check':
+          this.shapes.name.setText('Check');
+          break;
         default:
-          this.shapes.name.setAttrs(this.inactiveShapeProps);
+          this.shapes.name.setAttrs(this.inactivePlayerProps);
           break;
       }
 

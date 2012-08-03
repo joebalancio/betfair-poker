@@ -12,9 +12,16 @@ var express = require('express'),
   url = require('url');
   mkdirp = require('mkdirp'),
   server = http.createServer(app),
-  io = require('socket.io').listen(server, {debug: true}),
+  io = require('socket.io').listen(server),
   _ = require('underscore'),
   poker = require('./lib/node-poker');
+
+io.configure(function() {
+  io.set('log level', 1);
+  io.enable('browser client minification');
+  io.enable('browser client etag');
+  io.enable('browser client gzip');
+});
 
 
 /*
@@ -636,7 +643,7 @@ function passthrough(data) {
 
 function tableJson(table, socket, callback) {
   var t;
-  if (!table.game) return callback({});
+  if (!table.game) return callback({status: null, cards: [], pot: 0});
   return callback({
     status: table.game.roundName,
     cards: table.game.board,
@@ -651,11 +658,11 @@ function playersJson(players, socket, callback) {
   return callback(_.map(players, function(player, index) {
     var position;
     if (player.table.game) {
-      if (player.table.dealer === index) {
+      if (player.table.positions.dealer === index) {
         position = 'd';
-      } else if (player.table.smallBlindPlayer === index) {
+      } else if (player.table.positions.smallBlind === index) {
         position = 'sb';
-      } else if (player.table.bigBlindPlayer === index) {
+      } else if (player.table.positions.bigBlind === index) {
         position = 'bb';
       }
     }
@@ -701,21 +708,25 @@ io.sockets.on('connection', function(socket) {
       // start game
       table.StartGame();
 
-      // activate dealer
-      if (table.game && table.game.roundName === 'Deal') {
-        table.players[table.dealer].status = 'turn';
-      }
       socket.emit('table:read', tableJson(table, socket, passthrough));
       socket.broadcast.emit('table:read', tableJson(table, socket, passthrough));
     }
 
     socket.emit('players:read', playersJson(table.players, socket, passthrough));
     socket.broadcast.emit('players:read', playersJson(table.players, socket, passthrough));
+
+    var now = new Date();
+    var message = {
+      timestamp:  now.getHours() + ':' + now.getMinutes(),
+      message: data.name + ' joined',
+      name: 'sentinel'
+    };
+    socket.emit('messages:read', message);
+    socket.broadcast.emit('messages:read', message);
   });
 
   socket.on('player:update', function(data) {
     var index, player;
-
     _.each(table.players, function(p, i) {
       if (p.id === socket.user && p.id === data.id) {
         player = p;
@@ -725,38 +736,80 @@ io.sockets.on('connection', function(socket) {
     });
 
     if (!player) return;
-
     // deactivate player
-    player.status = '';
+    //player.status = '';
 
     // activate next player
     if (++index === table.players.length) index = 0;
-    table.players[index].status = 'turn';
+    //table.players[index].status = 'turn';
 
     switch (data.action) {
       case 'bet':
         player.Bet(data.amount);
+        var now = new Date();
+        var message = {
+          timestamp:  now.getHours() + ':' + now.getMinutes(),
+          message: player.playerName + ' bet ' + data.amount + ' chips.',
+          name: 'dealer'
+        };
+        table.game.pot += data.amount;
         break;
       case 'check':
         player.Check();
+        var now = new Date();
+        var message = {
+          timestamp:  now.getHours() + ':' + now.getMinutes(),
+          message: player.playerName + ' checked.',
+          name: 'dealer'
+        };
         break;
       case 'call':
-        player.Bet();
+        player.Call();
+        var now = new Date();
+        var message = {
+          timestamp:  now.getHours() + ':' + now.getMinutes(),
+          message: player.playerName + ' called.',
+          name: 'dealer'
+        };
+        table.game.pot += 50;
         break;
       case 'fold':
-        player.Bet();
+        player.Fold();
+        var now = new Date();
+        var message = {
+          timestamp:  now.getHours() + ':' + now.getMinutes(),
+          message: player.playerName + ' folded.',
+          name: 'dealer'
+        };
         break;
     }
-
-    socket.emit('table:read', tableJson(table, socket, passthrough));
-    socket.broadcast.emit('table:read', tableJson(table, socket, passthrough));
+    socket.emit('messages:read', message);
+    socket.broadcast.emit('messages:read', message);
     socket.emit('players:read', playersJson(table.players, socket, passthrough));
     socket.broadcast.emit('players:read', playersJson(table.players, socket, passthrough));
-
-    if (table.game.roundName === 'Showdown') {
-      delete table.game;
-      table.StartGame();
-    }
+    socket.emit('table:read', tableJson(table, socket, passthrough));
+    socket.broadcast.emit('table:read', tableJson(table, socket, passthrough));
   });
+
+  table.on('change:round', function(roundName) {
+    if (roundName === 'Showdown') {
+      setTimeout(function() {
+        table.NewHand();
+      }, 5000);
+    }
+    socket.emit('players:read', playersJson(table.players, socket, passthrough));
+    socket.broadcast.emit('players:read', playersJson(table.players, socket, passthrough));
+    socket.emit('table:read', tableJson(table, socket, passthrough));
+    socket.broadcast.emit('table:read', tableJson(table, socket, passthrough));
+    var now = new Date();
+    var message = {
+      timestamp:  now.getHours() + ':' + now.getMinutes(),
+      message: 'Round: ' + roundName,
+      name: 'sentinel'
+    };
+    socket.emit('messages:read', message);
+  });
+
+
 
 });

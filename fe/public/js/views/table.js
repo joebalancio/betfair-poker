@@ -31,39 +31,66 @@ define(function(require,exports,modules) {
       this.players = this.options.players;
       this.effects = this.options.effects;
       this.sprites = this.options.sprites;
-      console.log(this.sprites);
+
 
       this.shapes = {
         tabletop: new Kinetic.Image({}),
+        potBg: new Kinetic.Rect({
+          cornerRadius: 15,
+          width: 200,
+          height: 30,
+          draggable: true,
+          fill: 'black',
+          alpha: 0,
+          y: 327,
+          offset: {
+            x: 200 / 2,
+            y: 30 / 2,
+          }
+        }),
         pot: new Kinetic.Text({
           fontSize: 20,
           text: '0',
-          textFill: 'black'
+          textFill: 'white',
+          alpha: 0
+        }),
+        chips: new Kinetic.Image({
+          image: this.images.chips.xsmall,
+          width: 128,
+          height: 77,
+          offset: {x: 128/2, y: 77/2},
+          x: 512,
+          y: 319
         }),
         card1: new Kinetic.Sprite(_.extend({
           width: 92,
           height: 128,
           offset: { x: 92/2, y: 128/1.2 },
+          visible: false,
         }, this.sprites.cards)),
         card2: new Kinetic.Sprite(_.extend({
           width: 92,
           height: 128,
           offset: { x: 92/2, y: 128/1.2 },
+          visible: false,
         }, this.sprites.cards)),
         card3: new Kinetic.Sprite(_.extend({
           width: 92,
           height: 128,
           offset: { x: 92/2, y: 128/1.2 },
+          visible: false,
         }, this.sprites.cards)),
         card4: new Kinetic.Sprite(_.extend({
           width: 92,
           height: 128,
           offset: { x: 92/2, y: 128/1.2 },
+          visible: false,
         }, this.sprites.cards)),
         card5: new Kinetic.Sprite(_.extend({
           width: 92,
           height: 128,
           offset: { x: 92/2, y: 128/1.2 },
+          visible: false,
         }, this.sprites.cards)),
 
       };
@@ -76,7 +103,7 @@ define(function(require,exports,modules) {
      */
     render: function() {
       //So, image becomes a new JS image object that Kinetic will manipulate
-      var image = this.images['tabletop'];
+      var image = this.images.tabletop;
       var stage = this.layer.getStage();
       var stageWidth = stage.getWidth();
       var halfStageWidth = stage.getWidth() / 2;
@@ -88,7 +115,6 @@ define(function(require,exports,modules) {
       stageHeight = image.height = stageWidth * ratio;
       stage.setHeight(stageHeight);
       halfStageHeight = stageHeight / 2;
-      //this.$('.kineticjs-content').height(stage.attrs.height);
 
       // set placement of pot
       this.shapes.pot.setX(stageWidth / 2.3);
@@ -97,11 +123,12 @@ define(function(require,exports,modules) {
       // set image
       this.shapes.tabletop.setImage(image);
 
+      // pot bg
+      this.shapes.potBg.setX(halfStageWidth);
 
       var cardNum = -2;
       _.each(this.shapes, function(shape, name) {
         if (name.indexOf('card') === 0) {
-          console.log(shape);
           shape.setX(halfStageWidth + (shape.attrs.width * 1.1) * cardNum);
           shape.setY(halfStageHeight);
           cardNum++;
@@ -110,16 +137,60 @@ define(function(require,exports,modules) {
 
       //draw it!
       _.each(this.shapes, function(shape, name) {
-        console.log(name);
         this.layer.add(shape);
       }, this);
 
     },
     updateTable: function(model) {
-      //this.shapes.pot.setText('Pot: $' + model.get('pot'));
+      console.log('updateTable');
     },
     updatePot: function(model, pot) {
-      this.shapes.pot.setText('Pot: $' + model.get('pot'));
+      console.log(model);
+      var
+        previousPot = model.previous('pot'),
+        fadeIn = {
+          alpha: 1,
+          duration: 0.5,
+          easing: 'strong-ease-in'
+        },
+        fadeOut = {
+          alpha: 0,
+          duration: 0.5,
+          easing: 'strong-ease-out'
+        },
+        previousPositions;
+
+
+      if (previousPot === 0) {
+        previousPositions = {
+          chips: this.shapes.chips.getPosition(),
+          potBg: this.shapes.potBg.getPosition(),
+          pot: this.shapes.pot.getPosition()
+        };
+
+        this.shapes.chips.setAttrs({x: this.layer.getStage().getWidth()});
+        this.shapes.potBg.setAttrs({x: 0});
+        this.shapes.chips.transitionTo(_.extend({}, fadeIn, previousPositions.chips));
+        this.shapes.potBg.transitionTo(_.extend({}, fadeIn, {alpha: 0.5}, previousPositions.potBg));
+        this.shapes.pot.transitionTo(fadeIn);
+      }
+
+      if (pot === 0) {
+        this.shapes.chips.transitionTo(fadeOut);
+        this.shapes.potBg.transitionTo(fadeOut);
+        this.shapes.pot.transitionTo(fadeOut);
+      }
+
+      this.shapes.pot.setText('$' + pot);
+      if(pot > 200 && pot < 300) {
+      	this.shapes.chips.setImage(this.images.chips.small);
+      } else if (pot >= 300 && pot < 400) {
+      	this.shapes.chips.setImage(this.images.chips.medium);
+      } else if (pot >= 400 && pot < 500) {
+      	this.shapes.chips.setImage(this.images.chips.large);
+      } else if (pot > 500) {
+      	this.shapes.chips.setImage(this.images.chips.xlarge);
+      }
     },
     updateStage: function() {
       this.layer.getStage().draw();
@@ -130,57 +201,6 @@ define(function(require,exports,modules) {
       }
       this.effects.resetSpray();
       this.effects.spray();
-
-      /*
-      // need to create an effects layer that can be triggered
-      var layer = new Kinetic.Layer;
-      var stage = this.layer.getStage();
-
-      for(var i=0; i<50; i++) {
-        var scale = Math.random();
-        var shape = new Kinetic.Ellipse({
-          radius: 50,
-          scale: {
-            x: scale,
-            y: scale
-          },
-          rotationDeg: Math.random() * 180,
-          fill: 'red',
-          stroke: 'purple',
-          strokeWidth: 10,
-          alpha: 0.5,
-          x: stage.getWidth() / 2,
-          y: stage.getHeight() / 2,
-        });
-
-        layer.add(shape);
-      }
-
-      stage.add(layer);
-      stage.draw();
-      _.each(layer.getChildren(), function(shape) {
-        var x, y, x1, x2, x12, x22;
-        do {
-          x1 = Math.random() * 2 - 1;
-          x2 = Math.random() * 2 - 1;
-          x12 = Math.pow(x1, 2);
-          x22 = Math.pow(x2, 2);
-        } while(x12 + x22 >= 1);
-
-        x = (x12 - x22) / (x12 + x22);
-        y = (2 * x1 * x2) / (x12 + x22);
-
-        shape.transitionTo({
-          x: stage.getWidth() / 2 + x * stage.getWidth() / 2,
-          y: stage.getHeight() / 2 + y * stage.getHeight() / 2,
-          //x: stage.getWidth() / 2 + (Math.random() * 2 - 1) * stage.getWidth() / 2,
-          //y: stage.getHeight() / 2 + (Math.random() * 2 - 1) * stage.getHeight() / 2,
-          alpha: 0,
-          duration: Math.random() * 4 + 0.1
-        });
-      });
-      console.log(stage);
-      */
     },
     updateCards: function(model, cards) {
       var self = this;
@@ -189,9 +209,10 @@ define(function(require,exports,modules) {
         var cardShape = this.shapes['card' + (index + 1)];
         if (!cardShape.attrs.flipped) {
           cardShape.attrs.flipped = true;
+          cardShape.setAnimation('back');
           cardShape.show();
           cardShape.transitionTo({
-            scale: { x: 0, y: 1 },
+            scale: { x: 0.1, y: 1 },
             duration: 0.5,
             easing: 'strong-ease-in',
             callback: function() {
@@ -209,16 +230,35 @@ define(function(require,exports,modules) {
     },
 
     updateStatus: function(model, status) {
-      if (status === 'deal') {
-      	_.each(this.shapes, function(card, index) {
-	      		if(index.indexOf('card') === 0) {
-	      		var cardShape = this.shapes[index];
-	      		cardShape.hide();
-      		}
-      	},this);
-        //this.effects.resetSpray();
-        //this.effects.spray();
+      //Set the player's name labels back to their name for the next round
+      _.each(this.players.models, function(player, index) {
+      	player.shapes.name.setText(player.get('name'));
+      }, this);
+      switch (status) {
+        case 'DEAL':
+          _.each(this.shapes, function(card, index) {
+              if(index.indexOf('card') === 0) {
+              var cardShape = this.shapes[index];
+              cardShape.attrs.flipped = false;
+              cardShape.hide();
+            }
+          },this);
+          break;
+        case 'FLOP':
 
+
+          _.each(this.shapes, function(card, index) {
+              if(index.indexOf('card') === 0) {
+              var cardShape = this.shapes[index];
+              cardShape.flipped = false;
+              cardShape.hide();
+            }
+          },this);
+          break;
+        case 'SHOWDOWN':
+          this.effects.resetSpray();
+          this.effects.spray();
+          break;
       }
     }
   });

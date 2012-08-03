@@ -79,6 +79,10 @@ define([
         });
         this.views.effects.render();
 
+        // chat view
+        this.views.chat = new ChatView({collection: new Messages, player: this.user});
+        this.views.chat.render(); // not used atm
+
         // table view
         this.views.table = new TableView({
           layer: this.layers.table,
@@ -86,13 +90,9 @@ define([
           images: images,
           players: this.players,
           effects: this.views.effects,
-          sprites: this.sprites
+          sprites: this.sprites,
         });
         this.views.table.render();
-
-        // chat view
-        this.views.chat = new ChatView({collection: new Messages, player: this.user});
-        this.views.chat.render(); // not used atm
 
         // register
         this.views.register = new RegisterView({
@@ -119,12 +119,15 @@ define([
     preloadImages: function(callback) {
       var images = {
         tabletop: '/img/tabletop.jpg',
-        glyphicons_halflings_white: '/img/glyphicons-halflings-white.png',
-        glyphicons_halflings: '/img/glyphicons-halflings.png',
-        as: '/img/cards/as.png',
-        card_back: '/img/cards/back.png',
         cardSprites: '/img/cardsprites.png',
         cardSpritesSmall: '/img/cardsprites_small.png',
+        chips: {
+          xsmall: '/img/chips/chip-stack-1.png',
+          small: '/img/chips/chip-stack-2.png',
+          medium: '/img/chips/chip-stack-3.png',
+          large: '/img/chips/chip-stack-4.png',
+          xlarge: '/img/chips/chip-stack-5.png',
+        },
         avatars: {
           A01: '/img/avatars/A01.png',
           A02: '/img/avatars/A02.png',
@@ -298,20 +301,20 @@ define([
 
       switch (seat) {
         case 1:
-          model.group.setX(this.stage.attrs.width - (model.group.width - 20) );
-          model.group.setY(this.stage.attrs.height / 2 - model.group.height / 2.3);
+          model.group.setX(this.stage.attrs.width - model.group.width / 2);
+          model.group.setY(this.stage.attrs.height / 2);
           break;
         case 2:
-          model.group.setX(this.stage.attrs.width / 2 - model.group.width / 2);
-          model.group.setY(this.stage.attrs.height - (model.group.height / 1.7) );
+          model.group.setX(this.stage.attrs.width / 2);
+          model.group.setY(this.stage.attrs.height - model.group.height / 2);
           break;
         case 3:
-          model.group.setX(this.stage.attrs.width / 2 - model.group.width / 2);
-          model.group.setY(0);
+          model.group.setX(this.stage.attrs.width / 2);
+          model.group.setY(model.group.height / 2);
           break;
         case 4:
-          model.group.setX(0);
-          model.group.setY(this.stage.attrs.height / 2 - model.group.height / 2.3);
+          model.group.setX(model.group.width / 2);
+          model.group.setY(this.stage.attrs.height / 2);
           break;
       }
       this.layers.players.add(model.group);
@@ -452,7 +455,14 @@ define([
         image: this.images.cardSprites,
         animation: 'back',
         animations: animations,
-        frameRate: 1
+        frameRate: 1,
+        shadow: {
+          alpha: 0.5,
+          offset: {
+            x: 1,
+            y: 1
+          }
+        }
       };
 
       this.sprites.smallCards = {

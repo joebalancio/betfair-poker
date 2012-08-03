@@ -7,28 +7,44 @@ require.config({
     backbone_lib: 'libs/backbone',
     underscore: 'libs/underscore/underscore',
     kinetic: 'libs/kinetic/kinetic',
-    jade: 'libs/jade/runtime'
+    jade: 'libs/jade/runtime',
+    bf: 'libs/betfair'
   }
 });
 
 require([
-  'app'
-], function(App) {
-  var endpoint = window.location.protocol + '//' + window.location.host;
-  var app;
+  'app', 'backbone', 'bf/io'
+], function(App, Backbone, bfio) {
+  var
+    endpoint,
+    app,
+    real = false;
 
-  window.socket = io.connect(endpoint);
-
-  window.socket.on('connect', function() {
+  function connect() {
     if (!app) app = new App();
-  });
+  }
 
-  window.socket.on('disconnect', function() {
+  function disconnect() {
     console.log('disconnected, we should do something here');
-  });
+  }
+
+  // connect to backend
+  if (real) {
+    endpoint = 'ws://poker1.cp.sfo.us.betfair:9292/poker';
+    window.socket = bfio.connect(endpoint);
+  } else {
+    endpoint = window.location.protocol + '//' + window.location.host;
+    window.socket = io.connect(endpoint);
+  }
+
+  window.socket.on('connect', connect);
+  window.socket.on('disconnect', disconnect);
+
 
 });
 
+// defining module for socket.io
 define('io', function(require, exports, module) {
   module.exports = io;
 });
+
