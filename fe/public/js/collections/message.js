@@ -9,7 +9,6 @@ define(function(require, exports, modules) {
       this.ioBind('read', this.read, this);
     },
     read: function(data) {
-      console.log('reading new messages');
       this.add(data);
     }
 	});

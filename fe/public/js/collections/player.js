@@ -11,34 +11,14 @@ define(function(require, exports, modules) {
     queue: [],
 
     initialize: function() {
-      this.ioBind('read', this.default, this);
+      this.ioBind('read', this.read, this);
     },
     read: function(models) {
       this.queue.push(models);
     },
     consume: function() {
       if (!this.queue.length) return;
-
-      var models = this.queue.shift();
-      console.log(models, this.queue);
-      var newModels = [];
-
-      _.each(models, function(value) {
-        var model = this.get(value.id);
-        var player;
-        value.sprites = this.sprites;
-        value.images = this.images;
-        value.layer = this.layer;
-        value.user = this.user;
-        if (model) model.set(value);
-        else {
-          var player = new PlayerModel(value);
-          player.images = this.images;
-          newModels.push(player);
-        }
-      }, this);
-
-      if (newModels.length > 0) this.add(newModels);
+      this.default(this.queue.shift());
     },
     default: function(models) {
       var newModels = [];
@@ -60,6 +40,18 @@ define(function(require, exports, modules) {
 
       if (newModels.length > 0) this.add(newModels);
     },
+
+    tableStatus: function(table, status) {
+      var players = this;
+
+      if (status === 'DEAL') {
+        console.log('update player status');
+        players.each(function(player) {
+          console.log(player, players);
+          player.hideCards(players.layer.getStage());
+        });
+      }
+    }
   });
   return Players;
 });

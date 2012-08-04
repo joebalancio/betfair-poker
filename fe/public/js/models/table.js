@@ -12,18 +12,13 @@ define(function(require,exports,modules) {
     queue: [],
 
     initialize: function() {
-      this.ioBind('read', this.default, this);
+      this.ioBind('read', this.read, this);
     },
     read: function(model) {
       this.queue.push(model);
     },
     consume: function() {
-      console.log(this.queue);
-      var model;
-      if (!this.queue.length) return;
-      model = this.queue.shift();
-      console.log(model, this.queue);
-      this.set(this.queue.shift());
+      this.default(this.queue.shift());
     },
     default: function(model) {
       this.set(model);

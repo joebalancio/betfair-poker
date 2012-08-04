@@ -98,8 +98,8 @@ define(function(require,exports,modules) {
       this.shapes = {
         outline: new Kinetic.Rect({
           stroke: 'red',
-          width: 180,
-          height: 150
+          width: 170,
+          height: 155
         }),
         name: new Kinetic.Text({
           text: '',
@@ -148,7 +148,6 @@ define(function(require,exports,modules) {
           radius: 10,
           y: 25,
           x: 25,
-          visible: false,
           shadow: {
             color: 'black',
             blur: 2,
@@ -177,6 +176,7 @@ define(function(require,exports,modules) {
           x: 5,
         }),
         card1: new Kinetic.Sprite(_.extend({
+          name: 'card',
           width: 50,
           height: 50 * this.cardRatio,
           offset: {
@@ -186,6 +186,7 @@ define(function(require,exports,modules) {
           rotation: Math.PI * 0.05,
         }, this.sprites.smallCards)),
         card2: new Kinetic.Sprite(_.extend({
+          name: 'card',
           width: 50,
           height: 50 * this.cardRatio,
           offset: {
@@ -194,27 +195,6 @@ define(function(require,exports,modules) {
           },
           rotation: -Math.PI * 0.05,
         }, this.sprites.smallCards)),
-        /*
-        card1: new Kinetic.Image({
-          width: 50,
-          height: 50 * this.cardRatio,
-          offset: {
-            x: 25,
-            y: 50 * this.cardRatio / 2
-          },
-          rotation: Math.PI * 0.05,
-        }),
-        card2: new Kinetic.Image({
-          width: 50,
-          height: 50 * this.cardRatio,
-          offset: {
-            x: 25,
-            y: 50 * this.cardRatio / 2
-          },
-          rotation: -Math.PI * 0.05,
-          name: 'card'
-        }),
-        */
         avatar: new Kinetic.Image({
           name: 'avatar',
         })
@@ -222,8 +202,8 @@ define(function(require,exports,modules) {
       _.each(this.shapes, function(shape) {
         this.group.add(shape);
       }, this);
-      this.shapes.card1.setPosition(70, 70);
-      this.shapes.card2.setPosition(50, 70);
+      this.shapes.card1.setPosition(70, 85);
+      this.shapes.card2.setPosition(50, 85);
       this.shapes.card1.moveToBottom();
       this.shapes.card2.moveToBottom();
 
@@ -257,21 +237,28 @@ define(function(require,exports,modules) {
     updatePosition: function(model, position) {
       var previousPosition = model.previous('position');
       var stage = this.group.getStage();
+      var positionMap = {
+        'none': '',
+        'dealer': 'd',
+        'small blind': 'sb',
+        'big blind': 'bb',
+      };
+      var positionText = position ? positionMap[position].toUpperCase() : '';
 
       if (!stage) {
         // if there is no stage then just set the properties
         // this happens on a load
-        this.shapes.position.setText(position.toUpperCase());
+        if (position) this.shapes.position.setText(positionText);
         switch (position) {
-          case 'd':
+          case 'dealer':
             this.shapes.position.setAttrs(this.dealerTextProps);
             this.shapes.positionCircle.setAttrs(this.dealerButtonProps);
             break;
-          case 'bb':
+          case 'big blind':
             this.shapes.position.setAttrs(this.bigBlindTextProps);
             this.shapes.positionCircle.setAttrs(this.bigBlindButtonProps);
             break;
-          case 'sb':
+          case 'small blind':
             this.shapes.position.setAttrs(this.smallBlindTextProps);
             this.shapes.positionCircle.setAttrs(this.smallBlindButtonProps);
             break;
@@ -279,9 +266,9 @@ define(function(require,exports,modules) {
             this.shapes.position.setAttrs(this.fadeInProps);
             this.shapes.positionCircle.setAttrs(this.fadeInProps);
         }
+        console.log(this.shapes.positionCircle.attrs.visible);
       } else {
         // we have a stage that means we can do fancy stuff
-
         if (previousPosition != position) {
           if (position == 'none') {
             // just fade out if the position if it is empty
@@ -289,17 +276,17 @@ define(function(require,exports,modules) {
             this.shapes.positionCircle.transitionTo(this.fadeOutProps);
           } else {
             // set text and basic props
-            this.shapes.position.setText(position.toUpperCase());
+            this.shapes.position.setText(positionText);
             switch (position) {
-              case 'd':
+              case 'dealer':
                 this.shapes.position.setAttrs(this.dealerTextProps);
                 this.shapes.positionCircle.setAttrs(this.dealerButtonProps);
                 break;
-              case 'bb':
+              case 'big blind':
                 this.shapes.position.setAttrs(this.bigBlindTextProps);
                 this.shapes.positionCircle.setAttrs(this.bigBlindButtonProps);
                 break;
-              case 'sb':
+              case 'small blind':
                 this.shapes.position.setAttrs(this.smallBlindTextProps);
                 this.shapes.positionCircle.setAttrs(this.smallBlindButtonProps);
                 break;
@@ -315,50 +302,12 @@ define(function(require,exports,modules) {
             this.shapes.positionCircle.transitionTo(this.fadeInProps);
           }
         }
-/*
-        // set text and basic props
-        this.shapes.position.setText(position.toUpperCase());
-        switch (position) {
-          case 'd':
-            this.shapes.position.setAttrs(this.dealerTextProps);
-            this.shapes.positionCircle.setAttrs(this.dealerButtonProps);
-            break;
-          case 'bb':
-            this.shapes.position.setAttrs(this.bigBlindTextProps);
-            this.shapes.positionCircle.setAttrs(this.bigBlindButtonProps);
-            break;
-          case 'sb':
-            this.shapes.position.setAttrs(this.smallBlindTextProps);
-            this.shapes.positionCircle.setAttrs(this.smallBlindButtonProps);
-            break;
-          default:
-            this.shapes.position.setAttrs(this.fadeInProps);
-            this.shapes.positionCircle.setAttrs(this.fadeInProps);
-        }
-
-        // transition only if there is a stage and transitioning from one position to another
-        function done(self) {
-          return function(self) {
-            if (previousPosition != position && stage) {
-              if (position == '') {
-                this.shapes.position.transitionTo(this.fadeOutProps);
-                this.shapes.positionCircle.transitionTo(this.fadeOutProps);
-              } else {
-                this.shapes.position.setAttrs(this.fadeOutProps);
-                this.shapes.positionCircle.setAttrs(this.fadeOutProps);
-                this.shapes.position.transitionTo(this.fadeInProps);
-                this.shapes.positionCircle.transitionTo(this.fadeInProps);
-              }
-            }
-          };
-        }
-          */
       }
     },
     updateCards: function(model, cards) {
       if (cards && this.user && this.user.id === model.id) {
-        this.shapes.card1.setAnimation(cards[0]);
-        this.shapes.card2.setAnimation(cards[1]);
+        this.shapes.card1.setAnimation(this.getSimpleCard(cards[0]));
+        this.shapes.card2.setAnimation(this.getSimpleCard(cards[1]));
       } else {
         this.shapes.card1.setAnimation('back');
         this.shapes.card2.setAnimation('back');
@@ -389,13 +338,13 @@ define(function(require,exports,modules) {
         capitalize = status ? status.charAt(0).toUpperCase() + status.substr(1) : '';
 
       switch (status) {
-        case 'turn':
+        case 'TURN':
           this.shapes.name.setAttrs(this.activePlayerProps);
           break;
-        case 'bet':
-        case 'call':
-        case 'fold':
-        case 'check':
+        case 'BET':
+        case 'CALL':
+        case 'FOLD':
+        case 'CHECK':
           this.shapes.name.setText(capitalize);
         default:
           this.shapes.name.setAttrs(this.inactivePlayerProps);
@@ -415,7 +364,86 @@ define(function(require,exports,modules) {
       };
       this.shapes.card1.transitionTo(transition);
       this.shapes.card2.transitionTo(transition);
+    },
+
+    getSimpleCard: function(card) {
+      var map = {
+        TWO: 2,
+        THREE: 3,
+        FOUR: 4,
+        FIVE: 5,
+        SIX: 6,
+        SEVEN: 7,
+        EIGHT: 8,
+        NINE: 9,
+        TEN: 'T',
+        JACK: 'J',
+        QUEEN: 'Q',
+        KING: 'K',
+        ACE: 'A'
+      };
+      if (_.isObject(card)) {
+        return card.suit.charAt(0) + map[card.rank];
+      } else {
+        return card;
+      }
+    },
+
+    flipCards: function(next) {
+      // get cards
+      var cards = this.group.get('.card');
+      var completed = 0;
+      var next = next ? next : function() {};
+
+      // flip cards
+      _.each(cards, function(card, index) {
+        var c = this.getSimpleCard(this.get('cards')[index]);
+        completed++;
+        card.transitionTo({
+          scale: { x: 0.1, y: 1 },
+          duration: 0.2,
+          easing: 'strong-ease-in',
+          callback: function() {
+            card.setAnimation(c);
+            card.transitionTo({
+              scale: { x: 1, y: 1 },
+              duration: 0.2,
+              easing: 'strong-ease-out',
+              callback: function() {
+                if (--completed === 0) next();
+              }
+            });
+          }
+        });
+      }, this);
+    },
+
+    hideCards: function(hasStage, next) {
+      var
+        cards = this.group.get('.card'),
+        completed = 0,
+        next = next ? next : function() {};
+
+      if (hasStage) {
+        _.each(cards, function(card, index) {
+          completed++;
+          card.transitionTo({
+            alpha: 0,
+            duration: 0.5,
+            easing: 'strong-ease-out',
+            callback: function() {
+              if (--completed === 0) next();
+            }
+          });
+        }, this);
+      } else {
+        _.each(cards, function(card, index) {
+          card.setAlpha(0);
+        }, this);
+        next();
+      }
     }
+
 	});
 	return Player;
 });

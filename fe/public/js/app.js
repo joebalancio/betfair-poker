@@ -32,6 +32,7 @@ define([
       'click button#check': 'check',
       'click button#fold': 'fold',
       'click button#debug': 'debug',
+      'click button#reset': 'reset',
     },
     user: null,
     chatView: null,
@@ -62,12 +63,14 @@ define([
       this.players.on('add', this.addPlayer, this);
       this.players.on('add change', this.updateStage, this);
       this.players.on('change:status', this.displayActions, this);
-      this.players.on('change:chips', this.moveChips, this);
+      this.players.on('change:status', this.moveChips, this);
+      this.players.on('change:actions', this.updateActionButtons, this);
       this.players.sprites = this.sprites;
-      this.players.layer = this.layers.player;
+      this.players.layer = this.layers.players;
       this.players.user = this.user;
       this.table = new TableModel;
       this.table.on('change:current', this.updateUser, this);
+      this.table.on('change:status', this.players.tableStatus, this.players);
 
       this.preloadImages(function(images) {
         this.players.images = images;
@@ -302,19 +305,19 @@ define([
       }
 
       switch (seat) {
-        case 1:
+        case 0:
           model.group.setX(this.stage.attrs.width - model.group.width / 2);
           model.group.setY(this.stage.attrs.height / 2);
           break;
-        case 2:
+        case 1:
           model.group.setX(this.stage.attrs.width / 2);
           model.group.setY(this.stage.attrs.height - model.group.height / 2);
           break;
-        case 3:
+        case 2:
           model.group.setX(this.stage.attrs.width / 2);
           model.group.setY(model.group.height / 2);
           break;
-        case 4:
+        case 3:
           model.group.setX(model.group.width / 2);
           model.group.setY(this.stage.attrs.height / 2);
           break;
@@ -328,13 +331,19 @@ define([
     },
 
     displayActions: function(model) {
-      console.log('display actions', model, this.user);
       var status = model.get('status');
-
-
-      if (model == this.user && status === 'turn') {
+      if (model == this.user && status === 'TURN') {
         this.$('#actions').show();
+      } else {
+        //this.$('#actions').hide();
       }
+    },
+
+    updateActionButtons: function(model, buttons) {
+      this.$('#actions button').hide();
+      _.each(buttons, function(button) {
+        this.$('#actions button#' + button.toLowerCase()).show();
+      });
     },
 
     setUser: function(model) {
@@ -352,8 +361,8 @@ define([
       console.log('call');
       var data = {
         id: this.user.id,
-        seat: this.user.id,
-        action: 'call'
+        seat: this.user.get('seat'),
+        action: 'CALL'
       };
 
       this.user.save(data, { data: data });
@@ -364,11 +373,25 @@ define([
       console.log('check');
       var data = {
         id: this.user.id,
-        seat: this.user.id,
-        action: 'check'
+        seat: this.user.get('seat'),
+        action: 'CHECK'
       };
 
       this.user.save(data, {data: data});
+      this.$('#actions').hide();
+    },
+
+    bet: function() {
+      console.log('bet');
+      var amount = this.$('#actions input').val();
+      var data = {
+        id: this.user.id,
+        seat: this.user.get('seat'),
+        amount: parseInt(amount, 10),
+        action: 'BET'
+      };
+
+      this.user.save(data, { data: data });
       this.$('#actions').hide();
     },
 
@@ -377,9 +400,9 @@ define([
       var amount = this.$('#actions input').val();
       var data = {
         id: this.user.id,
-        seat: this.user.id,
-        amount: amount,
-        action: 'bet'
+        seat: this.user.get('seat'),
+        amount: parseInt(amount, 10),
+        action: 'RAISE'
       };
 
       this.user.save(data, { data: data });
@@ -391,8 +414,8 @@ define([
 
       var data = {
         id: this.user.id,
-        seat: this.user.id,
-        action: 'fold'
+        seat: this.user.get('seat'),
+        action: 'FOLD'
       };
 
       this.user.save(data, { data: data });
@@ -479,26 +502,40 @@ define([
 
     },
 
-    moveChips: function(model, chips) {
-      var previousChips = model.previous('chips');
+    moveChips: function(model, status) {
+      if (status === 'WIN') {
+        var layer = this.layers.players;
+        var chips = this.views.table.shapes.chips.clone();
+        layer.add(chips);
 
-      if (previousChips && chips > previousChips) {
-        var position = model.group.getPosition();
-        console.log(position);
-        this.views.table.shapes.chips.transitionTo({
-          x: position.x,
-          y: position.y,
-          duration: 1,
-          alpha: 0,
-          easing: 'strong-ease-out'
+        model.flipCards(function() {
+
+          var position = model.group.getPosition();
+          chips.transitionTo({
+            x: position.x,
+            y: position.y,
+            duration: 1,
+            alpha: 0,
+            easing: 'strong-ease-out',
+            callback: function() {
+              layer.remove(chips);
+            }
+          });
+
         });
+
       }
     },
 
     debug: function() {
       this.players.consume();
       this.views.table.model.consume();
-    }
+    },
+
+    reset: function() {
+      window.socket.emit('table:reset');
+
+    },
 
 
 

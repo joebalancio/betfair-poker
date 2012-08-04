@@ -72,8 +72,6 @@ define(function(require, exports, module) {
         this.transitions.spray.push(shape.transitionTo({
           x: this.layer.getStage().getWidth() / 2 + x * this.layer.getStage().getWidth() / 2,
           y: this.layer.getStage().getHeight() / 2 + y * this.layer.getStage().getHeight() / 2,
-          //x: stage.getWidth() / 2 + (Math.random() * 2 - 1) * stage.getWidth() / 2,
-          //y: stage.getHeight() / 2 + (Math.random() * 2 - 1) * stage.getHeight() / 2,
           alpha: 0,
           duration: duration,
           easing: 'ease-out',
