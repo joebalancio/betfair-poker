@@ -11,7 +11,12 @@
      <feature>camel-websocket</feature>
      <feature>camel-http</feature>
      <feature>player</feature>
+     <feature>deck</feature>
      <bundle>fab:mvn:com.betfair.poker/table/${project.version}</bundle>
+  </feature>
+
+  <feature name="deck" version="${project.version}" resolver="(obr)">
+     <bundle>fab:mvn:com.betfair.poker/deck/${project.version}</bundle>
   </feature>
 
   <feature name="player" version="${project.version}" resolver="(obr)">

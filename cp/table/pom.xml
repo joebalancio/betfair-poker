@@ -23,6 +23,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>com.betfair.poker</groupId>
+      <artifactId>deck</artifactId>
+      <version>${project.version}</version>
+    </dependency>  
+    <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-core</artifactId>
       <scope>provided</scope>

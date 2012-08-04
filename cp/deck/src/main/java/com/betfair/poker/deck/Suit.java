@@ -1,7 +1,10 @@
 package com.betfair.poker.deck;
 
 public enum Suit {
-    CLUB("Club", 0), DIAMOND("Diamond", 1), HEART("Heart", 2), SPADE("Spade", 3);
+    CLUB("Club", 0), 
+    DIAMOND("Diamond", 1), 
+    HEART("Heart", 2), 
+    SPADE("Spade", 3);
 
     private final String value;
     private final int suit;
@@ -26,5 +29,10 @@ public enum Suit {
             }
         }
         throw new IllegalArgumentException(v.toString());
+    }
+    
+    @Override
+    public String toString() {
+        return value;
     }
 }
