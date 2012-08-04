@@ -300,8 +300,12 @@ public class PokerRouteBuilder extends RouteBuilder {
     public void updatePlayer(final Map<String, Object> map) {
         final Integer pos = (Integer) map.get("seat");
         final String action = (String) map.get("action");
-        final Integer amount = (Integer) map.get("amount");
-
+        Integer amount = (Integer) map.get("amount");
+        
+        if (amount == null) {
+            amount = 0;
+        }
+        
         final Game game = table.getGame();
         final Seat seat = game.getSeat(pos);
 
