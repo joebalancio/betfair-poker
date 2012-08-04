@@ -44,6 +44,7 @@ Table.prototype.AddPlayer = function(playerName,chips){
 		var player = new Player(playerName,chips,this);
 		this.players.push(player);
     player.index = this.players.length - 1;
+    player.actions = ['CHECK','BET','FOLD','RAISE'];
 
 		Progress(this);
 	};
@@ -53,7 +54,6 @@ Table.prototype.StartGame = function(){
 	//If there is no current game and we have enough players, start a new game.
 	if(!this.game && this.players.length >= this.minPlayers){
 		this.game = new Game(this.smallBlind,this.bigBlind)
-    this.players[this.positions.dealer].status = 'turn';
 		//Deal 2 cards to each player
 		for(i=0;i<this.players.length;i++){
 			this.players[i].cards.push(this.game.deck.pop());
@@ -62,7 +62,7 @@ Table.prototype.StartGame = function(){
 
     // advance positions
     this.AdvancePositions(true);
-    this.players[this.positions.dealer].status = 'turn';
+    this.players[this.positions.dealer].status = 'TURN';
 
 		//Force Blind Bets
 		this.players[this.positions.smallBlind].chips -= this.smallBlind;
@@ -109,7 +109,7 @@ Table.prototype.NewHand = function() {
 
     // advance positions
     this.AdvancePositions();
-    this.players[this.positions.dealer].status = 'turn';
+    this.players[this.positions.dealer].status = 'TURN';
 
 		//Force Blind Bets
 		this.players[this.positions.smallBlind].chips -= this.smallBlind;
@@ -136,7 +136,7 @@ Player.prototype.Check = function(){
 	for(i=0;i<this.table.players.length;i++){
 		if(this == this.table.players[i]){
 			this.table.game.bets[i] = 0;
-      this.status = 'check';
+      this.status = 'CHECK';
 		};
 	};
 	//Attemp to progress the game
@@ -150,7 +150,7 @@ Player.prototype.Fold = function(){
 			var bet = parseInt(this.table.game.bets[i]);
 			this.table.game.bets[i] = 0;
 			this.table.game.pot += bet;
-      this.status = 'fold';
+      this.status = 'FOLD';
 		};
 	};
 	//Mark the player as folded
@@ -165,7 +165,7 @@ Player.prototype.Bet = function(bet){
 	for(i=0;i<this.table.players.length;i++){
 		if(this == this.table.players[i]){
 			this.table.game.bets[i] += bet;
-      this.status = 'bet';
+      this.status = 'BET';
 		};
 	};
 	//Attemp to progress the game
@@ -181,7 +181,7 @@ Player.prototype.Call = function(){
 			if(this.table.game.bets[i] > 0){
 				this.chips += this.table.game.bets[i];
 				this.chips -= maxBet;
-        this.status = 'call';
+        this.status = 'CALL';
 			};
 			this.table.game.bets[i] = maxBet;
 		};
@@ -245,10 +245,11 @@ function Progress(table, player){
     // player action performed
     if (player) {
       // advance to next player
+      console.log(player.index, player);
       if (table.players[player.index + 1]) {
-        table.players[player.index + 1].status = 'turn';
+        table.players[player.index + 1].status = 'TURN';
       } else {
-        table.players[0].status = 'turn';
+        table.players[0].status = 'TURN';
       }
     }
 		if(CheckForEndOfRound(table) == true){
@@ -269,7 +270,7 @@ function Progress(table, player){
 				var winners = new Array();
 				var maxRank = 0.000
 				for(k=0;k<table.players.length;k++){
-					table.players[k].status = 'lose';
+					table.players[k].status = 'LOSE';
 					if(table.players[k].hand.rank == maxRank){
 						winners.push(k);
 					};
@@ -283,7 +284,7 @@ function Progress(table, player){
 				var remainder = table.game.pot - (prize * winners.length);
 				for(i=0;i<winners.length;i++){
 					table.players[winners[i]].chips += prize;
-					table.players[winners[i]].status = 'win';
+					table.players[winners[i]].status = 'WIN';
 				};
 			};
 			if(table.game.roundName == "TURN"){
