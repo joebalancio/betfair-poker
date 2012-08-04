@@ -41,7 +41,7 @@ public enum Action {
 
     public static Action fromName(final String v) {
         for (Action c : Action.values()) {
-            if (c.name.equals(v)) {
+            if (c.name.equalsIgnoreCase(v)) {
                 return c;
             }
         }

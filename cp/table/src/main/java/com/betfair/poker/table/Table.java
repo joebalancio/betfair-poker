@@ -14,9 +14,9 @@ public class Table {
     private static final int DEFAULT_BIG_BLIND = 50;
     private int dealer = 0;
     private int numberOfSeats = DEFAULT_NUMBER_OF_SEATS;
-    private final List<Seat> seats;
+    private List<Seat> seats;
     private int bigBlind = DEFAULT_BIG_BLIND;
-    private final Game game;
+    private Game game;
 
     public Table() {
         this(DEFAULT_NUMBER_OF_SEATS, DEFAULT_BIG_BLIND);
@@ -27,24 +27,30 @@ public class Table {
         this.bigBlind = bigBlind;
         this.seats = new ArrayList<Seat>();
 
-        for (int i = 0; i < numberOfSeats; i++) {
-            Seat seat = new Seat(i);
-            seats.add(seat);
-        }
-
-        this.game = new Game();
+       reset();
     }
-    
+
     public int getBigBlind() {
         return this.bigBlind;
     }
-    
+
     public Game getGame() {
         return this.game;
     }
-    
+
     public List<Seat> getSeats() {
         return new ArrayList<Seat>(seats);
+    }
+
+    public void addPlayer(final Player player) {
+        for (Seat seat : getSeats()) {
+            if (seat != null) {
+                if (seat.isEmpty()) {
+                    seat.addPlayer(player);
+                    break;
+                }
+            }
+        }
     }
 
     public void addPlayer(final Player player, final int position) {
@@ -65,11 +71,23 @@ public class Table {
         }
     }
 
+    public void reset() {
+        this.dealer = 0;
+        this.seats = new ArrayList<Seat>();
+
+        for (int i = 0; i < numberOfSeats; i++) {
+            Seat seat = new Seat(i);
+            seats.add(seat);
+        }
+
+        this.game = new Game();
+    }
+    
     public Seat getDealer() {
         final Seat seat = getSeat(dealer);
         return seat;
     }
-    
+
     public Seat getSeat(final int position) {
         final Seat seat = getSeats().get(position);
 
@@ -78,7 +96,6 @@ public class Table {
 
     public void setSeatDealer() {
         final Seat seat = getDealer();
-
         if (seat.isEmpty()) {
             changeDealer();
 
@@ -90,7 +107,7 @@ public class Table {
         }
     }
 
-    private void changeDealer() {
+    public void changeDealer() {
         if (dealer < (numberOfSeats - 1)) {
             dealer++;
         } else {

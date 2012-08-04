@@ -21,7 +21,7 @@ public enum Suit {
 
     public static Suit fromValue(final String v) {
         for (Suit c : Suit.values()) {
-            if (c.value.equals(v)) {
+            if (c.value.equalsIgnoreCase(v)) {
                 return c;
             }
         }

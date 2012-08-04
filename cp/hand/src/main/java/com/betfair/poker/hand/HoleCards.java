@@ -13,6 +13,10 @@ public class HoleCards extends AbstractCardsList<Card> {
         setList(new ArrayList<Card>());
     }
 
+    public List<Card> getCards() {
+        return new ArrayList<Card>(list());
+    }
+    
     public void addCard(Card card) {
         if (card == null) {
             throw new IllegalArgumentException("Null card");

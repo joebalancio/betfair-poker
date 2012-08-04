@@ -23,7 +23,7 @@ public enum Rank {
 
     public static Rank fromValue(final String v) {
         for (Rank c : Rank.values()) {
-            if (c.value.equals(v)) {
+            if (c.value.equalsIgnoreCase(v)) {
                 return c;
             }
         }

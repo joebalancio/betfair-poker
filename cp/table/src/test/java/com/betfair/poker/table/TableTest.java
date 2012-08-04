@@ -23,16 +23,16 @@ public class TableTest {
 
         Table table = new Table(4, 50);
 
-        Player player1 = new Player("John", 1);
+        Player player1 = new Player("John");
         player1.setAvatar("John");
         table.addPlayer(player1, 0);
-        Player player2 = new Player("Joe", 2);
+        Player player2 = new Player("Joe");
         player2.setAvatar("Joe");
         table.addPlayer(player2, 1);
-        Player player3 = new Player("Jack", 3);
+        Player player3 = new Player("Jack");
         player3.setAvatar("Jack");
         table.addPlayer(player3, 2);
-        Player player4 = new Player("Jerry", 4);
+        Player player4 = new Player("Jerry");
         player4.setAvatar("Jerry");
         table.addPlayer(player4, 3);
         table.setSeatDealer();

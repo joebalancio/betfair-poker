@@ -30,7 +30,7 @@ public enum HandType {
 
     public static HandType fromValue(final String v) {
         for (HandType c : HandType.values()) {
-            if (c.value.equals(v)) {
+            if (c.value.equalsIgnoreCase(v)) {
                 return c;
             }
         }

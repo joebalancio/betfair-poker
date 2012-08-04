@@ -18,30 +18,22 @@ public class PokerRouteBuilderTest {
         prb.setTable(table);
         
         final Map<String, Object> map = new HashMap<String, Object>();
-        
-        map.put("id", 1);
-        map.put("seat", 0);
+
         map.put("name", "John");
         map.put("avatar", "1.png");
         
         prb.createPlayer(map);
 
-        map.put("id", 2);
-        map.put("seat", 1);
         map.put("name", "Jack");
         map.put("avatar", "2.png");
         
         prb.createPlayer(map);
-        
-        map.put("id", 3);
-        map.put("seat", 2);
+
         map.put("name", "Joe");
         map.put("avatar", "3.png");
         
         prb.createPlayer(map);
         
-        map.put("id", 4);
-        map.put("seat", 3);
         map.put("name", "John");
         map.put("avatar", "4.png");
         
@@ -84,9 +76,9 @@ public class PokerRouteBuilderTest {
         Table table = new Table();
         prb.setTable(table);
         
-        Player player1 = new Player("joe", 1);
+        Player player1 = new Player("joe");
         table.addPlayer(player1, 0);
-        Player player2 = new Player("blow", 2);
+        Player player2 = new Player("blow");
         table.addPlayer(player2, 2);
         table.setSeatDealer();
         String json = prb.readPlayers();
@@ -101,9 +93,9 @@ public class PokerRouteBuilderTest {
         Table table = new Table();
         prb.setTable(table);
         
-        Player player1 = new Player("joe", 1);
+        Player player1 = new Player("joe");
         table.addPlayer(player1, 0);
-        Player player2 = new Player("blow", 2);
+        Player player2 = new Player("blow");
         table.addPlayer(player2, 2);
         table.setSeatDealer();
         Map<String, Object> map = new HashMap<String, Object>();
@@ -120,9 +112,9 @@ public class PokerRouteBuilderTest {
         Table table = new Table();
         prb.setTable(table);
         
-        Player player1 = new Player("joe", 1);
+        Player player1 = new Player("joe");
         table.addPlayer(player1, 0);
-        Player player2 = new Player("blow", 2);
+        Player player2 = new Player("blow");
         table.addPlayer(player2, 2);
         table.setSeatDealer();
         Map<String, Object> inMap = new HashMap<String, Object>();

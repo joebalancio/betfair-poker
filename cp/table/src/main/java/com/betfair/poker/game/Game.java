@@ -74,7 +74,7 @@ public class Game {
         this.isPlaying = true;
         int dealerIndx = 0;
         playersToAct = getSeatSize();
-
+        
         for (int i = 0; i < getSeatSize(); i++) {
             if (seats.get(i).isDealer()) {
                 dealerIndx = i;
@@ -102,10 +102,12 @@ public class Game {
         bigBlind.setBigBlind(true);
         bigBlind.getPlayer().postBigBlind(BIG_BLIND);
         // mark next person to bb as isturn =true
-        if (bigBlindIdx == getSeatSize() - 1)
+        if (bigBlindIdx == getSeatSize() - 1) {
             nextTurnIdx = 0;
-        else
+        } else {
             nextTurnIdx = bigBlindIdx + 1;
+        }
+        
         seats.get(nextTurnIdx).setTurn(true);
 
         // deal the cards
@@ -114,6 +116,7 @@ public class Game {
 
     public void playHand(int seatId, Action action, int currentBet) {
         Seat currentSeat = getSeat(seatId);
+ 
         if (currentSeat.isTurn()) {
             Set<Action> allowedActions = getAllowedActions(currentSeat
                     .getPlayer());
@@ -379,7 +382,13 @@ public class Game {
     }
 
     public Seat getSeat(int position) {
-        return seats.get(position);
+        for (Seat seat : getActiveSeats()) {
+            if (seat.getPosition() == position) {
+                return seat;
+            }
+        }
+        
+        return null;
     }
 
     public void dealCards() {

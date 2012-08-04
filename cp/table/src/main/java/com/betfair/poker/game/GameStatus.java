@@ -19,7 +19,7 @@ public enum GameStatus {
 
     public static GameStatus fromValue(final String v) {
         for (GameStatus c : GameStatus.values()) {
-            if (c.value.equals(v)) {
+            if (c.value.equalsIgnoreCase(v)) {
                 return c;
             }
         }

@@ -13,10 +13,19 @@ public class Seat {
     private boolean isSmallBlind;
     private boolean isBigBlind;
     private boolean isTurn;
+    private boolean isWinner;
     
     
     public Seat(final int position) {
         this.position = position;
+    }
+    
+    public void reset() {
+        isDealer = false;
+        isSmallBlind = false;
+        isBigBlind = false;
+        isTurn = false;
+        isWinner = false;
     }
     
     public int getPosition() {
@@ -80,6 +89,18 @@ public class Seat {
     public void setSmallBlind(final boolean isSmallBlind) {
         this.isSmallBlind = isSmallBlind;
     }
+
+    public boolean isWinner() {
+        if ((getPlayer() != null) && (isWinner)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public void setWinner(final boolean isWinner) {
+        this.isWinner = isWinner;
+    }
     
     public boolean isTurn() {
         if ((getPlayer() != null) && (isTurn)) {
@@ -102,6 +123,6 @@ public class Seat {
             return "small blind";
         }
         
-        return null;
+        return "none";
     }
 }

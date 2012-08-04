@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 public class PlayerTest {
     @Test
     public void defaulConstructorTest() throws Exception {
-        Player player = new Player("Test1", 100);
+        Player player = new Player("Test1");
         Assert.assertNotNull(player);
         Assert.assertEquals(player.getStatus(), Status.CONTINUE);
 
@@ -31,10 +31,10 @@ public class PlayerTest {
     @Test
     public void anothertEst() throws Exception {
         Map<String, Player> a = new HashMap<String, Player>();
-        a.put("1", new Player("hello1", 1));
-        a.put("2", new Player("hello2", 2));
-        a.put("3", new Player("hello3", 3));
-        a.put("4", new Player("hello4", 4));
+        a.put("1", new Player("hello1"));
+        a.put("2", new Player("hello2"));
+        a.put("3", new Player("hello3"));
+        a.put("4", new Player("hello4"));
         a.get("2").setCash(100);
         
         System.out.println(a.get("2").getCash());

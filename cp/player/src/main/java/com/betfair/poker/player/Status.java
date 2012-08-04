@@ -31,7 +31,7 @@ public enum Status {
 
     public static Status fromName(final String v) {
         for (Status c : Status.values()) {
-            if (c.name.equals(v)) {
+            if (c.name.equalsIgnoreCase(v)) {
                 return c;
             }
         }

@@ -7,6 +7,7 @@ import com.betfair.poker.hand.Hand;
  */
 public class Player {
     private static final int DEFAULT_CASH = 10000;
+    private static int sequence = 1;
     private String name;
     private Status status;
     private Action action;
@@ -20,11 +21,12 @@ public class Player {
     private int id;
     private String avatar;
 
-    public Player(String name, int id) {
+    public Player(String name) {
         this.name = name;
-        this.id = id;
+        this.id = sequence++;
         this.hand = new Hand();
         this.status = Status.CONTINUE;
+        this.action = Action.CONTINUE;
         resetHand();
     }
 
@@ -87,8 +89,8 @@ public class Player {
             isAllIn = (cash == 0);
             break;
         case FOLD:
-             hand.setHoleCards(null);
-             hand.setCommunityCards(null);
+            hand.setHoleCards(null);
+            hand.setCommunityCards(null);
             break;
         }
         return action;
@@ -105,7 +107,7 @@ public class Player {
     public void setStatus(Status status) {
         this.status = status;
     }
-    
+
     public Action getAction() {
         return action;
     }
@@ -137,7 +139,7 @@ public class Player {
     public void setId(int id) {
         this.id = id;
     }
-    
+
     public String getAvatar() {
         return avatar;
     }
@@ -145,7 +147,7 @@ public class Player {
     public void setAvatar(String avatar) {
         this.avatar = avatar;
     }
-    
+
     public String getName() {
         return name;
     }
@@ -153,11 +155,11 @@ public class Player {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public int getCash() {
         return cash;
     }
-    
+
     public void setCash(int cash) {
         this.cash = cash;
     }
@@ -174,20 +176,17 @@ public class Player {
     public String toString() {
         return name;
     }
-    
-    public int getRaises()
-    {
-    	return raises;
+
+    public int getRaises() {
+        return raises;
     }
-    
+
     public void setAllInPot(int allInPot) {
         this.allInPot = allInPot;
     }
-    
-    public int getAllInPot()
-    {
-    	return allInPot;
-    }
 
+    public int getAllInPot() {
+        return allInPot;
+    }
 
 }
