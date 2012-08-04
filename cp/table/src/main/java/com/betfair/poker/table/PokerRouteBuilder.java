@@ -2,6 +2,7 @@ package com.betfair.poker.table;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -265,7 +266,12 @@ public class PokerRouteBuilder extends RouteBuilder {
                 innerMap.put("status", player.getAction());
             }
 
-            innerMap.put("actions", game.getAllowedActions(player));
+            if (seat.isTurn()) {
+                innerMap.put("actions", game.getAllowedActions(player));
+            } else {
+                innerMap.put("actions", new HashSet<Action>());
+            }
+         
             list.add(innerMap);
 
             map.put("args", list);
@@ -348,7 +354,12 @@ public class PokerRouteBuilder extends RouteBuilder {
                     innerMap.put("status", player.getAction());
                 }
 
-                innerMap.put("actions", game.getAllowedActions(player));
+                if (seat.isTurn()) {
+                    innerMap.put("actions", game.getAllowedActions(player));
+                } else {
+                    innerMap.put("actions", new HashSet<Action>());
+                }
+                
                 list.add(innerMap);
             }
         }

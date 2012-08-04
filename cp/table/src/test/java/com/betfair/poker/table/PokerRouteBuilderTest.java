@@ -3,12 +3,14 @@ package com.betfair.poker.table;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.betfair.poker.game.Game;
+import com.betfair.poker.player.Action;
 import com.betfair.poker.player.Player;
-
 
 public class PokerRouteBuilderTest {
     @Test
@@ -56,6 +58,200 @@ public class PokerRouteBuilderTest {
         json = prb.readPlayers();
         Assert.assertNotNull(json);
         System.out.println("##### players2=\n" + json);
+
+        
+        playHand(table, prb);
+        
+        json = prb.readTable();
+        Assert.assertNotNull(json);
+        System.out.println("##### table3=\n" + json);
+        
+        json = prb.readPlayers();
+        Assert.assertNotNull(json);
+        System.out.println("##### players3=\n" + json);
+        
+        playHand(table, prb);
+        
+        json = prb.readTable();
+        Assert.assertNotNull(json);
+        System.out.println("##### table4=\n" + json);
+        
+        json = prb.readPlayers();
+        Assert.assertNotNull(json);
+        System.out.println("##### players4=\n" + json);
+        
+        playHand(table, prb);
+        
+        json = prb.readTable();
+        Assert.assertNotNull(json);
+        System.out.println("##### table5=\n" + json);
+        
+        json = prb.readPlayers();
+        Assert.assertNotNull(json);
+        System.out.println("##### players5=\n" + json);
+        
+        playHand(table, prb);
+        
+        json = prb.readTable();
+        Assert.assertNotNull(json);
+        System.out.println("##### table6=\n" + json);
+        
+        json = prb.readPlayers();
+        Assert.assertNotNull(json);
+        System.out.println("##### players6=\n" + json);
+        
+        
+        playHand(table, prb);
+        
+        json = prb.readTable();
+        Assert.assertNotNull(json);
+        System.out.println("##### table7=\n" + json);
+        
+        json = prb.readPlayers();
+        Assert.assertNotNull(json);
+        System.out.println("##### players7=\n" + json);
+        
+        
+        playHand(table, prb);
+        
+        json = prb.readTable();
+        Assert.assertNotNull(json);
+        System.out.println("##### table8=\n" + json);
+        
+        json = prb.readPlayers();
+        Assert.assertNotNull(json);
+        System.out.println("##### players8=\n" + json);
+        
+        
+        playHand(table, prb);
+        
+        json = prb.readTable();
+        Assert.assertNotNull(json);
+        System.out.println("##### table9=\n" + json);
+        
+        json = prb.readPlayers();
+        Assert.assertNotNull(json);
+        System.out.println("##### players9=\n" + json);
+        
+        playHand(table, prb);
+        
+        json = prb.readTable();
+        Assert.assertNotNull(json);
+        System.out.println("##### table10=\n" + json);
+        
+        json = prb.readPlayers();
+        Assert.assertNotNull(json);
+        System.out.println("##### players10=\n" + json);
+        
+        playHand(table, prb);
+        
+        json = prb.readTable();
+        Assert.assertNotNull(json);
+        System.out.println("##### table11=\n" + json);
+        
+        json = prb.readPlayers();
+        Assert.assertNotNull(json);
+        System.out.println("##### players11=\n" + json);
+        
+        playHand(table, prb);
+        
+        json = prb.readTable();
+        Assert.assertNotNull(json);
+        System.out.println("##### table12=\n" + json);
+        
+        json = prb.readPlayers();
+        Assert.assertNotNull(json);
+        System.out.println("##### players12=\n" + json);
+        
+        playHand(table, prb);
+        
+        json = prb.readTable();
+        Assert.assertNotNull(json);
+        System.out.println("##### table13=\n" + json);
+        
+        json = prb.readPlayers();
+        Assert.assertNotNull(json);
+        System.out.println("##### players13=\n" + json);
+        
+        playHand(table, prb);
+        
+        json = prb.readTable();
+        Assert.assertNotNull(json);
+        System.out.println("##### table14=\n" + json);
+        
+        json = prb.readPlayers();
+        Assert.assertNotNull(json);
+        System.out.println("##### players14=\n" + json);
+        
+        playHand(table, prb);
+        
+        json = prb.readTable();
+        Assert.assertNotNull(json);
+        System.out.println("##### table15=\n" + json);
+        
+        json = prb.readPlayers();
+        Assert.assertNotNull(json);
+        System.out.println("##### players15=\n" + json);
+        
+        playHand(table, prb);
+        
+        json = prb.readTable();
+        Assert.assertNotNull(json);
+        System.out.println("##### table16=\n" + json);
+        
+        json = prb.readPlayers();
+        Assert.assertNotNull(json);
+        System.out.println("##### players16=\n" + json);
+        
+        playHand(table, prb);
+        
+        json = prb.readTable();
+        Assert.assertNotNull(json);
+        System.out.println("##### table17=\n" + json);
+        
+        json = prb.readPlayers();
+        Assert.assertNotNull(json);
+        System.out.println("##### players17=\n" + json);
+        
+        playHand(table, prb);
+        
+        json = prb.readTable();
+        Assert.assertNotNull(json);
+        System.out.println("##### table18=\n" + json);
+        
+        json = prb.readPlayers();
+        Assert.assertNotNull(json);
+        System.out.println("##### players18=\n" + json);
+    }
+    
+    private void playHand(final Table table, final PokerRouteBuilder prb) {
+        
+        final Map<String, Object> map = new HashMap<String, Object>();
+    
+        final Game game = table.getGame();
+        
+        for (Seat seat : game.getActiveSeats()) {
+            if (seat.isTurn()) {
+                map.put("seat", seat.getPosition());
+                
+                
+                Set<Action> actions = game.getAllowedActions(seat.getPlayer());
+                
+                if (actions.contains(Action.CHECK)) {
+                    map.put("action", Action.CHECK.getName());
+                    map.put("amount", 0);
+                } else if (actions.contains(Action.CALL)) {
+                    map.put("action", Action.CALL.getName());
+                    map.put("amount", 0);                    
+                } else {
+                    map.put("action", Action.FOLD.getName());
+                    map.put("amount", 0);  
+                }
+
+                prb.updatePlayer(map);
+                break;
+            }
+        }
     }
     
     

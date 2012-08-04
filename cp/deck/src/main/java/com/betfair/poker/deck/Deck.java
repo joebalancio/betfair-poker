@@ -1,7 +1,7 @@
 package com.betfair.poker.deck;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -73,10 +73,11 @@ public class Deck {
         if (position == 51) {
             return null;
         }
-        for(int i=0; i< noOfCards; i++)
-        {
-        	dealtCards.add(cards.get(position++));
+        
+        for (int i=0; i< noOfCards; i++) {
+            dealtCards.add(cards.get(position++));
         }
+        
         return dealtCards;
     }
 
@@ -102,9 +103,16 @@ public class Deck {
         this.position = 0;
     }
 
+    public void shuffle(final int num) {
+        for (int i = 0; i < num; i++) {
+            shuffle();
+        }
+    }
+    
     /**
      * String representation of this class.
      */
+    @Override
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         buffer.append("Deck[");

@@ -116,13 +116,13 @@ public class Seat {
     
     public String getGamePosition() {
         if (isDealer()) {
-            return "dealer";
+            return "DEALER";
         } else if (isBigBlind()) {
-            return "big blind";
+            return "BIG BLIND";
         } else if (isSmallBlind()) {
-            return "small blind";
+            return "SMALL BLIND";
         }
         
-        return "none";
+        return "NONE";
     }
 }

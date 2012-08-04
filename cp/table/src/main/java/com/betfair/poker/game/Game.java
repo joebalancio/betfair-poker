@@ -68,6 +68,7 @@ public class Game {
     }
 
     public void initGame() {
+        this.deck.shuffle();
         minBet = BIG_BLIND;
         status = GameStatus.DEAL;
         bet = minBet;
@@ -153,8 +154,10 @@ public class Game {
                 seats.get(seatId).getPlayer();
                 // seats.remove(seatId);
                 if (getSeatSize() == 1) {
+                    final Seat seat = seats.get(0);
                     // The player left wins.
-                    playerWins(seats.get(0).getPlayer());
+                    seat.setWinner(true);
+                    playerWins(seat.getPlayer());
                     playersToAct = 0;
                 }
                 break;
@@ -188,7 +191,7 @@ public class Game {
                         if (null != seat.getPlayer())
                             seat.getPlayer().setBet(0);
                     }
-                    status = null;
+                    status = GameStatus.SHOWDOWN;
                     log.debug("Game is complete ");
                     payPots();
                 }
@@ -307,6 +310,7 @@ public class Game {
             if (winners.size() == 1) {
                 // Single winner.
                 Seat winner = winners.get(0);
+                winner.setWinner(true);
                 winner.getPlayer().win(pot);
                 break;
             } else {
@@ -331,6 +335,7 @@ public class Game {
                     // Give the player his share of the pot.
                     for (Seat origSeat : seats) {
                         if (origSeat.equals(seat)) {
+                            origSeat.setWinner(true);
                             origSeat.getPlayer().win(potShare);
                         }
                     }
@@ -395,15 +400,20 @@ public class Game {
         // Burn the first card
         deck.dealCard();
         log.debug("seat size " + getSeatSize());
-        // Deal 2 cards to each player at the start
+        
+        // Deal first card to each player at the start
         for (Seat seat : seats) {
             Hand hand = new Hand();
             HoleCards holeCards = new HoleCards();
-            log.debug("how many cards dealt "
-                    + deck.dealCards(2).size());
-            holeCards.addCards(deck.dealCards(2));
+            holeCards.addCard(deck.dealCard());
             hand.setHoleCards(holeCards);
             seat.getPlayer().setHand(hand);
+        }
+
+        // Deal second card to each player at the start
+        for (Seat seat : seats) {
+            HoleCards holeCards = seat.getPlayer().getHand().getHoleCards();
+            holeCards.addCard(deck.dealCard());
         }
     }
 
@@ -418,7 +428,7 @@ public class Game {
         // Burn the first card
         deck.dealCard();
 
-        // Deal 2 cards to each player at the start
+        // Deal 3 flop cards
         this.communityCards = new CommunityCards();
         communityCards.addCards(deck.dealCards(3));
 
@@ -456,8 +466,9 @@ public class Game {
         // Burn the first card
         deck.dealCard();
 
-        // Deal 2 cards to each player at the start
+        // Deal turn or river card
         communityCards.addCards(deck.dealCards(1));
+ 
         for (int i = 0; i < seats.size(); i++) {
             Seat seat = seats.get(i);
             if (null != seat.getPlayer()) {
@@ -470,7 +481,9 @@ public class Game {
 
             }
         }
+        
         playersToAct = getSeatSize();
+        
         if (GameStatus.FLOP.equals(status)) {
             status = GameStatus.TURN;
         } else if (GameStatus.TURN.equals(status)) {

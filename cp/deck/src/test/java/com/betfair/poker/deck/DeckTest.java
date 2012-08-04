@@ -1,11 +1,11 @@
 package com.betfair.poker.deck;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import java.util.Random;
-import java.util.ArrayList;
 
 public class DeckTest {
     private ArrayList<Card> cards;
