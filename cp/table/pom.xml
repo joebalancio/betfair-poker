@@ -28,6 +28,11 @@
       <version>${project.version}</version>
     </dependency>  
     <dependency>
+      <groupId>com.betfair.poker</groupId>
+      <artifactId>hand</artifactId>
+      <version>${project.version}</version>
+    </dependency> 
+    <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-core</artifactId>
       <scope>provided</scope>
@@ -40,6 +45,12 @@
     <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-http</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-core-asl</artifactId>
+      <version>${jackson.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
