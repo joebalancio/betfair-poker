@@ -1,5 +1,8 @@
 define(function(require,exports,modules) {
-	var Backbone = require('backbone');
+	var
+    Backbone = require('backbone'),
+    Common = require('common');
+
 	var Player = Backbone.Model.extend({
     /*
      * Properties
@@ -75,7 +78,7 @@ define(function(require,exports,modules) {
       visible: true
     },
     user: null, // screen user
-    queueChanges: [],
+    animationInProgress: 0,
 
     /*
      * Functions
@@ -88,18 +91,31 @@ define(function(require,exports,modules) {
       delete this.attributes.images;
       this.user = this.attributes.user;
       delete this.attributes.user;
+
+      // binding
       this.on('add', this.add, this);
-      //this.on('change', this.update, this);
       this.on('change:position', this.updatePosition, this);
       this.on('change:cards', this.updateCards, this);
       this.on('change:chips', this.updateChips, this);
       this.on('change:avatar', this.updateAvatar, this);
       this.on('change:status', this.updateStatus, this);
+      this.on('animation:begin', function() {
+        if (this.animationInProgress === 0) this.trigger('animation:before');
+        this.animationInProgress++;
+      });
+      this.on('animation:end', function() {
+        if (--this.animationInProgress === 0) this.trigger('animation:complete');
+      });
+      this.on('animation:complete', function() {
+        console.log('animations complete!!');
+      });
+
       this.shapes = {
         outline: new Kinetic.Rect({
           stroke: 'red',
-          width: 180,
-          height: 150
+          width: 170,
+          height: 155,
+          visible: false
         }),
         name: new Kinetic.Text({
           text: '',
@@ -148,7 +164,6 @@ define(function(require,exports,modules) {
           radius: 10,
           y: 25,
           x: 25,
-          visible: false,
           shadow: {
             color: 'black',
             blur: 2,
@@ -177,6 +192,7 @@ define(function(require,exports,modules) {
           x: 5,
         }),
         card1: new Kinetic.Sprite(_.extend({
+          name: 'card',
           width: 50,
           height: 50 * this.cardRatio,
           offset: {
@@ -186,6 +202,7 @@ define(function(require,exports,modules) {
           rotation: Math.PI * 0.05,
         }, this.sprites.smallCards)),
         card2: new Kinetic.Sprite(_.extend({
+          name: 'card',
           width: 50,
           height: 50 * this.cardRatio,
           offset: {
@@ -194,27 +211,6 @@ define(function(require,exports,modules) {
           },
           rotation: -Math.PI * 0.05,
         }, this.sprites.smallCards)),
-        /*
-        card1: new Kinetic.Image({
-          width: 50,
-          height: 50 * this.cardRatio,
-          offset: {
-            x: 25,
-            y: 50 * this.cardRatio / 2
-          },
-          rotation: Math.PI * 0.05,
-        }),
-        card2: new Kinetic.Image({
-          width: 50,
-          height: 50 * this.cardRatio,
-          offset: {
-            x: 25,
-            y: 50 * this.cardRatio / 2
-          },
-          rotation: -Math.PI * 0.05,
-          name: 'card'
-        }),
-        */
         avatar: new Kinetic.Image({
           name: 'avatar',
         })
@@ -222,8 +218,8 @@ define(function(require,exports,modules) {
       _.each(this.shapes, function(shape) {
         this.group.add(shape);
       }, this);
-      this.shapes.card1.setPosition(70, 70);
-      this.shapes.card2.setPosition(50, 70);
+      this.shapes.card1.setPosition(70, 85);
+      this.shapes.card2.setPosition(50, 85);
       this.shapes.card1.moveToBottom();
       this.shapes.card2.moveToBottom();
 
@@ -257,119 +253,102 @@ define(function(require,exports,modules) {
     updatePosition: function(model, position) {
       var previousPosition = model.previous('position');
       var stage = this.group.getStage();
+      var positionMap = {
+        'NONE': '',
+        'DEALER': 'd',
+        'SMALL BLIND': 'sb',
+        'BIG BLIND': 'bb',
+      };
+      var positionText = position ? positionMap[position].toUpperCase() : '';
 
-      if (!stage) {
-        // if there is no stage then just set the properties
-        // this happens on a load
-        this.shapes.position.setText(position.toUpperCase());
-        switch (position) {
-          case 'd':
-            this.shapes.position.setAttrs(this.dealerTextProps);
-            this.shapes.positionCircle.setAttrs(this.dealerButtonProps);
-            break;
-          case 'bb':
-            this.shapes.position.setAttrs(this.bigBlindTextProps);
-            this.shapes.positionCircle.setAttrs(this.bigBlindButtonProps);
-            break;
-          case 'sb':
-            this.shapes.position.setAttrs(this.smallBlindTextProps);
-            this.shapes.positionCircle.setAttrs(this.smallBlindButtonProps);
-            break;
-          default:
-            this.shapes.position.setAttrs(this.fadeInProps);
-            this.shapes.positionCircle.setAttrs(this.fadeInProps);
-        }
+      // set text
+      this.shapes.position.setText(positionText);
+
+      // set position style
+      switch (position) {
+        case 'DEALER':
+          this.shapes.position.setAttrs(this.dealerTextProps);
+          this.shapes.positionCircle.setAttrs(this.dealerButtonProps);
+          break;
+        case 'BIG BLIND':
+          this.shapes.position.setAttrs(this.bigBlindTextProps);
+          this.shapes.positionCircle.setAttrs(this.bigBlindButtonProps);
+          break;
+        case 'SMALL BLIND':
+          this.shapes.position.setAttrs(this.smallBlindTextProps);
+          this.shapes.positionCircle.setAttrs(this.smallBlindButtonProps);
+          break;
+      }
+
+      if (previousPosition) {
+        if (position === 'none') this.hidePosition();
+        else this.showPosition();
       } else {
-        // we have a stage that means we can do fancy stuff
+        if (position === 'none') this.hidePosition(false);
+        else this.showPosition(false);
+      }
 
-        if (previousPosition != position) {
-          if (position == 'none') {
-            // just fade out if the position if it is empty
-            this.shapes.position.transitionTo(this.fadeOutProps);
-            this.shapes.positionCircle.transitionTo(this.fadeOutProps);
-          } else {
-            // set text and basic props
-            this.shapes.position.setText(position.toUpperCase());
-            switch (position) {
-              case 'd':
-                this.shapes.position.setAttrs(this.dealerTextProps);
-                this.shapes.positionCircle.setAttrs(this.dealerButtonProps);
-                break;
-              case 'bb':
-                this.shapes.position.setAttrs(this.bigBlindTextProps);
-                this.shapes.positionCircle.setAttrs(this.bigBlindButtonProps);
-                break;
-              case 'sb':
-                this.shapes.position.setAttrs(this.smallBlindTextProps);
-                this.shapes.positionCircle.setAttrs(this.smallBlindButtonProps);
-                break;
-              default:
-                this.shapes.position.setAttrs(this.fadeInProps);
-                this.shapes.positionCircle.setAttrs(this.fadeInProps);
+    },
+    showPosition: function(animate, next) {
+      var
+        self = this,
+        stage = this.group.getStage(),
+        animate = !_.isUndefined(animate) ? animate : true,
+        next = !_.isUndefined(next) ? next : function() {},
+        completed = 2,
+        fadeIn = _.extend({
+          callback: function() {
+            if (--completed === 0) {
+              self.trigger('animation:end');
+              next();
             }
-
-            // transitioning to a value
-            this.shapes.position.setAttrs(this.fadeOutProps);
-            this.shapes.positionCircle.setAttrs(this.fadeOutProps);
-            this.shapes.position.transitionTo(this.fadeInProps);
-            this.shapes.positionCircle.transitionTo(this.fadeInProps);
           }
-        }
-/*
-        // set text and basic props
-        this.shapes.position.setText(position.toUpperCase());
-        switch (position) {
-          case 'd':
-            this.shapes.position.setAttrs(this.dealerTextProps);
-            this.shapes.positionCircle.setAttrs(this.dealerButtonProps);
-            break;
-          case 'bb':
-            this.shapes.position.setAttrs(this.bigBlindTextProps);
-            this.shapes.positionCircle.setAttrs(this.bigBlindButtonProps);
-            break;
-          case 'sb':
-            this.shapes.position.setAttrs(this.smallBlindTextProps);
-            this.shapes.positionCircle.setAttrs(this.smallBlindButtonProps);
-            break;
-          default:
-            this.shapes.position.setAttrs(this.fadeInProps);
-            this.shapes.positionCircle.setAttrs(this.fadeInProps);
-        }
+        }, Common.fadeIn);
 
-        // transition only if there is a stage and transitioning from one position to another
-        function done(self) {
-          return function(self) {
-            if (previousPosition != position && stage) {
-              if (position == '') {
-                this.shapes.position.transitionTo(this.fadeOutProps);
-                this.shapes.positionCircle.transitionTo(this.fadeOutProps);
-              } else {
-                this.shapes.position.setAttrs(this.fadeOutProps);
-                this.shapes.positionCircle.setAttrs(this.fadeOutProps);
-                this.shapes.position.transitionTo(this.fadeInProps);
-                this.shapes.positionCircle.transitionTo(this.fadeInProps);
-              }
+      if (stage && animate) {
+        this.trigger('animation:begin');
+        this.shapes.position.transitionTo(fadeIn);
+        this.shapes.positionCircle.transitionTo(fadeIn);
+      } else {
+        this.shapes.position.setAttrs(Common.visible);
+        this.shapes.positionCircle.setAttrs(Common.visible);
+        next();
+      }
+    },
+    hidePosition: function(animate, next) {
+      var
+        self = this,
+        stage = this.group.getStage(),
+        animate = !_.isUndefined(animate) ? animate : true,
+        next = !_.isUndefined(next) ? next : function() {},
+        completed = 2,
+        fadeOut = _.extend({
+          callback: function() {
+            if (--completed === 0) {
+              self.trigger('animation:end');
+              next();
             }
-          };
-        }
-          */
+          }
+        }, Common.fadeOut);
+
+      if (stage && animate) {
+        this.trigger('animation:begin');
+        this.shapes.position.transitionTo(fadeOut);
+        this.shapes.positionCircle.transitionTo(fadeOut);
+      } else {
+        this.shapes.position.setAttrs(Common.hidden);
+        this.shapes.positionCircle.setAttrs(Common.hidden);
+        next();
       }
     },
     updateCards: function(model, cards) {
       if (cards && this.user && this.user.id === model.id) {
-        this.shapes.card1.setAnimation(cards[0]);
-        this.shapes.card2.setAnimation(cards[1]);
+        this.shapes.card1.setAnimation(this.getSimpleCard(cards[0]));
+        this.shapes.card2.setAnimation(this.getSimpleCard(cards[1]));
       } else {
         this.shapes.card1.setAnimation('back');
         this.shapes.card2.setAnimation('back');
       }
-
-    /*
-      if(cards && cards[0] === 'over') {
-        this.shapes.card1.hide();
-        this.shapes.card2.hide();
-      }
-      */
     },
     updateName: function(model, name) {
       this.shapes.name.setText(name);
@@ -389,13 +368,13 @@ define(function(require,exports,modules) {
         capitalize = status ? status.charAt(0).toUpperCase() + status.substr(1) : '';
 
       switch (status) {
-        case 'turn':
+        case 'TURN':
           this.shapes.name.setAttrs(this.activePlayerProps);
           break;
-        case 'bet':
-        case 'call':
-        case 'fold':
-        case 'check':
+        case 'BET':
+        case 'CALL':
+        case 'FOLD':
+        case 'CHECK':
           this.shapes.name.setText(capitalize);
         default:
           this.shapes.name.setAttrs(this.inactivePlayerProps);
@@ -403,19 +382,150 @@ define(function(require,exports,modules) {
       }
     },
 
-    fold: function() {
-      var stage = this.group.getStage();
-      var transition = {
-        x: stage.getWidth() / 2 - this.group.getX() - 50 / 2,
-        y: stage.getHeight() / 2 - this.group.getY() - 50 * this.cardRatio / 2,
-        rotation: Math.PI,
-        alpha: 0,
-        easing: 'strong-ease-out',
-        duration: 1.5
+    foldCards: function(animate, next) {
+      var
+        self = this,
+        stage = this.group.getStage(),
+        animate = !_.isUndefined(animate) ? animate : true,
+        next = !_.isUndefined(next) ? next : function() {},
+        completed = 2;
+
+      if (stage && animate) {
+        transition = {
+          x: stage.getWidth() / 2 - this.group.getX() - 50 / 2,
+          y: stage.getHeight() / 2 - this.group.getY() - 50 * this.cardRatio / 2,
+          rotation: Math.PI,
+          alpha: 0,
+          easing: 'strong-ease-out',
+          duration: 1.5,
+          callback: function() {
+            if (--completed === 0) {
+              self.trigger('animation:end');
+              next();
+            }
+          }
+        };
+
+        this.trigger('animation:begin');
+        this.shapes.card1.transitionTo(transition);
+        this.shapes.card2.transitionTo(transition);
+      } else {
+        this.hideCards(false);
+      }
+    },
+
+    getSimpleCard: function(card) {
+      var map = {
+        TWO: 2,
+        THREE: 3,
+        FOUR: 4,
+        FIVE: 5,
+        SIX: 6,
+        SEVEN: 7,
+        EIGHT: 8,
+        NINE: 9,
+        TEN: 'T',
+        JACK: 'J',
+        QUEEN: 'Q',
+        KING: 'K',
+        ACE: 'A'
       };
-      this.shapes.card1.transitionTo(transition);
-      this.shapes.card2.transitionTo(transition);
+      if (_.isObject(card)) {
+        console.log(card.suit.charAt(0) + map[card.rank]);
+        return card.suit.charAt(0) + map[card.rank];
+      } else {
+        return card;
+      }
+    },
+    showCards: function(animate, next) {
+      var
+        self = this,
+        stage = this.group.getStage(),
+        animate = !_.isUndefined(animate) ? animate : true,
+        next = !_.isUndefined(next) ? next : function() {},
+        completed = 2,
+        callback = function() {
+          if (--completed === 0) {
+            console.log('animation done');
+            self.trigger('animation:end');
+            next();
+          }
+        },
+        fadeIn = _.extend({
+          callback: callback
+        }, Common.fadeIn),
+        flipIn = _.extend({
+          callback: callback
+        }, Common.flipIn);
+    },
+
+    flipCards: function(next) {
+      var
+        self = this,
+        stage = this.group.getStage(),
+        animate = !_.isUndefined(animate) ? animate : true,
+        next = !_.isUndefined(next) ? next : function() {},
+        cards = [this.shapes.card1, this.shapes.card2],
+        completed = 0,
+        flipOut = _.extend({
+          callback: function() {
+            if (--completed === 0) {
+              console.log('flip cards animation done');
+              self.trigger('animation:end');
+              next();
+            }
+            console.log(completed);
+          }
+        }, Common.flipOut);
+
+      function getTransitionProps(card, animation) {
+        return _.extend({
+          callback: function() {
+            console.log(animation, completed);
+            card.setAnimation(animation);
+            card.transitionTo(flipOut);
+          }
+        }, Common.flipIn);
+      }
+
+      if (stage && animate) {
+        this.trigger('animation:begin');
+        _.each(cards, function(card, index) {
+          completed++;
+          var previousAnimation = card.getAnimation();
+          previousAnimation = this.getSimpleCard(this.get('cards')[index]);
+          card.setAnimation('back');
+          card.transitionTo(getTransitionProps(card, previousAnimation));
+        }, this);
+      }
+    },
+
+    hideCards: function(hasStage, next) {
+      var
+        cards = this.group.get('.card'),
+        completed = 0,
+        next = next ? next : function() {};
+
+      if (hasStage) {
+        _.each(cards, function(card, index) {
+          completed++;
+          card.transitionTo({
+            alpha: 0,
+            duration: 0.5,
+            easing: 'strong-ease-out',
+            callback: function() {
+              if (--completed === 0) next();
+            }
+          });
+        }, this);
+      } else {
+        _.each(cards, function(card, index) {
+          card.setAlpha(0);
+        }, this);
+        next();
+      }
     }
+
 	});
 	return Player;
 });

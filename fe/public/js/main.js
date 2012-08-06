@@ -13,12 +13,11 @@ require.config({
 });
 
 require([
-  'app', 'backbone', 'bf/io'
-], function(App, Backbone, bfio) {
+  'app', 'backbone', 'bf/io', 'config'
+], function(App, Backbone, bfio, Config) {
   var
     endpoint,
-    app,
-    real = false;
+    app;
 
   function connect() {
     if (!app) app = new App();
@@ -29,17 +28,19 @@ require([
   }
 
   // connect to backend
-  if (real) {
-    endpoint = 'ws://poker1.cp.sfo.us.betfair:9292/poker';
-    window.socket = bfio.connect(endpoint);
-  } else {
+  if (Config.backend.mock) {
     endpoint = window.location.protocol + '//' + window.location.host;
     window.socket = io.connect(endpoint);
+  } else {
+    endpoint = Config.backend.uri;
+    window.socket = bfio.connect(endpoint);
   }
 
   window.socket.on('connect', connect);
   window.socket.on('disconnect', disconnect);
 
+  // notifications
+  window.Notifications = window.webkitNotifications || false;
 
 });
 
@@ -48,3 +49,8 @@ define('io', function(require, exports, module) {
   module.exports = io;
 });
 
+// defining module for stomp
+define('stomp', function(require, exports, module) {
+  require('/js/libs/stomp/stomp.js');
+  module.exports = Stomp;
+});
