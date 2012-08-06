@@ -159,7 +159,7 @@ public class PokerRouteBuilder extends RouteBuilder {
             .process(new Processor() {
                 @Override
                 public void process(Exchange exchange) throws Exception {
-                    exchange.getOut().setBody("Poker Game Started.  Watch here:  <a href=\"" + feEndpoint + "\">Poker</a>");
+                    exchange.getOut().setBody("Poker Game Started.  <a href=\"" + feEndpoint + "\">Watch here!</a>");
                 }
             })
             .log(">>> Message sending to Notification Client: ${body}")
@@ -172,7 +172,7 @@ public class PokerRouteBuilder extends RouteBuilder {
             .process(new Processor() {
                 @Override
                 public void process(Exchange exchange) throws Exception {
-                    exchange.getOut().setBody("Poker Game is about to start.  Join:  <a href=\"" + feEndpoint + "\">Poker</a>");
+                    exchange.getOut().setBody("Poker Game is about to start.  <a href=\"" + feEndpoint + "\">Join here!</a>");
                 }
             })
             .log(">>> Message sending to Notification Client: ${body}")
