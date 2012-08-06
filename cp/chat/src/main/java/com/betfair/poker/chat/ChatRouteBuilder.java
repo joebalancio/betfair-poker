@@ -3,10 +3,7 @@ package com.betfair.poker.chat;
 import org.apache.camel.builder.RouteBuilder;
 
 public class ChatRouteBuilder extends RouteBuilder {
-
-    private String fromEndpoint;
-    private String toEndpoint;
-
+    
     public ChatRouteBuilder() {
     }
 
@@ -28,14 +25,6 @@ public class ChatRouteBuilder extends RouteBuilder {
             // this is needed as by default messages is InOnly
             // and we will by default send back to the current client using
             // the provided connection key
-            .to("websocket://chat");
-    }
-
-    public void setFromEndpoint(String fromEndpoint) {
-        this.fromEndpoint = fromEndpoint;
-    }
-
-    public void setToEndpoint(String toEndpoint) {
-        this.toEndpoint = toEndpoint;
+            .to("websocket://chat?sendToAll=true");
     }
 }
