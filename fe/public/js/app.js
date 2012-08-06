@@ -91,7 +91,7 @@ define([
         this.views.effects.render();
 
         // chat view
-        this.views.chat = new ChatView({collection: new Messages, player: this.user});
+        this.views.chat = new ChatView({collection: new Messages});
         this.views.chat.render(); // not used atm
 
         // table view
@@ -314,6 +314,7 @@ define([
         model.get('avatar') === this.views.register.model.get('avatar')) {
         console.log('found screen user');
         this.user = model;
+        this.views.chat.name = model.get('name');
         model.user = model;
         model.trigger('change:cards', model, model.get('cards'));
       }
