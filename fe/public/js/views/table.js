@@ -1,6 +1,7 @@
 define(function(require,exports,modules) {
   var Backbone = require('backbone');
   var Kinetic = require('kinetic');
+  var Common = require('common');
 
   var TableView = Backbone.View.extend({
     /*
@@ -12,6 +13,7 @@ define(function(require,exports,modules) {
     images: null,
     effects: null,
     shapes: {},
+    animationInProgress: 0,
 
     /*
      * Functions
@@ -21,6 +23,16 @@ define(function(require,exports,modules) {
       this.model.on('change:pot', this.updatePot, this);
       this.model.on('change:status', this.updateStatus, this);
       this.model.on('change', this.updateStage, this);
+      this.on('animation:begin', function() {
+        if (this.animationInProgress === 0) this.trigger('animation:before');
+        this.animationInProgress++;
+      });
+      this.on('animation:end', function() {
+        if (--this.animationInProgress === 0) this.trigger('animation:complete');
+      });
+      this.on('animation:complete', function() {
+        console.log('animations complete!!');
+      });
 
       this.images = this.options.images;
       this.layer = this.options.layer;
@@ -61,38 +73,43 @@ define(function(require,exports,modules) {
         }),
         card1: new Kinetic.Sprite(_.extend({
           name: 'card',
+          position: 0,
           width: 92,
           height: 128,
           offset: { x: 92/2, y: 128/1.2 },
-          visible: false,
+          alpha: 0,
         }, this.sprites.cards)),
         card2: new Kinetic.Sprite(_.extend({
           name: 'card',
+          position: 1,
           width: 92,
           height: 128,
           offset: { x: 92/2, y: 128/1.2 },
-          visible: false,
+          alpha: 0,
         }, this.sprites.cards)),
         card3: new Kinetic.Sprite(_.extend({
           name: 'card',
+          position: 2,
           width: 92,
           height: 128,
           offset: { x: 92/2, y: 128/1.2 },
-          visible: false,
+          alpha: 0,
         }, this.sprites.cards)),
         card4: new Kinetic.Sprite(_.extend({
           name: 'card',
+          position: 3,
           width: 92,
           height: 128,
           offset: { x: 92/2, y: 128/1.2 },
-          visible: false,
+          alpha: 0,
         }, this.sprites.cards)),
         card5: new Kinetic.Sprite(_.extend({
           name: 'card',
+          position: 4,
           width: 92,
           height: 128,
           offset: { x: 92/2, y: 128/1.2 },
-          visible: false,
+          alpha: 0,
         }, this.sprites.cards)),
 
       };
@@ -146,6 +163,68 @@ define(function(require,exports,modules) {
       }, this);
 
     },
+    showPot: function(animate, next) {
+      var
+        self = this,
+        originalPositions = {
+          chips: this.shapes.chips.getPosition(),
+          potBg: this.shapes.potBg.getPosition(),
+          pot: this.shapes.pot.getPosition()
+        },
+        stage = this.layer.getStage(),
+        animate = !_.isUndefined(animate) ? animate : true,
+        next = !_.isUndefined(next) ? next : function() {},
+        completed = 3,
+        callback = function() {
+          if (--completed === 0) {
+            self.trigger('animation:end');
+            next();
+          }
+        };
+
+      if (stage && animate) {
+        this.trigger('animation:begin');
+        this.shapes.chips.setAttrs({x: stage.getWidth()});
+        this.shapes.potBg.setAttrs({x: 0});
+        this.shapes.chips.transitionTo(_.extend({callback: callback}, Common.fadeIn, originalPositions.chips));
+        this.shapes.potBg.transitionTo(_.extend({callback: callback}, Common.fadeIn, Common.visible50, originalPositions.potBg));
+        this.shapes.pot.transitionTo(_.extend({callback: callback}, Common.fadeIn));
+      } else {
+        this.shapes.chips.setAttrs(Common.visible);
+        this.shapes.potBg.setAttrs(Common.visible50);
+        this.shapes.pot.setAttrs(Common.visible);
+        next();
+      }
+    },
+    hidePot: function(animate, next) {
+      var
+        self = this,
+        stage = this.layer.getStage(),
+        animate = !_.isUndefined(animate) ? animate : true,
+        next = !_.isUndefined(next) ? next : function() {},
+        completed = 2,
+        callback = function() {
+          if (--completed === 0) {
+            self.trigger('animation:end');
+            next();
+          }
+        },
+        fadeOut = _.extend({
+          callback: callback,
+        }, Common.fadeOut);
+
+      if (stage && animate) {
+        this.trigger('animation:begin');
+        this.shapes.chips.transitionTo(fadeOut);
+        this.shapes.potBg.transitionTo(fadeOut);
+        this.shapes.pot.setAttrs(Common.hidden);
+      } else {
+        this.shapes.chips.setAttrs(Common.hidden);
+        this.shapes.potBg.setAttrs(Common.hidden);
+        this.shapes.pot.setAttrs(Common.hidden);
+        next();
+      }
+    },
     updatePot: function(model, pot) {
       var
         previousPot = model.previous('pot'),
@@ -162,36 +241,6 @@ define(function(require,exports,modules) {
         },
         previousPositions;
 
-      if (showTransition) {
-        if (previousPot === 0) {
-          previousPositions = {
-            chips: this.shapes.chips.getPosition(),
-            potBg: this.shapes.potBg.getPosition(),
-            pot: this.shapes.pot.getPosition()
-          };
-
-          this.shapes.chips.setAttrs({x: this.layer.getStage().getWidth()});
-          this.shapes.potBg.setAttrs({x: 0});
-          this.shapes.chips.transitionTo(_.extend({}, fadeIn, previousPositions.chips));
-          this.shapes.potBg.transitionTo(_.extend({}, fadeIn, {alpha: 0.5}, previousPositions.potBg));
-          this.shapes.pot.transitionTo(fadeIn);
-        }
-
-        if (pot === 0) {
-          this.shapes.chips.transitionTo(fadeOut);
-          this.shapes.potBg.transitionTo(fadeOut);
-          this.shapes.pot.setAttrs(fadeOut);
-        }
-      } else {
-        // don't transition
-        if (pot > 0) {
-          // only show pot if positive value
-          this.shapes.chips.setAttrs(_.extend({}, fadeIn));
-          this.shapes.potBg.setAttrs(_.extend({}, fadeIn, {alpha: 0.5}));
-          this.shapes.pot.setAttrs(fadeIn);
-        }
-      }
-
       this.shapes.pot.setText('$' + pot);
       if(pot > 200 && pot < 300) {
       	this.shapes.chips.setImage(this.images.chips.small);
@@ -202,6 +251,22 @@ define(function(require,exports,modules) {
       } else if (pot > 500) {
       	this.shapes.chips.setImage(this.images.chips.xlarge);
       }
+
+      // show/hide
+      if (_.isNumber(previousPot)) {
+        if (previousPot === 0) {
+          this.showPot();
+        } else if (pot === 0) {
+          this.hidePot();
+        }
+      } else {
+        if (pot === 0) {
+          this.hidePot(false);
+        } else {
+          this.showPot(false);
+        }
+      }
+
     },
     updateStage: function() {
       this.layer.getStage().draw();
@@ -222,91 +287,144 @@ define(function(require,exports,modules) {
         KING: 'K',
         ACE: 'A'
       };
+
       if (_.isObject(card)) {
         return card.suit.charAt(0) + map[card.rank];
       } else {
         return card;
       }
     },
-    updateCards: function(model, cards) {
-      var self = this,
-      previousCards = model.previous('cards');
-      console.log(cards, previousCards);
-
-      if (previousCards) {
-        if (cards.length) {
-          _.each(cards, function(card, index) {
-            var card = this.getSimpleCard(card);
-            var cardShape = this.shapes['card' + (index + 1)];
-            if (!cardShape.attrs.flipped) {
-              cardShape.attrs.flipped = true;
-              cardShape.setAnimation('back');
-              cardShape.show();
-              cardShape.transitionTo({
-                scale: { x: 0.1, y: 1 },
-                alpha: 1,
-                duration: 0.5,
-                easing: 'strong-ease-in',
-                callback: function() {
-                  cardShape.setAnimation(card);
-                  cardShape.transitionTo({
-                    scale: { x: 1, y: 1 },
-                    duration: 0.5,
-                    easing: 'strong-ease-out'
-                  });
-                }
-              });
+    showCards: function(cardValues, animate, next) {
+      console.log('show cards', cardValues);
+      var
+        self = this,
+        completed = 0,
+        cards = this.layer.get('.card'),
+        stage = this.layer.getStage(),
+        animate = !_.isUndefined(animate) ? animate : true,
+        next = !_.isUndefined(next) ? next : function() {},
+        flipOut = _.extend({
+          callback: function() {
+            if (--completed === 0) {
+              console.log('animation done');
+              self.trigger('animation:end');
+              next();
             }
-          }, this);
-        } else {
-          // hide cards
-          _.each(this.layer.get('.card'), function(card) {
-            console.log('card');
-            card.transitionTo({
-              alpha: 0,
-              duration: 0.5,
-              easing: 'strong-ease-out',
-            });
-          });
+          }
+        }, Common.flipOut);
 
-        }
-      } else {
-        _.each(cards, function(card, index) {
-          var cardShape = this.shapes['card' + (index + 1)];
-          cardShape.setAnimation('back');
-          cardShape.setAttrs({
-            animation: card,
-            visible: true,
-          });
-        }, this);
+      function getTransitionProps(card, animation) {
+        return _.extend({
+          callback: function() {
+            //card.setAnimation(animation);
+            card.transitionTo(flipOut);
+          }
+        }, Common.flipIn);
       }
+
+      if (stage && animate) {
+        _.each(cards, function(card) {
+          if (!card.attrs.flipped && cardValues[card.attrs.position]) {
+            completed++;
+            card.attrs.flipped = true;
+            //card.setAnimation('back');
+            card.transitionTo(getTransitionProps(card, cardValues[card.attrs.position]));
+          }
+        }, this);
+      } else {
+        _.each(cards, function(card) {
+          if (!card.attrs.flipped && cardValues[card.attrs.position]) {
+            card.setAttrs({
+              alpha: 1,
+              flipped: true
+            });
+          }
+        }, this);
+        next();
+      }
+
+    },
+    hideCards: function(cardValues, animate, next) {
+      console.log('hide cards');
+      var
+        self = this,
+        completed = 0,
+        cards = this.layer.get('.card'),
+        stage = this.layer.getStage(),
+        animate = !_.isUndefined(animate) ? animate : true,
+        next = !_.isUndefined(next) ? next : function() {},
+        fadeOut = _.extend({
+          callback: function() {
+            if (--completed === 0) {
+              console.log('animation done');
+              self.trigger('animation:end');
+              next();
+            }
+          }
+        }, Common.fadeOut);
+
+      if (stage && animate) {
+        _.each(cards, function(card) {
+          if (card.attrs.flipped) {
+            completed++;
+            card.attrs.flipped = false;
+            card.transitionTo(fadeOut);
+          }
+        }, this);
+      } else {
+        _.each(cards, function(card) {
+          if (card.attrs.flipped) {
+            card.setAttrs({
+              alpha: 0,
+              flipped: false
+            });
+          }
+        }, this);
+        next();
+      }
+    },
+    updateCards: function(model, cards) {
+      console.log('update cards');
+      var
+        self = this,
+        previousCards = model.previous('cards'),
+        cardShapes = this.layer.get('.card');
+
+      _.each(cardShapes, function(card) {
+        if (cards[card.attrs.position]) card.setAnimation(this.getSimpleCard(cards[card.attrs.position]));
+      }, this);
 
     },
 
     updateStatus: function(model, status) {
+      console.log('update status');
       var previousStatus = model.previous('status');
-      //Set the player's name labels back to their name for the next round
-      _.each(this.players.models, function(player, index) {
-      	player.shapes.name.setText(player.get('name'));
-      }, this);
-      switch (status) {
-        case 'DEAL':
-          break;
-        case 'FLOP':
 
-
-          _.each(this.shapes, function(card, index) {
-              if(index.indexOf('card') === 0) {
-              var cardShape = this.shapes[index];
-              cardShape.flipped = false;
-              cardShape.hide();
-            }
-          },this);
-          break;
-        case 'SHOWDOWN':
-          //this.effects.resetSpray();
-          //this.effects.spray();
-          break;
+      if (previousStatus) {
+        console.log('status', status);
+        switch (status) {
+          case 'DEAL':
+            this.hideCards(model.get('cards'));
+            break;
+          case 'FLOP':
+          case 'TURN':
+          case 'RIVER':
+          case 'SHOWDOWN':
+            this.showCards(model.get('cards'));
+            break;
+        }
+      } else {
+        switch (status) {
+          case 'DEAL':
+            this.hideCards(model.get('cards'), false);
+            break;
+          case 'FLOP':
+          case 'TURN':
+          case 'RIVER':
+          case 'SHOWDOWN':
+            this.showCards(model.get('cards'), false);
+            break;
+        }
       }
     }
   });

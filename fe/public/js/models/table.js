@@ -10,12 +10,14 @@ define(function(require,exports,modules) {
       action: null
     },
     queue: [],
+    animating: false,
 
     initialize: function() {
       this.ioBind('read', this.read, this);
     },
     read: function(model) {
       this.queue.push(model);
+      if (!this.animating) this.consume();
     },
     consume: function() {
       this.default(this.queue.shift());

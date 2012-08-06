@@ -65,6 +65,13 @@ define([
       this.players.on('change:status', this.displayActions, this);
       this.players.on('change:status', this.moveChips, this);
       this.players.on('change:actions', this.updateActionButtons, this);
+      this.players.on('animation:before', function() {
+        this.animating = true;
+      });
+      this.players.on('animation:complete', function() {
+        this.animating = false;
+        this.consume();
+      });
       this.players.sprites = this.sprites;
       this.players.layer = this.layers.players;
       this.players.user = this.user;
@@ -97,6 +104,13 @@ define([
           sprites: this.sprites,
         });
         this.views.table.render();
+        this.views.table.on('animation:before', function() {
+          this.model.animating = true;
+        });
+        this.views.table.on('animation:complete', function() {
+          this.model.animating = false;
+          this.model.consume();
+        });
 
         // register
         this.views.register = new RegisterView({
@@ -340,10 +354,14 @@ define([
     },
 
     updateActionButtons: function(model, buttons) {
-      this.$('#actions button').hide();
-      _.each(buttons, function(button) {
-        this.$('#actions button#' + button.toLowerCase()).show();
-      });
+      if (model == this.user) {
+        console.log('update action buttons', buttons);
+        this.$('#actions button').hide();
+        _.each(buttons, function(button) {
+          console.log(this.$('#actions button#' + button.toLowerCase()));
+          this.$('#actions button#' + button.toLowerCase()).show();
+        });
+      }
     },
 
     setUser: function(model) {
@@ -471,6 +489,7 @@ define([
           }
         });
       });
+      console.log(animations);
 
       // create cards sprite
       this.sprites.cards = {
@@ -503,12 +522,13 @@ define([
     },
 
     moveChips: function(model, status) {
-      if (status === 'WIN') {
+      if (status === 'WINNER') {
         var layer = this.layers.players;
         var chips = this.views.table.shapes.chips.clone();
         layer.add(chips);
 
         model.flipCards(function() {
+          model.trigger('animation:begin');
 
           var position = model.group.getPosition();
           chips.transitionTo({
@@ -518,6 +538,7 @@ define([
             alpha: 0,
             easing: 'strong-ease-out',
             callback: function() {
+              model.trigger('animation:end')
               layer.remove(chips);
             }
           });
@@ -536,6 +557,8 @@ define([
       window.socket.emit('table:reset');
 
     },
+
+
 
 
 

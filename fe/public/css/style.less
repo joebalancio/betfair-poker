@@ -1,21 +1,16 @@
 @import "bootstrap.less";
 @import "responsive.less";
 
-// variables
-@bodyPadding: 60px;
-@typeOfDisplay: default;
+body {
+  padding-top: 60px;
+}
 
-.addBorderRadiusByDisplay () when (@typeOfDisplay = default) {
+div.kineticjs-content {
   .border-radius(6px);
 }
-.addBorderRadiusByDisplay () when (@typeOfDisplay = mobile) {
-}
 
-body {
-  padding-top: @bodyPadding;
-}
 canvas {
-  .addBorderRadiusByDisplay;
+  .border-radius(6px);
 }
 
 div#chatbox {

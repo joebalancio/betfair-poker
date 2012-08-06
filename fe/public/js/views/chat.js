@@ -46,13 +46,15 @@ define(function(require, exports, module) {
       }
     },
     connect: function() {
-      var parts = [
-        '/',
-        this.stomp.channel.type,
-        '/',
-        this.stomp.channel.channelName
-      ];
-      this.stomp.subscribe(parts.join(''), this.notification);
+      var channel = this.stomp.channel;
+
+      function getChannelPath(type, name) {
+        return '/' + type + '/' + name;
+      }
+
+      console.log(this.stomp.channel);
+      this.stomp.subscribe(getChannelPath(channel.type, channel.channelName), this.notification);
+      this.stomp.subscribe(getChannelPath(channel.type, channel.heartBeats));
       console.log('connect', arguments);
     },
     notification: function(data) {
