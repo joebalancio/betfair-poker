@@ -129,7 +129,7 @@ define(function(require, exports, module) {
     sendMessage: function(name, text) {
       var data = { message: text };
       if (name) data.name = name;
-      new Message(data).save();
+      this.collection.add(new Message(data));
     }
   });
 

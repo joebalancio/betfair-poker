@@ -546,6 +546,11 @@ define([
 
         });
 
+        // cheesy effects
+        this.views.effects.resetSpray();
+        this.views.effects.spray();
+        this.views.chat.sendMessage('sentinel', 'cheesy effects, bro');
+
       }
     },
 
