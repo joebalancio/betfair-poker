@@ -488,8 +488,9 @@ define(function(require,exports,modules) {
         }, Common.flipIn);
       }
 
-      if (stage && animate) {
+      if (stage && animate && !this.cardsFlipped) {
         this.trigger('animation:begin');
+        this.cardsFlipped = true;
         _.each(cards, function(card, index) {
           completed++;
           var previousAnimation = card.getAnimation();
@@ -507,6 +508,7 @@ define(function(require,exports,modules) {
         next = next ? next : function() {};
 
       if (hasStage) {
+        this.cardsFlipped = false;
         _.each(cards, function(card, index) {
           completed++;
           card.transitionTo({
