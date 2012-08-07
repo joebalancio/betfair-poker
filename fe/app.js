@@ -15,7 +15,8 @@ var express = require('express'),
   io = require('socket.io').listen(server),
   _ = require('underscore'),
   poker = require('./lib/node-poker'),
-  monomi = require('monomi');
+  monomi = require('monomi'),
+  TestScenarios = require('./scenarios');
 
 io.configure(function() {
   io.set('log level', 1);
@@ -323,119 +324,5 @@ io.sockets.on('connection', function(socket) {
 //*/
 
 /*
-io.sockets.on('connection', function(socket) {
-  socket.on('load', function() {
-    var table = {
-      status: 'RIVER',
-      cards: ['JD','3H','AS','6H','QS'],
-      pot: 150,
-      user: 2
-    },
-    players = [{
-      chips: 500,
-      id: 1,
-      seat: 0,
-      name: 'joe',
-      avatar: 'A01',
-      position: 'dealer',
-      status: 'CHECK',
-      cards: ['3C','7C']
-    }, {
-      chips: 500,
-      id: 2,
-      seat: 1,
-      name: 'joe',
-      avatar: 'A01',
-      position: 'small blind',
-      status: 'CHECK',
-      cards: ['3C','7C']
-    }, {
-      chips: 500,
-      id: 3,
-      seat: 2,
-      name: 'joe',
-      avatar: 'A01',
-      position: 'big blind',
-      status: 'CHECK',
-      cards: ['3C','7C']
-    }];
-
-    var newTable = {
-      status: 'DEAL',
-      cards: [],
-      pot: 0
-    };
-    // get initial state
-    socket.emit('table:read', table);
-    socket.emit('players:read', players);
-
-    delay = 100;
-    setTimeout(function() {
-      table.status = 'SHOWDOWN';
-      table.pot = 0;
-      players[0].status = 'WIN';
-      players[0].chips = 600;
-      players[1].status = 'WIN';
-      players[1].chips = 550;
-      players[2].status = 'LOSE';
-      players[0].position = 'none';
-      players[1].position = 'none';
-      players[2].position = 'none';
-      socket.emit('table:read', table);
-      socket.emit('players:read', players);
-    }, delay);
-
-    delay += 100;
-    setTimeout(function() {
-      table = newTable;
-      table.pot = 100;
-      players[0].position = 'big blind';
-      players[0].status = 'CONTINUE';
-      players[1].position = 'dealer';
-      players[1].status = 'CONTINUE';
-      players[2].position = 'small blind';
-      players[2].status = 'TURN';
-      socket.emit('table:read', table);
-      socket.emit('players:read', players);
-    }, delay);
-
-    delay += 100;
-    setTimeout(function() {
-      players[0].position = 'big blind';
-      players[0].status = 'TURN';
-      players[1].position = 'dealer';
-      players[1].status = 'CONTINUE';
-      players[2].position = 'small blind';
-      players[2].status = 'CHECK';
-      socket.emit('table:read', table);
-      socket.emit('players:read', players);
-    }, delay);
-
-    delay += 100;
-    setTimeout(function() {
-      players[0].position = 'big blind';
-      players[0].status = 'CHECK';
-      players[1].position = 'dealer';
-      players[1].status = 'TURN';
-      players[2].position = 'small blind';
-      players[2].status = 'CHECK';
-      socket.emit('table:read', table);
-      socket.emit('players:read', players);
-    }, delay);
-
-    delay += 100;
-    setTimeout(function() {
-      table.cards = ['JD','3H','AS'];
-      table.status = 'FLOP';
-      players[0].position = 'big blind';
-      players[0].status = 'CONTINUE';
-      players[1].position = 'dealer';
-      players[1].status = 'CONTINUE';
-      players[2].position = 'small blind';
-      players[2].status = 'TURN';
-      socket.emit('table:read', table);
-      socket.emit('players:read', players);
-    }, delay);
-  });
-});
+io.sockets.on('connection', TestScenarios.transitionFromRiverToDeal);
 //*/

@@ -17,7 +17,7 @@ define(function(require, exports, module) {
      */
     initialize: function() {
       this.layer = this.options.layer;
-      this.layer.hide();
+      //this.layer.hide();
     },
 
     render: function() {
@@ -35,7 +35,7 @@ define(function(require, exports, module) {
           fill: 'red',
           stroke: 'purple',
           strokeWidth: 10,
-          alpha: 0.5,
+          alpha: 0,
           x: this.layer.getStage().getWidth() / 2,
           y: this.layer.getStage().getHeight() / 2,
         });

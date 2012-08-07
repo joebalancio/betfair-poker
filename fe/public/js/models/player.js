@@ -258,7 +258,9 @@ define(function(require,exports,modules) {
         'DEALER': 'd',
         'SMALL BLIND': 'sb',
         'BIG BLIND': 'bb',
+        'CONTINUE': '',
       };
+      console.log('position', position);
       var positionText = position ? positionMap[position].toUpperCase() : '';
 
       // set text
@@ -281,10 +283,10 @@ define(function(require,exports,modules) {
       }
 
       if (previousPosition) {
-        if (position === 'none') this.hidePosition();
+        if (position === 'NONE') this.hidePosition();
         else this.showPosition();
       } else {
-        if (position === 'none') this.hidePosition(false);
+        if (position === 'NONE') this.hidePosition(false);
         else this.showPosition(false);
       }
 

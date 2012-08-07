@@ -11,9 +11,10 @@ define([
   'models/table',
   'collections/player',
   'models/player',
+  'common',
   'backbone_lib/backbone.iosync',
   'backbone_lib/backbone.iobind'
-], function($, Backbone, _, Kinetic, TableView, ChatView, EffectsView, RegisterView, Messages, TableModel, PlayerCollection, PlayerModel) {
+], function($, Backbone, _, Kinetic, TableView, ChatView, EffectsView, RegisterView, Messages, TableModel, PlayerCollection, PlayerModel, Common) {
   var AppView = Backbone.View.extend({
     /*
      * Properties
@@ -65,6 +66,7 @@ define([
       this.players.on('change:status', this.displayActions, this);
       this.players.on('change:status', this.moveChips, this);
       this.players.on('change:actions', this.updateActionButtons, this);
+      this.players.on('change:chips', this.profitOrLoss, this);
       this.players.on('animation:before', function() {
         this.animating = true;
       });
@@ -558,6 +560,64 @@ define([
 
     },
 
+    profitOrLoss: function(model, chips) {
+      var
+        previousChips = model.previous('chips'),
+        layer,
+        position,
+        currency,
+        transition;
+
+
+      // show animation
+      if (!_.isUndefined(previousChips)) {
+        layer = this.layers.effects;
+        position = model.group.getPosition();
+        currency = new Kinetic.Text(_.extend({
+          fontFamily: 'Helvetica',
+          text: '$',
+          fontSize: 20,
+          textStrokeWidth: 1,
+          align: 'center',
+          width: 100,
+          height: 100,
+          offset: {
+            x: 50,
+            y: 50
+          }
+        }, position));
+        transition = {
+          alpha: 0,
+          easing: 'ease-out',
+          scale: { x: 2, y: 2 },
+          callback: function() {
+            model.trigger('animation:end');
+            layer.remove(this);
+          },
+          duration: 2,
+          alpha: 0,
+        };
+
+        layer.add(currency);
+        if (chips > previousChips) {
+          currency.setAttrs({
+            textFill: 'green',
+            textStroke: 'gold',
+          });
+          model.trigger('animation:begin');
+          currency.transitionTo(transition);
+          console.log(model.get('name') + ' won chips');
+        } else if (chips < previousChips){
+          currency.setAttrs({
+            textFill: 'red',
+            textStroke: 'black',
+          });
+          model.trigger('animation:begin');
+          currency.transitionTo(transition);
+          console.log(model.get('name') + ' lost chips');
+        }
+      }
+    },
 
 
 
