@@ -27,11 +27,12 @@ public class Player {
         this.hand = new Hand();
         this.status = Status.CONTINUE;
         this.action = Action.CONTINUE;
-        resetHand();
+        reset();
     }
 
-    public void resetHand() {
+    public void reset() {
         resetBet();
+        this.hand = new Hand();
         isAllIn = false;
     }
 

@@ -190,8 +190,7 @@ public class PokerRouteBuilder extends RouteBuilder {
         Game game = table.getGame();
 
         if (!game.isPlaying()) {
-            table.newGame();
-            game = table.getGame();
+            game = table.newGame();
             List<Seat> activeSeats = new ArrayList<Seat>();
 
             for (Seat seat : table.getSeats()) {

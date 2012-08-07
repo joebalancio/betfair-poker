@@ -76,6 +76,13 @@ public class Game {
         int dealerIndx = 0;
         playersToAct = getSeatSize();
         
+        for (Seat seat : getActiveSeats()) {
+            if (!seat.isEmpty()) {
+                final Player player = seat.getPlayer();
+                player.reset();
+            }
+        }
+        
         for (int i = 0; i < getSeatSize(); i++) {
             if (seats.get(i).isDealer()) {
                 dealerIndx = i;

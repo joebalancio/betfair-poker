@@ -94,8 +94,9 @@ public class Table {
         return seat;
     }
     
-    public void newGame() {
+    public Game newGame() {
         this.game = new Game();
+        return this.game;
     }
 
     public void setSeatDealer() {
