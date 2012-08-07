@@ -18,13 +18,14 @@ public class ChatRouteBuilder extends RouteBuilder {
         // expose a chat websocket client, that sends back an echo
         from("websocket://chat")
             .routeId("chatWebsocket")
-            .log(">>> Message received from WebSocket Client : ${body}")
-            .transform().simple("${body}${body}")
+            .log(">>> Message received from WebSocket Chat Client : ${body}")
+            .transform().simple("${body}")
             // send back to the client, by sending the message to the same
             // endpoint
             // this is needed as by default messages is InOnly
             // and we will by default send back to the current client using
             // the provided connection key
+            .log(">>> Message sent to WebSocket Chat Client : ${body}")
             .to("websocket://chat?sendToAll=true");
     }
 }

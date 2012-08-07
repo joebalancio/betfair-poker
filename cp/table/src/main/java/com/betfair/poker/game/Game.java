@@ -90,7 +90,12 @@ public class Game {
         } else {
             log.debug("in here ");
             smallBlindIdx = dealerIndx + 1;
-            bigBlindIdx = smallBlindIdx + 1;
+            
+            if  (smallBlindIdx == getSeatSize() -1) {
+                bigBlindIdx = 0;
+            } else {
+                bigBlindIdx = smallBlindIdx + 1;
+            }
         }
         log.debug("smallBlindIdx " + smallBlindIdx);
         log.debug("bigBlindIdx " + bigBlindIdx);
@@ -102,6 +107,10 @@ public class Game {
         Seat bigBlind = seats.get(bigBlindIdx);
         bigBlind.setBigBlind(true);
         bigBlind.getPlayer().postBigBlind(BIG_BLIND);
+        
+        this.pot += SMALL_BLIND;
+        this.pot += BIG_BLIND;
+        
         // mark next person to bb as isturn =true
         if (bigBlindIdx == getSeatSize() - 1) {
             nextTurnIdx = 0;
@@ -134,19 +143,19 @@ public class Game {
                 // Do nothing.
                 break;
             case CALL:
-                pot += currentBet;
-                currentSeat.getPlayer().act(action, bet, currentBet);
+                this.pot += bet - currentSeat.getPlayer().getBet();
+                currentSeat.getPlayer().act(action, currentBet, bet);
                 break;
             case BET:
-                bet = minBet;
-                pot += currentBet;
-                currentSeat.getPlayer().act(action, bet, currentBet);
+                this.bet = minBet;
+                this.pot += currentBet;
+                currentSeat.getPlayer().act(action, currentBet, bet);
                 playersToAct = getSeatSize();
                 break;
             case RAISE:
-                bet += minBet;
-                pot += currentBet;
-                currentSeat.getPlayer().act(action, bet, currentBet);
+                this.bet += minBet;
+                this.pot += currentBet;
+                currentSeat.getPlayer().act(action, currentBet, bet);
                 playersToAct = getSeatSize() - 1;
                 break;
             case FOLD:
@@ -159,6 +168,7 @@ public class Game {
                     seat.setWinner(true);
                     playerWins(seat.getPlayer());
                     playersToAct = 0;
+                    isGameCompleted = true;
                 }
                 break;
             default:
@@ -192,6 +202,8 @@ public class Game {
                             seat.getPlayer().setBet(0);
                     }
                     status = GameStatus.SHOWDOWN;
+                    bet = 0;
+                    isGameCompleted = true;
                     log.debug("Game is complete ");
                     payPots();
                 }
@@ -220,8 +232,9 @@ public class Game {
     }
 
     private void playerWins(Player player) {
-        player.win(pot);
-        pot = 0;
+        player.win(this.pot);
+        this.pot = 0;
+        this.bet = 0;
     }
 
     public int getPot() {
@@ -231,6 +244,7 @@ public class Game {
     public Set<Action> getAllowedActions(Player player) {
         int playerBet = player.getBet();
         log.debug("player bet " + playerBet);
+        log.debug("table bet " + bet);
         Set<Action> actions = new HashSet<Action>();
         log.debug("Value of Min Bet " + bet);
         if (bet == 0) {
@@ -256,6 +270,9 @@ public class Game {
         this.isGameCompleted = false;
         this.seats = new ArrayList<Seat>();
         this.deck.shuffle();
+        this.pot = 0;
+        this.bet = 0;
+        
     }
 
     /*
@@ -312,6 +329,8 @@ public class Game {
                 Seat winner = winners.get(0);
                 winner.setWinner(true);
                 winner.getPlayer().win(pot);
+                this.pot = 0;
+                this.bet = 0;
                 break;
             } else {
                 // Tie; share the pot amongst winners.
@@ -342,6 +361,8 @@ public class Game {
                     tempPot -= potShare;
                     // If there is no more pot to divide, we're done.
                     if (tempPot == 0) {
+                        this.pot = 0;
+                        this.bet = 0;
                         break;
                     }
                 }
@@ -443,6 +464,7 @@ public class Game {
         }
         playersToAct = getSeatSize();
         status = GameStatus.FLOP;
+        bet = 0;
     }
 
     private void setPlayerTurn() {
@@ -486,8 +508,10 @@ public class Game {
         
         if (GameStatus.FLOP.equals(status)) {
             status = GameStatus.TURN;
+            bet = 0;
         } else if (GameStatus.TURN.equals(status)) {
             status = GameStatus.RIVER;
+            bet = 0;
         }
     }
 

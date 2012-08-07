@@ -77,8 +77,9 @@ public class PokerRouteBuilder extends RouteBuilder {
                 .to("direct:readTable")
                 .to("direct:readPlayers")
                 .delay(100)
-                .to("direct:startGame")
-                .to("direct:endGame")
+                .to("seda:startGame")
+                .delay(100)
+                .to("seda:endGame")
                 .end();
 
         from("direct:readTable")
@@ -105,8 +106,8 @@ public class PokerRouteBuilder extends RouteBuilder {
             .to("websocket://poker?sendToAll=true")
             .end();
         
-        from("direct:startGame")
-            .routeId("direct:startGame")
+        from("seda:startGame")
+            .routeId("seda:startGame")
             .process(new Processor() {
                 @Override
                 public void process(Exchange exchange) throws Exception {
@@ -119,7 +120,6 @@ public class PokerRouteBuilder extends RouteBuilder {
                     }
                 }
             })
-            .log(">>> dealer = " + table.getDealer().getPosition())
             .choice()
                 .when(header(GAME_START).isEqualTo(true))
                     .log(">>> Game Starting")
@@ -129,8 +129,8 @@ public class PokerRouteBuilder extends RouteBuilder {
             .end()
             .end();
         
-        from("direct:endGame")
-            .routeId("direct:endGame")
+        from("seda:endGame")
+            .routeId("seda:endGame")
             .process(new Processor() {
                 @Override
                 public void process(Exchange exchange) throws Exception {
@@ -142,15 +142,16 @@ public class PokerRouteBuilder extends RouteBuilder {
                         message.setHeader(GAME_END, false);
                     }
                 }
-            })                
+            })
             .choice()
                 .when(header(GAME_END).isEqualTo(true))
                     .log(">>> Game Ended")
                     .to("seda:notifyEnd")
+                    .delay(3000)
                     .to("direct:readTable")
                     .to("direct:readPlayers")
-                    .delay(100)
-                    .to("direct:startGame")
+                    .delay(3000)
+                    .to("seda:startGame")
             .end()
             .end();
         
@@ -189,6 +190,8 @@ public class PokerRouteBuilder extends RouteBuilder {
         Game game = table.getGame();
 
         if (!game.isPlaying()) {
+            table.newGame();
+            game = table.getGame();
             List<Seat> activeSeats = new ArrayList<Seat>();
 
             for (Seat seat : table.getSeats()) {
@@ -215,14 +218,14 @@ public class PokerRouteBuilder extends RouteBuilder {
     public boolean endGame() {
         Game game = table.getGame();
 
+        
         if (game.isGameCompleted()) {
-            game.payPots();
             game.reset();
             
             for (Seat seat : table.getSeats()) {
                 seat.reset();
             }
-            
+
             table.changeDealer();
             
             return true;

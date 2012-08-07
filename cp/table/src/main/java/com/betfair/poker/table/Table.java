@@ -93,6 +93,10 @@ public class Table {
 
         return seat;
     }
+    
+    public void newGame() {
+        this.game = new Game();
+    }
 
     public void setSeatDealer() {
         final Seat seat = getDealer();
