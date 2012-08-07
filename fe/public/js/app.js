@@ -438,7 +438,7 @@ define([
       };
 
       this.user.save(data, { data: data });
-      this.user.fold();
+      this.user.foldCards();
       this.$('#actions').hide();
     },
 
@@ -545,12 +545,6 @@ define([
           });
 
         });
-
-        // cheesy effects
-        this.views.effects.resetSpray();
-        this.views.effects.spray();
-        this.views.chat.sendMessage('sentinel', 'cheesy effects, bro');
-
       }
     },
 
