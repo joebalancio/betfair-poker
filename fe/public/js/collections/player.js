@@ -49,9 +49,9 @@ define(function(require, exports, modules) {
       if (previousStatus) {
         switch (status) {
           case 'DEAL':
-            players.each(function(player) {
-              player.hideCards(players.layer.getStage());
-            });
+            //players.each(function(player) {
+            //  player.hideCards(players.layer.getStage());
+            //});
             break;
           case 'FLOP':
           case 'TURN':

@@ -107,7 +107,6 @@ define(function(require,exports,modules) {
         if (--this.animationInProgress === 0) this.trigger('animation:complete');
       });
       this.on('animation:complete', function() {
-        console.log('animations complete!!');
       });
 
       this.shapes = {
@@ -344,13 +343,29 @@ define(function(require,exports,modules) {
       }
     },
     updateCards: function(model, cards) {
-      if (cards && this.user && this.user.id === model.id) {
-        this.shapes.card1.setAnimation(this.getSimpleCard(cards[0]));
-        this.shapes.card2.setAnimation(this.getSimpleCard(cards[1]));
-      } else {
-        this.shapes.card1.setAnimation('back');
-        this.shapes.card2.setAnimation('back');
+      var
+        previousCards = model.previous('cards');
+
+      function setValue(model, cards, next) {
+        if (cards && this.user && this.user.id === model.id) {
+          this.cardsFlipped = true;
+          this.shapes.card1.setAnimation(this.getSimpleCard(cards[0]));
+          this.shapes.card2.setAnimation(this.getSimpleCard(cards[1]));
+        } else {
+          this.shapes.card1.setAnimation('back');
+          this.shapes.card2.setAnimation('back');
+        }
+
+        if (next && _.isFunction(next)) next();
       }
+
+      if (previousCards && previousCards != cards) {
+        this.hideCards(true, _.bind(setValue, this, model, cards, _.bind(this.showCards, this)));
+      } else {
+        setValue.apply(this, arguments);
+        this.showCards(false);
+      }
+
     },
     updateName: function(model, name) {
       this.shapes.name.setText(name);
@@ -371,6 +386,7 @@ define(function(require,exports,modules) {
 
       switch (status) {
         case 'TURN':
+        console.log('your turn!');
           this.shapes.name.setAttrs(this.activePlayerProps);
           break;
         case 'BET':
@@ -378,6 +394,7 @@ define(function(require,exports,modules) {
         case 'FOLD':
         case 'CHECK':
           this.shapes.name.setText(capitalize);
+          break;
         default:
           this.shapes.name.setAttrs(this.inactivePlayerProps);
           break;
@@ -433,7 +450,6 @@ define(function(require,exports,modules) {
         ACE: 'A'
       };
       if (_.isObject(card)) {
-        console.log(card.suit.charAt(0) + map[card.rank]);
         return card.suit.charAt(0) + map[card.rank];
       } else {
         return card;
@@ -445,10 +461,10 @@ define(function(require,exports,modules) {
         stage = this.group.getStage(),
         animate = !_.isUndefined(animate) ? animate : true,
         next = !_.isUndefined(next) ? next : function() {},
-        completed = 2,
+        cards = [this.shapes.card1, this.shapes.card2],
+        completed = 0,
         callback = function() {
           if (--completed === 0) {
-            console.log('animation done');
             self.trigger('animation:end');
             next();
           }
@@ -459,6 +475,18 @@ define(function(require,exports,modules) {
         flipIn = _.extend({
           callback: callback
         }, Common.flipIn);
+
+      if (stage) {
+        this.trigger('animation:begin');
+        _.each(cards, function(card) {
+          completed++;
+          card.transitionTo(fadeIn);
+        });
+      } else {
+        _.each(cards, function(card) {
+          card.setAttrs(Common.visible);
+        });
+      }
     },
 
     flipCards: function(next) {
@@ -472,18 +500,15 @@ define(function(require,exports,modules) {
         flipOut = _.extend({
           callback: function() {
             if (--completed === 0) {
-              console.log('flip cards animation done');
               self.trigger('animation:end');
               next();
             }
-            console.log(completed);
           }
         }, Common.flipOut);
 
       function getTransitionProps(card, animation) {
         return _.extend({
           callback: function() {
-            console.log(animation, completed);
             card.setAnimation(animation);
             card.transitionTo(flipOut);
           }
@@ -503,14 +528,19 @@ define(function(require,exports,modules) {
       }
     },
 
-    hideCards: function(hasStage, next) {
+    hideCards: function(animate, next) {
       var
-        cards = this.group.get('.card'),
+        self = this,
+        stage = this.group.getStage(),
+        animate = !_.isUndefined(animate) ? animate : true,
+        next = !_.isUndefined(next) ? next : function() {},
+        cards = [this.shapes.card1, this.shapes.card2],
         completed = 0,
         next = next ? next : function() {};
 
-      if (hasStage) {
+      if (stage) {
         this.cardsFlipped = false;
+        this.trigger('animation:begin');
         _.each(cards, function(card, index) {
           completed++;
           card.transitionTo({
@@ -518,7 +548,10 @@ define(function(require,exports,modules) {
             duration: 0.5,
             easing: 'strong-ease-out',
             callback: function() {
-              if (--completed === 0) next();
+              if (--completed === 0) {
+                self.trigger('animation:end');
+                next();
+              }
             }
           });
         }, this);

@@ -186,7 +186,7 @@ function filterPlayersForBroadcast(players) {
   });
 }
 
-//*
+/*
 io.sockets.on('connection', function(socket) {
   socket.on('load', function() {
     // get initial state
@@ -323,6 +323,6 @@ io.sockets.on('connection', function(socket) {
 });
 //*/
 
-/*
+//*
 io.sockets.on('connection', TestScenarios.transitionFromRiverToDeal);
 //*/

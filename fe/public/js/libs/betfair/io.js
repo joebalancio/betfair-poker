@@ -5,6 +5,8 @@ define(function(require, exports, module) {
     BetfairIO = {};
 
   BetfairIO = _.extend({}, Backbone.Events, {
+    socket: null,
+
     connect: function(endpoint) {
       var self = this;
       this.socket = new WebSocket(endpoint);
@@ -16,7 +18,6 @@ define(function(require, exports, module) {
         self.trigger('connect');
       };
       this.socket.onclose = function(event) {
-        console.log(this);
         self.trigger('disconnect');
       };
       return this;

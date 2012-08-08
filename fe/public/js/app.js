@@ -308,13 +308,11 @@ define([
     },
 
     addPlayer: function(model) {
-      console.log('add player');
       var seat = model.get('seat');
 
       // get current screen's user
       if (model.get('name') === this.views.register.model.get('name') &&
         model.get('avatar') === this.views.register.model.get('avatar')) {
-        console.log('found screen user');
         this.user = model;
         this.views.chat.name = model.get('name');
         model.user = model;
@@ -358,20 +356,15 @@ define([
 
     updateActionButtons: function(model, buttons) {
       if (model == this.user) {
-        console.log('update action buttons', buttons);
         this.$('#actions button').hide();
         _.each(buttons, function(button) {
-          console.log(this.$('#actions button#' + button.toLowerCase()));
-          this.$('#actions button#' + button.toLowerCase()).show();
+          this.$('#actions, #actions button#' + button.toLowerCase()).show();
         });
       }
     },
 
     setUser: function(model) {
-      console.log(model);
-
       this.players.each(function(player) {
-        console.log(player.id, model, model.id);
         if (player.id === model.id) {
           this.user = player;
         }
@@ -379,7 +372,6 @@ define([
     },
 
     call: function() {
-      console.log('call');
       var data = {
         id: this.user.id,
         seat: this.user.get('seat'),
@@ -403,7 +395,6 @@ define([
     },
 
     bet: function() {
-      console.log('bet');
       var amount = this.$('#actions input').val();
       var data = {
         id: this.user.id,
@@ -417,7 +408,6 @@ define([
     },
 
     raise: function() {
-      console.log('raise');
       var amount = this.$('#actions input').val();
       var data = {
         id: this.user.id,
@@ -431,7 +421,6 @@ define([
     },
 
     fold: function() {
-      console.log('fold');
 
       var data = {
         id: this.user.id,
@@ -492,7 +481,6 @@ define([
           }
         });
       });
-      console.log(animations);
 
       // create cards sprite
       this.sprites.cards = {
@@ -606,7 +594,6 @@ define([
           });
           model.trigger('animation:begin');
           currency.transitionTo(transition);
-          console.log(model.get('name') + ' won chips');
         } else if (chips < previousChips){
           currency.setAttrs({
             textFill: 'red',
@@ -614,7 +601,6 @@ define([
           });
           model.trigger('animation:begin');
           currency.transitionTo(transition);
-          console.log(model.get('name') + ' lost chips');
         }
       }
     },

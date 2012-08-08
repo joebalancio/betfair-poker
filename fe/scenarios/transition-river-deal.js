@@ -13,7 +13,7 @@ module.exports = function(socket) {
       avatar: 'FD05',
       position: 'DEALER',
       status: 'TURN',
-      cards: ['5F','KC'],
+      cards: ['5C','KC'],
       actions: ['FOLD', 'CHECK', 'BET']
     }, {
       chips: 9996,
